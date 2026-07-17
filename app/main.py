@@ -1,12 +1,12 @@
-from ai import analisar_concurso
-from coletor import procurar_concursos
-from database import (
+from .ai import analisar_concurso
+from .coletor import procurar_concursos
+from .database import (
     concurso_existe,
     contar_concursos,
     criar_base_dados,
     guardar_concurso,
 )
-from emailer import enviar_email_concursos
+from .emailer import enviar_email_concursos
 
 
 LIMITE_RESULTADOS_NO_ECRA = 30
@@ -18,18 +18,22 @@ def mostrar_concurso(numero, concurso):
     """
     print("\n" + "-" * 52)
     print(f"{numero}. {concurso['titulo']}")
+
     print(
-        f"   Entidade: "
+        "   Entidade: "
         f"{concurso.get('entidade') or 'não indicada'}"
     )
+
     print(
-        f"   Publicação: "
+        "   Publicação: "
         f"{concurso.get('data') or 'não indicada'}"
     )
+
     print(
-        f"   Prazo: "
+        "   Prazo: "
         f"{concurso.get('data_limite') or 'não indicado'}"
     )
+
     print(f"   Link: {concurso['link']}")
 
 
@@ -65,20 +69,42 @@ def main():
 
     total_inicial_base_dados = contar_concursos()
 
-    print("\nA analisar os anúncios de 2025...")
+    print("\nA recolher anúncios recentes do Portal BASE...")
 
-    concursos = procurar_concursos(
-        dias_atras=1000,
-        apenas_abertos=False,
-    )
+    try:
+        concursos = procurar_concursos()
+
+    except Exception as erro:
+        print("\nERRO: não foi possível consultar o Portal BASE.")
+        print(f"Detalhe: {erro}")
+        return
 
     concursos_relevantes = []
     concursos_novos = []
     concursos_ja_existentes = []
     concursos_excluidos = 0
 
+    print("\nA analisar os anúncios recolhidos...")
+
     for concurso in concursos:
-        resultado = analisar_concurso(concurso)
+        try:
+            resultado = analisar_concurso(concurso)
+
+        except Exception as erro:
+            concursos_excluidos += 1
+
+            print(
+                "\nAviso: não foi possível analisar o anúncio:"
+            )
+            print(
+                concurso.get(
+                    "titulo",
+                    "Título não indicado",
+                )
+            )
+            print(f"Detalhe: {erro}")
+
+            continue
 
         if not resultado["relevante"]:
             concursos_excluidos += 1
@@ -95,18 +121,23 @@ def main():
     print("\n" + "=" * 52)
     print("RESUMO DA ANÁLISE")
     print("=" * 52)
+
     print(f"Anúncios analisados: {len(concursos)}")
+
     print(
-        f"Concursos relevantes: "
+        "Concursos relevantes: "
         f"{len(concursos_relevantes)}"
     )
+
     print(f"Anúncios excluídos: {concursos_excluidos}")
+
     print(
-        f"Concursos novos encontrados: "
+        "Concursos novos encontrados: "
         f"{len(concursos_novos)}"
     )
+
     print(
-        f"Concursos que já existiam: "
+        "Concursos que já existiam: "
         f"{len(concursos_ja_existentes)}"
     )
 
@@ -121,7 +152,7 @@ def main():
     )
 
     print(
-        f"\nA mostrar os primeiros "
+        "\nA mostrar os primeiros "
         f"{quantidade_a_mostrar} concursos novos:"
     )
 
@@ -129,7 +160,10 @@ def main():
         concursos_novos[:LIMITE_RESULTADOS_NO_ECRA],
         start=1,
     ):
-        mostrar_concurso(numero, concurso)
+        mostrar_concurso(
+            numero,
+            concurso,
+        )
 
     restantes = (
         len(concursos_novos)
@@ -157,11 +191,13 @@ def main():
     except Exception as erro:
         print("\nERRO: não foi possível enviar o email.")
         print(f"Detalhe: {erro}")
+
         print(
             "\nOs concursos não foram guardados. "
             "O programa poderá tentar novamente "
             "na próxima execução."
         )
+
         return
 
     quantidade_guardada = guardar_concursos_enviados(
@@ -171,12 +207,14 @@ def main():
     total_final_base_dados = contar_concursos()
 
     print("\nEmail enviado com sucesso.")
+
     print(
-        f"Concursos guardados depois do envio: "
+        "Concursos guardados depois do envio: "
         f"{quantidade_guardada}"
     )
+
     print(
-        f"Total na base de dados: "
+        "Total na base de dados: "
         f"{total_inicial_base_dados} -> "
         f"{total_final_base_dados}"
     )
