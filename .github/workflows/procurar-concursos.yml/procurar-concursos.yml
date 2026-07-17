@@ -1,0 +1,57 @@
+name: Procurar concursos de arquitetura
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: "0 9 * * *"
+      timezone: "Europe/Lisbon"
+
+permissions:
+  contents: write
+
+jobs:
+  procurar-concursos:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Obter o código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependências
+        run: |
+          python -m pip install --upgrade pip
+
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Procurar concursos e enviar email
+        env:
+          SMTP_HOST: smtp.gmail.com
+          SMTP_PORT: "465"
+          SMTP_USE_SSL: "true"
+          SMTP_USER: andreiamarquescnlll@gmail.com
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_FROM: andreiamarquescnlll@gmail.com
+          EMAIL_TO: andreiamarquescnlll@gmail.com
+        run: python app/main.py
+
+      - name: Guardar atualização da base de dados
+        run: |
+          if git diff --quiet -- concursos.db; then
+            echo "Não existem alterações na base de dados."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add concursos.db
+          git commit -m "Atualizar concursos encontrados"
+          git push
