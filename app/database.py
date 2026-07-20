@@ -1,4 +1,3 @@
-cat > app/database.py <<'PY'
 import sqlite3
 from datetime import date, datetime
 
@@ -226,4 +225,3 @@ def listar_concursos_periodo(data_inicio, data_fim):
         concurso.pop("_data_ordenacao", None)
 
     return concursos
-PY

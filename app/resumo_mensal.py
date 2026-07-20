@@ -1,5 +1,4 @@
-cat > app/resumo_mensal.py <<'PY'
-from datetime import date
+from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
 from .database import (
@@ -27,14 +26,11 @@ MESES_PORTUGUES = {
 
 def obter_periodo_mes_anterior():
     """
-    Determina o primeiro e o último limite
-    do mês anterior, usando a hora portuguesa.
+    Devolve o primeiro dia do mês anterior
+    e o primeiro dia do mês atual.
     """
-    agora_portugal = (
-        __import__("datetime")
-        .datetime.now(
-            ZoneInfo("Europe/Lisbon")
-        )
+    agora_portugal = datetime.now(
+        ZoneInfo("Europe/Lisbon")
     )
 
     primeiro_dia_mes_atual = date(
@@ -64,15 +60,14 @@ def obter_periodo_mes_anterior():
 
 def main():
     print("=" * 60)
-    print(" Resumo mensal de concursos de arquitetura")
+    print("Resumo mensal de concursos de arquitetura")
     print("=" * 60)
 
     criar_base_dados()
 
-    (
-        data_inicio,
-        data_fim,
-    ) = obter_periodo_mes_anterior()
+    data_inicio, data_fim = (
+        obter_periodo_mes_anterior()
+    )
 
     nome_mes = MESES_PORTUGUES[
         data_inicio.month
@@ -108,4 +103,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-PY
