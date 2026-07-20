@@ -5,10 +5,50 @@ from datetime import date, datetime
 DB_NAME = "concursos.db"
 
 
+COLUNAS_ADICIONAIS = {
+    "data_limite": "TEXT",
+    "preco_base": "TEXT",
+    "cpv": "TEXT",
+    "tipo_procedimento": "TEXT",
+}
+
+
+def _adicionar_colunas_em_falta(cursor):
+    """
+    Acrescenta novas colunas à tabela sem apagar
+    os concursos que já existem.
+    """
+    cursor.execute(
+        """
+        PRAGMA table_info(concursos)
+        """
+    )
+
+    colunas_existentes = {
+        linha[1]
+        for linha in cursor.fetchall()
+    }
+
+    for nome_coluna, tipo_coluna in (
+        COLUNAS_ADICIONAIS.items()
+    ):
+        if nome_coluna in colunas_existentes:
+            continue
+
+        cursor.execute(
+            f"""
+            ALTER TABLE concursos
+            ADD COLUMN {nome_coluna} {tipo_coluna}
+            """
+        )
+
+
 def criar_base_dados():
     """
-    Cria a base de dados e a tabela de concursos,
-    caso ainda não existam.
+    Cria a base de dados e a tabela de concursos.
+
+    Se a tabela já existir, acrescenta automaticamente
+    as colunas novas sem apagar os dados existentes.
     """
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -21,16 +61,46 @@ def criar_base_dados():
             entidade TEXT,
             link TEXT NOT NULL UNIQUE,
             data TEXT,
-            relevante INTEGER DEFAULT 1
+            relevante INTEGER DEFAULT 1,
+            data_limite TEXT,
+            preco_base TEXT,
+            cpv TEXT,
+            tipo_procedimento TEXT
         )
         """
     )
+
+    _adicionar_colunas_em_falta(cursor)
 
     conn.commit()
     conn.close()
 
 
-def guardar_concurso(titulo, entidade, link, data):
+def _texto_ou_none(valor):
+    """
+    Converte valores vazios em None.
+    """
+    if valor is None:
+        return None
+
+    texto = str(valor).strip()
+
+    if not texto:
+        return None
+
+    return texto
+
+
+def guardar_concurso(
+    titulo,
+    entidade,
+    link,
+    data,
+    data_limite=None,
+    preco_base=None,
+    cpv=None,
+    tipo_procedimento=None,
+):
     """
     Guarda um concurso na base de dados.
 
@@ -49,15 +119,23 @@ def guardar_concurso(titulo, entidade, link, data):
                 entidade,
                 link,
                 data,
-                relevante
+                relevante,
+                data_limite,
+                preco_base,
+                cpv,
+                tipo_procedimento
             )
-            VALUES (?, ?, ?, ?, 1)
+            VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?)
             """,
             (
                 titulo,
-                entidade,
+                _texto_ou_none(entidade),
                 link,
-                data,
+                _texto_ou_none(data),
+                _texto_ou_none(data_limite),
+                _texto_ou_none(preco_base),
+                _texto_ou_none(cpv),
+                _texto_ou_none(tipo_procedimento),
             ),
         )
 
@@ -71,6 +149,80 @@ def guardar_concurso(titulo, entidade, link, data):
         conn.close()
 
     return guardado
+
+
+def atualizar_dados_concurso(
+    link,
+    titulo=None,
+    entidade=None,
+    data=None,
+    data_limite=None,
+    preco_base=None,
+    cpv=None,
+    tipo_procedimento=None,
+):
+    """
+    Atualiza os dados complementares de um concurso existente.
+
+    Valores vazios não substituem informação que já esteja
+    guardada na base de dados.
+    """
+    if not link:
+        return False
+
+    titulo = _texto_ou_none(titulo)
+    entidade = _texto_ou_none(entidade)
+    data = _texto_ou_none(data)
+    data_limite = _texto_ou_none(data_limite)
+    preco_base = _texto_ou_none(preco_base)
+    cpv = _texto_ou_none(cpv)
+    tipo_procedimento = _texto_ou_none(
+        tipo_procedimento
+    )
+
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        UPDATE concursos
+        SET
+            titulo = COALESCE(?, titulo),
+            entidade = COALESCE(?, entidade),
+            data = COALESCE(?, data),
+            data_limite = COALESCE(
+                ?,
+                data_limite
+            ),
+            preco_base = COALESCE(
+                ?,
+                preco_base
+            ),
+            cpv = COALESCE(?, cpv),
+            tipo_procedimento = COALESCE(
+                ?,
+                tipo_procedimento
+            )
+        WHERE link = ?
+        """,
+        (
+            titulo,
+            entidade,
+            data,
+            data_limite,
+            preco_base,
+            cpv,
+            tipo_procedimento,
+            link,
+        ),
+    )
+
+    atualizado = cursor.rowcount > 0
+
+    conn.commit()
+    conn.close()
+
+    return atualizado
 
 
 def concurso_existe(link):
@@ -137,6 +289,7 @@ def _converter_data_guardada(valor):
         "%d/%m/%Y",
         "%Y-%m-%d",
         "%Y-%m-%dT%H:%M:%S",
+        "%Y-%m-%dT%H:%M:%S.%f",
         "%Y-%m-%d %H:%M:%S",
         "%d-%m-%Y %H:%M:%S",
         "%d/%m/%Y %H:%M:%S",
@@ -144,7 +297,11 @@ def _converter_data_guardada(valor):
 
     for formato in formatos:
         try:
-            return datetime.strptime(texto, formato).date()
+            return datetime.strptime(
+                texto,
+                formato,
+            ).date()
+
         except ValueError:
             continue
 
@@ -152,11 +309,15 @@ def _converter_data_guardada(valor):
         return datetime.fromisoformat(
             texto.replace("Z", "+00:00")
         ).date()
+
     except ValueError:
         return None
 
 
-def listar_concursos_periodo(data_inicio, data_fim):
+def listar_concursos_periodo(
+    data_inicio,
+    data_fim,
+):
     """
     Devolve os concursos publicados entre duas datas,
     incluindo a data inicial e excluindo a data final.
@@ -164,10 +325,14 @@ def listar_concursos_periodo(data_inicio, data_fim):
     Os argumentos devem ser objetos datetime.date.
     """
     if not isinstance(data_inicio, date):
-        raise TypeError("data_inicio deve ser uma data.")
+        raise TypeError(
+            "data_inicio deve ser uma data."
+        )
 
     if not isinstance(data_fim, date):
-        raise TypeError("data_fim deve ser uma data.")
+        raise TypeError(
+            "data_fim deve ser uma data."
+        )
 
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -178,7 +343,11 @@ def listar_concursos_periodo(data_inicio, data_fim):
             titulo,
             entidade,
             link,
-            data
+            data,
+            data_limite,
+            preco_base,
+            cpv,
+            tipo_procedimento
         FROM concursos
         WHERE relevante = 1
         """
@@ -189,7 +358,18 @@ def listar_concursos_periodo(data_inicio, data_fim):
 
     concursos = []
 
-    for titulo, entidade, link, data_texto in linhas:
+    for linha in linhas:
+        (
+            titulo,
+            entidade,
+            link,
+            data_texto,
+            data_limite,
+            preco_base,
+            cpv,
+            tipo_procedimento,
+        ) = linha
+
         data_publicacao = _converter_data_guardada(
             data_texto
         )
@@ -210,6 +390,12 @@ def listar_concursos_periodo(data_inicio, data_fim):
                 "entidade": entidade,
                 "link": link,
                 "data": data_texto,
+                "data_limite": data_limite,
+                "preco_base": preco_base,
+                "cpv": cpv,
+                "tipo_procedimento": (
+                    tipo_procedimento
+                ),
                 "_data_ordenacao": data_publicacao,
             }
         )
@@ -222,6 +408,9 @@ def listar_concursos_periodo(data_inicio, data_fim):
     )
 
     for concurso in concursos:
-        concurso.pop("_data_ordenacao", None)
+        concurso.pop(
+            "_data_ordenacao",
+            None,
+        )
 
     return concursos

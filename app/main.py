@@ -1,6 +1,7 @@
 from .ai import analisar_concurso
 from .coletor import procurar_concursos
 from .database import (
+    atualizar_dados_concurso,
     concurso_existe,
     contar_concursos,
     criar_base_dados,
@@ -10,6 +11,64 @@ from .emailer import enviar_email_concursos
 
 
 LIMITE_RESULTADOS_NO_ECRA = 30
+
+
+def _obter_cpv_texto(concurso):
+    """
+    Converte os CPVs do concurso num único texto.
+    """
+    cpvs = concurso.get("cpvs")
+
+    if isinstance(cpvs, list):
+        return "; ".join(
+            str(cpv).strip()
+            for cpv in cpvs
+            if str(cpv).strip()
+        )
+
+    if cpvs:
+        return str(cpvs).strip()
+
+    cpv = concurso.get("cpv")
+
+    if cpv:
+        return str(cpv).strip()
+
+    return ""
+
+
+def _obter_tipo_procedimento(concurso):
+    """
+    Obtém o tipo de procedimento disponível no concurso.
+
+    O coletor fornece uma lista com o tipo de contrato,
+    procedimento, modelo e anúncio. Mantemos toda essa
+    informação para não perder dados.
+    """
+    tipo_direto = concurso.get(
+        "tipo_procedimento"
+    )
+
+    if tipo_direto:
+        return str(tipo_direto).strip()
+
+    tipos = concurso.get("tipos_contrato")
+
+    if isinstance(tipos, list):
+        valores = []
+
+        for tipo in tipos:
+            texto = str(tipo).strip()
+
+            if texto and texto not in valores:
+                valores.append(texto)
+
+        return "; ".join(valores)
+
+    if tipos:
+        return str(tipos).strip()
+
+    return ""
 
 
 def mostrar_concurso(numero, concurso):
@@ -34,7 +93,55 @@ def mostrar_concurso(numero, concurso):
         f"{concurso.get('data_limite') or 'não indicado'}"
     )
 
+    print(
+        "   Preço base: "
+        f"{concurso.get('preco_base') or 'não indicado'}"
+    )
+
+    print(
+        "   Procedimento: "
+        f"{_obter_tipo_procedimento(concurso) or 'não indicado'}"
+    )
+
+    print(
+        "   CPV: "
+        f"{_obter_cpv_texto(concurso) or 'não indicado'}"
+    )
+
     print(f"   Link: {concurso['link']}")
+
+
+def atualizar_concursos_existentes(concursos):
+    """
+    Atualiza preço, prazo, CPV e procedimento dos
+    concursos que já estavam guardados.
+    """
+    quantidade_atualizada = 0
+
+    for concurso in concursos:
+        atualizado = atualizar_dados_concurso(
+            link=concurso["link"],
+            titulo=concurso.get("titulo"),
+            entidade=concurso.get("entidade"),
+            data=concurso.get("data"),
+            data_limite=concurso.get(
+                "data_limite"
+            ),
+            preco_base=concurso.get(
+                "preco_base"
+            ),
+            cpv=_obter_cpv_texto(concurso),
+            tipo_procedimento=(
+                _obter_tipo_procedimento(
+                    concurso
+                )
+            ),
+        )
+
+        if atualizado:
+            quantidade_atualizada += 1
+
+    return quantidade_atualizada
 
 
 def guardar_concursos_enviados(concursos):
@@ -52,6 +159,18 @@ def guardar_concursos_enviados(concursos):
             entidade=concurso.get("entidade"),
             link=concurso["link"],
             data=concurso.get("data"),
+            data_limite=concurso.get(
+                "data_limite"
+            ),
+            preco_base=concurso.get(
+                "preco_base"
+            ),
+            cpv=_obter_cpv_texto(concurso),
+            tipo_procedimento=(
+                _obter_tipo_procedimento(
+                    concurso
+                )
+            ),
         )
 
         if guardado:
@@ -69,13 +188,19 @@ def main():
 
     total_inicial_base_dados = contar_concursos()
 
-    print("\nA recolher anúncios recentes do Portal BASE...")
+    print(
+        "\nA recolher anúncios recentes "
+        "do Portal BASE..."
+    )
 
     try:
         concursos = procurar_concursos()
 
     except Exception as erro:
-        print("\nERRO: não foi possível consultar o Portal BASE.")
+        print(
+            "\nERRO: não foi possível consultar "
+            "o Portal BASE."
+        )
         print(f"Detalhe: {erro}")
         return
 
@@ -88,20 +213,25 @@ def main():
 
     for concurso in concursos:
         try:
-            resultado = analisar_concurso(concurso)
+            resultado = analisar_concurso(
+                concurso
+            )
 
         except Exception as erro:
             concursos_excluidos += 1
 
             print(
-                "\nAviso: não foi possível analisar o anúncio:"
+                "\nAviso: não foi possível analisar "
+                "o anúncio:"
             )
+
             print(
                 concurso.get(
                     "titulo",
                     "Título não indicado",
                 )
             )
+
             print(f"Detalhe: {erro}")
 
             continue
@@ -114,22 +244,36 @@ def main():
         concursos_relevantes.append(concurso)
 
         if concurso_existe(concurso["link"]):
-            concursos_ja_existentes.append(concurso)
+            concursos_ja_existentes.append(
+                concurso
+            )
         else:
-            concursos_novos.append(concurso)
+            concursos_novos.append(
+                concurso
+            )
+
+    quantidade_atualizada = (
+        atualizar_concursos_existentes(
+            concursos_ja_existentes
+        )
+    )
 
     print("\n" + "=" * 52)
     print("RESUMO DA ANÁLISE")
     print("=" * 52)
 
-    print(f"Anúncios analisados: {len(concursos)}")
+    print(
+        f"Anúncios analisados: {len(concursos)}"
+    )
 
     print(
         "Concursos relevantes: "
         f"{len(concursos_relevantes)}"
     )
 
-    print(f"Anúncios excluídos: {concursos_excluidos}")
+    print(
+        f"Anúncios excluídos: {concursos_excluidos}"
+    )
 
     print(
         "Concursos novos encontrados: "
@@ -141,8 +285,15 @@ def main():
         f"{len(concursos_ja_existentes)}"
     )
 
+    print(
+        "Concursos existentes atualizados: "
+        f"{quantidade_atualizada}"
+    )
+
     if not concursos_novos:
-        print("\nNão foram encontrados concursos novos.")
+        print(
+            "\nNão foram encontrados concursos novos."
+        )
         print("Nenhum email foi enviado.")
         return
 
@@ -157,7 +308,9 @@ def main():
     )
 
     for numero, concurso in enumerate(
-        concursos_novos[:LIMITE_RESULTADOS_NO_ECRA],
+        concursos_novos[
+            :LIMITE_RESULTADOS_NO_ECRA
+        ],
         start=1,
     ):
         mostrar_concurso(
@@ -172,8 +325,9 @@ def main():
 
     if restantes > 0:
         print(
-            f"\nExistem ainda {restantes} concursos novos "
-            "que não foram mostrados no terminal."
+            f"\nExistem ainda {restantes} concursos "
+            "novos que não foram mostrados "
+            "no terminal."
         )
 
     print("\nA enviar email...")
@@ -185,11 +339,15 @@ def main():
 
         if not email_enviado:
             raise RuntimeError(
-                "A função de email não confirmou o envio."
+                "A função de email não confirmou "
+                "o envio."
             )
 
     except Exception as erro:
-        print("\nERRO: não foi possível enviar o email.")
+        print(
+            "\nERRO: não foi possível enviar "
+            "o email."
+        )
         print(f"Detalhe: {erro}")
 
         print(
@@ -200,8 +358,10 @@ def main():
 
         return
 
-    quantidade_guardada = guardar_concursos_enviados(
-        concursos_novos
+    quantidade_guardada = (
+        guardar_concursos_enviados(
+            concursos_novos
+        )
     )
 
     total_final_base_dados = contar_concursos()

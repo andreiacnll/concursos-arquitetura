@@ -1,0 +1,30 @@
+{
+  "dreSeries": "2",
+  "impugnations": false,
+  "dreNumber": "137",
+  "contractsCount": 0,
+  "drPublicationDate": "17-07-2026",
+  "contractType": "Aquisição de serviços",
+  "contractDesignation": "Aquisição de serviços de aplicação de produtos fitofármacos e biológicos em palmeiras do Concelho de Lagos",
+  "basePrice": "30.030,00 €",
+  "contractingProcedureUrl": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEyMzQxNw",
+  "ambientCriteria": false,
+  "cpvs": "77211500-7, Serviços de manutenção de árvores",
+  "contractingEntities": [
+    {
+      "nif": "505170876",
+      "description": "Município de Lagos",
+      "id": 80
+    }
+  ],
+  "proposalDeadline": "3 dias.",
+  "announcementNumber": "18384/2026",
+  "contractingProcedureAliasID": "11257144",
+  "contractingProcedureId": 19967545,
+  "modelType": "Concurso público",
+  "cnccs": false,
+  "maximumEstimatedValueUnderFrameworkAgreement": false,
+  "reference": "https://files.diariodarepublica.pt/cp_hora/2026/07/137/419967661.pdf",
+  "id": 451494,
+  "type": "Anúncio de concurso urgente"
+}

@@ -1,0 +1,585 @@
+Detalhe
+saltar para o conteúdo principal da página
+EN
+PT
+Área Reservada
+Notícias
+Documentação
+Orientações Técnicas
+Perguntas Frequentes
+Relatórios
+Legislação
+Sanções Acessórias
+Medidas Especiais
+DEUCP
+Bem-vindo.
+O Portal BASE centraliza a informação sobre os contratos públicos celebrados em Portugal continental e regiões autónomas.
+Selecione o tipo de pesquisa
+Contratos
+Anúncios DR
+Entidades
+Modificações contratuais
+Bens móveis
+Não celebrações de contrato
+Impugnações
+Consultas preliminares
+Medidas especiais
+Incluir MEC ao abrigo do CCP
+Tipologia da medida especial
+Todos
+Projetos financiados ou cofinanciados por fundos europeus – artigo 2º da Lei n.º30/2021
+Habitação e descentralização – artigo 3º da Lei n.º30/2021
+Tecnologias de informação e conhecimento – artigo 4º da Lei n.º30/2021
+Setor da saúde e do apoio social – artigo 5º da Lei n.º30/2021
+Plano de Recuperação e Resiliência (PRR) – artigo 2º da Lei n.º30/2021, DL n.º 78/2022
+Sistema de Gestão Integrada de Fogos Rurais – artigo 7º da Lei n.º30/2021
+Bens agro-alimentares – artigo 8º da Lei n.º30/2021
+Programa de Estabilização Económica e Social (PEES) – artigo 6º da Lei n.º 30/2021
+Plano de Recuperação e Resiliência (PRR) – artigo 6º da Lei n.º30/2021
+Regime especial de empreitadas de conceção-construção – artigo 2º-A da Lei n.º30/2021, DL n.º 78/2022
+Formação de contratos no âmbito da concentração de serviços no Campus XXI - artigo 25.º-C da Lei n.º 30/2021
+Objeto do contrato
+Entidade adjudicante
+Entidade adjudicatária
+Tipo de procedimento
+Todos
+Consulta Prévia
+Ajuste Direto Regime Geral
+Concurso público
+Concurso limitado por prévia qualificação
+Procedimento de negociação
+Diálogo concorrencial
+Ao abrigo de acordo-quadro (art.º 258.º)
+Ao abrigo de acordo-quadro (art.º 259.º)
+Parceria para a inovação
+Disponibilização de bens móveis
+Serviços sociais e outros serviços específicos
+Concurso de conceção simplificado
+Concurso de ideias simplificado
+Consulta Prévia Simplificada
+Concurso público simplificado
+Concurso limitado por prévia qualificação simplificado
+Ajuste Direto Regime Geral ao abrigo do artigo 7º da Lei n.º 30/2021, de 21.05
+Consulta prévia ao abrigo do artigo 7º da Lei n.º 30/2021, de 21.05
+Ajuste direto simplificado
+Ajuste direto simplificado ao abrigo da Lei n.º 30/2021, de 21.05
+Setores especiais – isenção parte II
+Contratação excluída II
+Tipo de contrato
+Todos
+Aquisição de bens móveis
+Aquisição de serviços
+Concessão de obras públicas
+Concessão de serviços públicos
+Empreitadas de obras públicas
+Locação de bens móveis
+Sociedade
+Outros
+CPV
+Nº ou descrição do acordo quadro
+Acordo quadro
+Procedimento centralizado
+Peças do procedimento
+Critérios ambientais
+Prazo de execução (dias)
+Preços
+Preço contratual
+Preço total efetivo
+Datas
+Data do contrato
+Data da publicação
+Data do fecho
+Local de execução (País, Distrito, Concelho)
+Todos
+Afeganistão
+África do Sul
+Albânia
+Alemanha
+Andorra
+Angola
+Anguila
+Antárctica
+Antígua e Barbuda
+Arábia Saudita
+Argélia
+Argentina
+Arménia
+Aruba
+Austrália
+Áustria
+Azerbaijão
+Bahamas
+Bangladesh
+Barbados
+Barém
+Bélgica
+Belize
+Benim
+Bermudas
+Bielorrússia
+Bolívia
+Bósnia-Herzegovina
+Botswana
+Brasil
+Brunei Darussalam
+Bulgária
+Burkina Faso
+Burundi
+Butão
+Cabo Verde
+Camarões
+Camboja
+Canadá
+Catar
+Cazaquistão
+Centro-Africana (República)
+Chade
+Chile
+China
+Chipre
+Colômbia
+Comores
+Congo
+Congo (República Democrática do)
+Coreia (República da)
+Coreia (República Popular Democrática da)
+Costa do Marfim
+Costa Rica
+Croácia
+Cuba
+Dinamarca
+Domínica
+Egipto
+El Salvador
+Emiratos Árabes Unidos
+Equador
+Eritreia
+Eslováquia
+Eslovénia
+Espanha
+Estados Unidos
+Estónia
+Etiópia
+Filipinas
+Finlândia
+França
+Gabão
+Gâmbia
+Gana
+Geórgia
+Geórgia do Sul e Ilhas Sandwich
+Gibraltar
+Granada
+Grécia
+Gronelândia
+Guadalupe
+Guam
+Guatemala
+Guernsey
+Guiana
+Guiana Francesa
+Guiné
+Guiné Equatorial
+Guiné-Bissau
+Haiti
+Honduras
+Hong Kong
+Hungria
+Iéme
+Ilha Bouvet
+Ilha Christmas
+Ilha de Man
+Ilha Heard e Ilhas Mcdonald
+Ilha Norfolk
+Ilhas Caimão
+Ilhas Cocos (Keeling)
+Ilhas Cook
+Ilhas Falkland (Malvinas)
+Ilhas Faroé
+Ilhas Fiji
+Ilhas Marianas do Norte
+Ilhas Marshall
+Ilhas Menores Distantes dos Estados Unidos
+Ilhas Salomão
+Ilhas Turcas e Caicos
+Ilhas Virgens (Britânicas)
+Ilhas Virgens (Estados Unidos)
+Índia
+Indonésia
+Irão (República Islâmica)
+Iraque
+Irlanda
+Islândia
+Israel
+Itália
+Jamaica
+Japão
+Jersey
+Jibuti
+Jordânia
+Kiribati
+Kosovo
+Kuwait
+Laos (República Popular Democrática do)
+Lesoto
+Letónia
+Líbano
+Libéria
+Líbia (Jamahiriya Árabe da)
+Liechtenstein
+Lituânia
+Luxemburgo
+Macau
+Macedónia (Antiga República Jugoslava da)
+Madagáscar
+Malásia
+Malawi
+Maldivas
+Mali
+Malta
+Marrocos
+Martinica
+Maurícias
+Mauritânia
+Mayotte
+México
+Micronésia (Estados Federados da)
+Moçambique
+Moldova
+Mónaco
+Mongólia
+Monserrate
+Montenegro
+Myanmar
+Namíbia
+Nauru
+Nepal
+Nicarágua
+Niger
+Nigéria
+Niue
+Noruega
+Nova Caledónia
+Nova Zelândia
+Omã
+Países Baixos
+Palau
+Panamá
+Papuásia-Nova Guiné
+Paquistão
+Paraguai
+Peru
+Pitcairn
+Polinésia Francesa
+Polónia
+Porto Rico
+Portugal
+Quénia
+Quirguizistão
+Reino Unido
+República Checa
+República Dominicana
+Reunião
+Roménia
+Ruanda
+Rússia (Federação da)
+Samoa
+Samoa Americana
+Santa Helena, Ascensão e Tristão da Cunha
+Santa Lúcia
+Santa Sé
+São Bartolomeu
+São Cristóvão e Nevis
+São Marino
+São Martinho (parte francesa)
+São Pedro e Miquelon
+São Tomé e Príncipe
+São Vicente e Granadinas
+Sara Ocidental
+Senegal
+Serra Leoa
+Sérvia
+Seychelles
+Singapura
+Síria (República Árabe da)
+Somália
+Sri Lanka
+Sudão
+Suécia
+Suiça
+Suriname
+Svalbard e a Ilha de Jan Mayen
+Tailândia
+Taiwan (Província da China)
+Tajiquistão
+Tanzânia, República Unida da
+Território Britânico do Oceano Índico
+Território Palestiniano Ocupado
+Timor Leste
+Togo
+Tokelau
+Tonga
+Trindade e Tobago
+Tunísia
+Turquemenistão
+Turquia
+Tuvalu
+Ucrânia
+Uganda
+Uruguai
+Usbequistão
+Vanuatu
+Venezuela
+Vietname
+Wallis e Futuna (Ilhas)
+Zâmbia
+Zimbabwe
+Alanda
+Bonaire, Santo Eustáquio e Saba
+Curaçau
+Sudão do Sul
+Essuatíni
+São Martinho
+Clipperton
+União Europeia
+Terras Austrais e Antárticas Francesas
+Todos
+Todos
+Limpar
+Pesquisar
+Descrição do anúncio
+Nº do anúncio DR
+Entidade emissora
+Tipo de contrato
+Todos
+Aquisição de bens móveis
+Aquisição de serviços
+Concessão de obras públicas
+Concessão de serviços públicos
+Empreitadas de obras públicas
+Locação de bens móveis
+Sociedade
+Outros
+Data da publicação
+Peças do procedimento
+Critérios ambientais
+Tipo de ato
+Todos
+Anúncio de procedimento
+Anúncio de concurso urgente
+Declaração de retificação de anúncio
+Aviso de prorrogação de prazo
+Anúncio de Alteração
+Tipo de modelo
+Todos
+Concurso público
+Concurso público urgente
+Concurso limitado por prévia qualificação
+Procedimento de negociação
+Diálogo concorrencial
+Concurso de concepção
+Anúncio simplificado
+Instituição de sistema de qualificação
+Intenção de celebração de empreitadas de obras publicas por concessionários que não sejam entidades adjudicantes
+Parceria para a inovação
+Concurso de ideias
+Instituição de sistema de aquisição dinâmico
+Hasta Pública de Alienação de Bens Móveis
+Aquisição de Serviços Sociais e de Outros Serviços Específicos
+Anúncio de Adjudicação de Aquisição de Serviços Sociais e de Outros Serviços Específicos
+Concurso público simplificado
+Concurso limitado por prévia qualificação simplificado
+CPV
+Preço base
+Anúncios ativos
+Limpar
+Pesquisar
+NIPC, descrição ou país da entidade
+Limpar
+Pesquisar
+Objeto do contrato
+Preços
+Preço contratual
+Preço alterado
+Entidade adjudicante
+Entidade adjudicatária
+Datas
+Data do contrato
+Data da modificação
+Limpar
+Pesquisar
+Descrição do bem móvel
+Limpar
+Pesquisar
+Objeto do procedimento
+Entidade adjudicante
+Tipo de procedimento
+Todos
+Consulta Prévia
+Ajuste Direto Regime Geral
+Concurso público
+Concurso limitado por prévia qualificação
+Procedimento de negociação
+Diálogo concorrencial
+Ao abrigo de acordo-quadro (art.º 258.º)
+Ao abrigo de acordo-quadro (art.º 259.º)
+Parceria para a inovação
+Disponibilização de bens móveis
+Serviços sociais e outros serviços específicos
+Concurso de conceção simplificado
+Concurso de ideias simplificado
+Consulta Prévia Simplificada
+Concurso público simplificado
+Concurso limitado por prévia qualificação simplificado
+Ajuste Direto Regime Geral ao abrigo do artigo 7º da Lei n.º 30/2021, de 21.05
+Consulta prévia ao abrigo do artigo 7º da Lei n.º 30/2021, de 21.05
+Ajuste direto simplificado
+Ajuste direto simplificado ao abrigo da Lei n.º 30/2021, de 21.05
+Setores especiais – isenção parte II
+Contratação excluída II
+Motivo da não celebração de contrato
+Todos
+Revogação da decisão de contratar
+Caducidade de adjudicação sem que seja possível a adjudicação de outra proposta
+Desvinculação da proposta pela entidade adjudicatária
+Outro
+Falta de manifestação de interesse
+Alteração da intenção da disponibilização
+Alteração da intenção da alienação
+Datas
+Data da decisão
+Data da publicação
+Limpar
+Pesquisar
+Objeto do procedimento
+Entidade adjudicante
+Datas
+Data da decisão
+Data da publicação
+Tipo de procedimento
+Todos
+Consulta Prévia
+Ajuste Direto Regime Geral
+Concurso público
+Concurso limitado por prévia qualificação
+Procedimento de negociação
+Diálogo concorrencial
+Ao abrigo de acordo-quadro (art.º 258.º)
+Ao abrigo de acordo-quadro (art.º 259.º)
+Parceria para a inovação
+Disponibilização de bens móveis
+Serviços sociais e outros serviços específicos
+Concurso de conceção simplificado
+Concurso de ideias simplificado
+Consulta Prévia Simplificada
+Concurso público simplificado
+Concurso limitado por prévia qualificação simplificado
+Ajuste Direto Regime Geral ao abrigo do artigo 7º da Lei n.º 30/2021, de 21.05
+Consulta prévia ao abrigo do artigo 7º da Lei n.º 30/2021, de 21.05
+Ajuste direto simplificado
+Ajuste direto simplificado ao abrigo da Lei n.º 30/2021, de 21.05
+Setores especiais – isenção parte II
+Contratação excluída II
+Objeto da impugnação/reclamação
+Todos
+Ato de adjudicação
+Peças procedimentais
+Deliberações
+Júri
+Ajustamentos ao contrato
+Não entrega dos documentos de habilitação
+Outros
+Execução
+Fase do procedimento
+Todos
+Apagado
+Procedimento registado
+Anúncio publicado
+Convites Enviados
+Análise de propostas
+Análise de candidaturas
+Análise de soluções
+Habilitação do adjudicatário
+Contrato comunicado
+Concluído
+Fim de Procedimento
+Descontinuado
+Em execução
+Limpar
+Pesquisar
+Objeto da consulta preliminar
+Entidade adjudicante
+CPV
+Consultas ativas
+Data da receção de respostas
+Local de execução (Distrito, Concelho, Freguesia)
+Todos
+Aveiro
+Beja
+Braga
+Braganca
+Castelo Branco
+Coimbra
+Évora
+Faro
+Guarda
+Leiria
+Lisboa
+Portalegre
+Porto
+Santarém
+Setúbal
+Viana do Castelo
+Vila Real
+Viseu
+Região Autónoma dos Açores
+Região Autónoma da Madeira
+Portugal Continental
+Distrito não determinado
+Consulado situados no estrangeiro
+Todos
+Todos
+Limpar
+Pesquisar
+Início
+Detalhe
+Última atualização:
+17 jul.2026
+Detalhe
+Anúncio DR
+O Portal
+Base
+Quem é Quem
+O que nos comunicam
+O que publicitamos
+Prazos de comunicação
+História do Base
+Formações e Eventos
+Ligações Úteis
+Plataformas Eletrónicas
+O que são
+Credenciação e Licenciamento
+Plataformas Eletrónicas Licenciadas
+Condições de Interligação
+Sanções Acessórias das PEs
+Entidades Integradoras
+Protocolos Celebrados
+Plataformas - Ligações Ativas
+União Europeia
+Legislação Comunitária
+E-Certis
+Public Procurement Network
+Ligações Úteis da UE
+Contactos / Sede
+Av. Júlio Dinis, 11,
+1069-010 Lisboa
+Tel. 217 946 808
+geral@base.gov.pt
+Suporte do Portal Base
+Dias úteis das
+9h - 13h / 14h - 17h30
+Mapa do Site
+Ficha Técnica
+Política de Privacidade
+Instituto dos Mercados Públicos, do Imobiliário e da Construção, I.P.
+2026 © Portal BASE - Contratos Públicos Online. Todos os direitos reservados.
