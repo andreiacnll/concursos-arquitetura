@@ -1,6 +1,8 @@
 import os
+import re
 import smtplib
 from collections import Counter
+from decimal import Decimal, InvalidOperation
 from email.message import EmailMessage
 from html import escape
 
@@ -10,7 +12,8 @@ def _obter_variavel(nome):
 
     if not valor:
         raise RuntimeError(
-            f"A variável de ambiente {nome} não está configurada."
+            f"A variável de ambiente {nome} "
+            "não está configurada."
         )
 
     return valor
@@ -23,13 +26,19 @@ def _obter_configuracao_smtp():
     """
     return {
         "host": _obter_variavel("SMTP_HOST"),
-        "port": int(_obter_variavel("SMTP_PORT")),
+        "port": int(
+            _obter_variavel("SMTP_PORT")
+        ),
         "user": _obter_variavel("SMTP_USER"),
         "password": _obter_variavel(
             "SMTP_PASSWORD"
         ).strip(),
-        "email_from": _obter_variavel("EMAIL_FROM"),
-        "email_to": _obter_variavel("EMAIL_TO"),
+        "email_from": _obter_variavel(
+            "EMAIL_FROM"
+        ),
+        "email_to": _obter_variavel(
+            "EMAIL_TO"
+        ),
         "usar_ssl": os.getenv(
             "SMTP_USE_SSL",
             "true",
@@ -45,8 +54,7 @@ def _obter_configuracao_smtp():
 
 def _enviar_mensagem(mensagem):
     """
-    Envia uma mensagem através do servidor SMTP
-    configurado nas variáveis de ambiente.
+    Envia uma mensagem através do servidor SMTP.
     """
     configuracao = _obter_configuracao_smtp()
 
@@ -76,6 +84,171 @@ def _enviar_mensagem(mensagem):
     return configuracao["email_to"]
 
 
+def _valor_texto(valor, padrao="Não indicado"):
+    """
+    Devolve um texto limpo ou o valor padrão.
+    """
+    if valor is None:
+        return padrao
+
+    if isinstance(valor, list):
+        valores = [
+            str(item).strip()
+            for item in valor
+            if str(item).strip()
+        ]
+
+        return "; ".join(valores) or padrao
+
+    texto = str(valor).strip()
+
+    return texto or padrao
+
+
+def _obter_cpv(concurso):
+    return _valor_texto(
+        concurso.get("cpv")
+        or concurso.get("cpvs")
+    )
+
+
+def _obter_procedimento(concurso):
+    return _valor_texto(
+        concurso.get("tipo_procedimento")
+        or concurso.get("tipos_contrato")
+    )
+
+
+def _converter_preco_decimal(valor):
+    """
+    Converte preços apresentados em formatos portugueses
+    ou internacionais para Decimal.
+
+    Exemplos aceites:
+        1.250.000,00 €
+        1250000.00
+        1 250 000 €
+    """
+    if valor is None:
+        return None
+
+    texto = str(valor).strip()
+
+    if not texto:
+        return None
+
+    texto = texto.replace("\xa0", " ")
+    texto = re.sub(
+        r"[^\d,.\-]",
+        "",
+        texto,
+    )
+
+    if not texto:
+        return None
+
+    if "," in texto and "." in texto:
+        if texto.rfind(",") > texto.rfind("."):
+            texto = texto.replace(".", "")
+            texto = texto.replace(",", ".")
+        else:
+            texto = texto.replace(",", "")
+
+    elif "," in texto:
+        partes = texto.split(",")
+
+        if len(partes) == 2:
+            texto = (
+                partes[0].replace(".", "")
+                + "."
+                + partes[1]
+            )
+        else:
+            texto = texto.replace(",", "")
+
+    elif "." in texto:
+        partes = texto.split(".")
+
+        if len(partes) > 2:
+            if len(partes[-1]) in {1, 2}:
+                texto = (
+                    "".join(partes[:-1])
+                    + "."
+                    + partes[-1]
+                )
+            else:
+                texto = "".join(partes)
+
+        elif (
+            len(partes) == 2
+            and len(partes[1]) == 3
+        ):
+            texto = "".join(partes)
+
+    try:
+        numero = Decimal(texto)
+
+    except InvalidOperation:
+        return None
+
+    if numero < 0:
+        return None
+
+    return numero
+
+
+def _formatar_euros(valor):
+    """
+    Formata um Decimal no padrão português.
+    """
+    texto = f"{valor:,.2f}"
+
+    texto = (
+        texto.replace(",", "X")
+        .replace(".", ",")
+        .replace("X", ".")
+    )
+
+    return f"{texto} €"
+
+
+def _calcular_estatisticas_precos(concursos):
+    """
+    Calcula valor total, média e número de preços válidos.
+    """
+    valores = []
+
+    for concurso in concursos:
+        valor = _converter_preco_decimal(
+            concurso.get("preco_base")
+        )
+
+        if valor is not None:
+            valores.append(valor)
+
+    if not valores:
+        return {
+            "quantidade": 0,
+            "total": None,
+            "media": None,
+        }
+
+    total = sum(
+        valores,
+        Decimal("0"),
+    )
+
+    media = total / Decimal(
+        len(valores)
+    )
+
+    return {
+        "quantidade": len(valores),
+        "total": total,
+        "media": media,
+    }
+
+
 def _criar_texto_email(concursos):
     linhas = [
         f"Foram encontrados {len(concursos)} "
@@ -91,23 +264,35 @@ def _criar_texto_email(concursos):
             [
                 (
                     f"{indice}. "
-                    f"{concurso.get('titulo', 'Sem título')}"
+                    f"{_valor_texto(concurso.get('titulo'), 'Sem título')}"
                 ),
                 (
                     "Entidade: "
-                    f"{concurso.get('entidade', 'Não indicada')}"
+                    f"{_valor_texto(concurso.get('entidade'))}"
                 ),
                 (
                     "Data de publicação: "
-                    f"{concurso.get('data', 'Não indicada')}"
+                    f"{_valor_texto(concurso.get('data'))}"
                 ),
                 (
                     "Data limite: "
-                    f"{concurso.get('data_limite', 'Não indicada')}"
+                    f"{_valor_texto(concurso.get('data_limite'))}"
+                ),
+                (
+                    "Preço base: "
+                    f"{_valor_texto(concurso.get('preco_base'))}"
+                ),
+                (
+                    "Procedimento: "
+                    f"{_obter_procedimento(concurso)}"
+                ),
+                (
+                    "CPV: "
+                    f"{_obter_cpv(concurso)}"
                 ),
                 (
                     "Link: "
-                    f"{concurso.get('link', 'Não indicado')}"
+                    f"{_valor_texto(concurso.get('link'))}"
                 ),
                 "",
             ]
@@ -121,47 +306,48 @@ def _criar_html_email(concursos):
 
     for concurso in concursos:
         titulo = escape(
-            str(
-                concurso.get(
-                    "titulo",
-                    "Sem título",
-                )
+            _valor_texto(
+                concurso.get("titulo"),
+                "Sem título",
             )
         )
 
         entidade = escape(
-            str(
-                concurso.get(
-                    "entidade",
-                    "Não indicada",
-                )
+            _valor_texto(
+                concurso.get("entidade")
             )
         )
 
         data = escape(
-            str(
-                concurso.get(
-                    "data",
-                    "Não indicada",
-                )
+            _valor_texto(
+                concurso.get("data")
             )
         )
 
         data_limite = escape(
-            str(
-                concurso.get(
-                    "data_limite",
-                    "Não indicada",
-                )
+            _valor_texto(
+                concurso.get("data_limite")
             )
+        )
+
+        preco_base = escape(
+            _valor_texto(
+                concurso.get("preco_base")
+            )
+        )
+
+        procedimento = escape(
+            _obter_procedimento(concurso)
+        )
+
+        cpv = escape(
+            _obter_cpv(concurso)
         )
 
         link = escape(
             str(
-                concurso.get(
-                    "link",
-                    "",
-                )
+                concurso.get("link")
+                or ""
             )
         )
 
@@ -180,8 +366,8 @@ def _criar_html_email(concursos):
             <div style="
                 border: 1px solid #dddddd;
                 border-radius: 8px;
-                padding: 16px;
-                margin-bottom: 16px;
+                padding: 18px;
+                margin-bottom: 18px;
             ">
                 <h2 style="margin-top: 0;">
                     {titulo}
@@ -202,6 +388,21 @@ def _criar_html_email(concursos):
                     {data_limite}
                 </p>
 
+                <p>
+                    <strong>Preço base:</strong>
+                    {preco_base}
+                </p>
+
+                <p>
+                    <strong>Procedimento:</strong>
+                    {procedimento}
+                </p>
+
+                <p>
+                    <strong>CPV:</strong>
+                    {cpv}
+                </p>
+
                 <p>{link_html}</p>
             </div>
             """
@@ -220,7 +421,7 @@ def _criar_html_email(concursos):
     <body style="
         font-family: Arial, sans-serif;
         color: #222222;
-        max-width: 800px;
+        max-width: 850px;
         margin: 0 auto;
         padding: 24px;
     ">
@@ -243,7 +444,9 @@ def enviar_email_concursos(concursos):
     Envia o alerta diário com os concursos novos.
     """
     if not concursos:
-        print("Não existem concursos novos para enviar.")
+        print(
+            "Não existem concursos novos para enviar."
+        )
         return False
 
     configuracao = _obter_configuracao_smtp()
@@ -277,18 +480,33 @@ def enviar_email_concursos(concursos):
 
 def _contar_entidades(concursos):
     """
-    Conta quantos concursos foram publicados
-    por cada entidade.
+    Conta os concursos publicados por entidade.
     """
     contador = Counter()
 
     for concurso in concursos:
-        entidade = (
-            concurso.get("entidade")
-            or "Entidade não indicada"
-        ).strip()
+        entidade = _valor_texto(
+            concurso.get("entidade"),
+            "Entidade não indicada",
+        )
 
         contador[entidade] += 1
+
+    return contador.most_common()
+
+
+def _contar_procedimentos(concursos):
+    """
+    Conta os concursos por tipo de procedimento.
+    """
+    contador = Counter()
+
+    for concurso in concursos:
+        procedimento = _obter_procedimento(
+            concurso
+        )
+
+        contador[procedimento] += 1
 
     return contador.most_common()
 
@@ -298,14 +516,50 @@ def _criar_texto_resumo_mensal(
     nome_mes,
     ano,
 ):
+    estatisticas = _calcular_estatisticas_precos(
+        concursos
+    )
+
     linhas = [
-        f"Resumo mensal de concursos de arquitetura "
-        f"— {nome_mes} de {ano}",
+        (
+            "Resumo mensal de concursos "
+            f"de arquitetura — {nome_mes} de {ano}"
+        ),
         "",
-        f"Total de concursos encontrados: {len(concursos)}",
-        "",
-        "Entidades que mais publicaram:",
+        (
+            "Total de concursos encontrados: "
+            f"{len(concursos)}"
+        ),
     ]
+
+    if estatisticas["total"] is not None:
+        linhas.extend(
+            [
+                (
+                    "Valor total com preço conhecido: "
+                    f"{_formatar_euros(estatisticas['total'])}"
+                ),
+                (
+                    "Preço base médio: "
+                    f"{_formatar_euros(estatisticas['media'])}"
+                ),
+                (
+                    "Concursos com preço conhecido: "
+                    f"{estatisticas['quantidade']}"
+                ),
+            ]
+        )
+    else:
+        linhas.append(
+            "Não existem preços base disponíveis."
+        )
+
+    linhas.extend(
+        [
+            "",
+            "Entidades que mais publicaram:",
+        ]
+    )
 
     entidades = _contar_entidades(concursos)
 
@@ -317,6 +571,29 @@ def _criar_texto_resumo_mensal(
     else:
         linhas.append(
             "- Não foram encontrados concursos."
+        )
+
+    linhas.extend(
+        [
+            "",
+            "Tipos de procedimento:",
+        ]
+    )
+
+    procedimentos = _contar_procedimentos(
+        concursos
+    )
+
+    if procedimentos:
+        for procedimento, total in (
+            procedimentos[:10]
+        ):
+            linhas.append(
+                f"- {procedimento}: {total}"
+            )
+    else:
+        linhas.append(
+            "- Não existem dados de procedimento."
         )
 
     linhas.extend(
@@ -341,19 +618,35 @@ def _criar_texto_resumo_mensal(
             [
                 (
                     f"{indice}. "
-                    f"{concurso.get('titulo', 'Sem título')}"
+                    f"{_valor_texto(concurso.get('titulo'), 'Sem título')}"
                 ),
                 (
                     "Entidade: "
-                    f"{concurso.get('entidade') or 'Não indicada'}"
+                    f"{_valor_texto(concurso.get('entidade'))}"
                 ),
                 (
                     "Data de publicação: "
-                    f"{concurso.get('data') or 'Não indicada'}"
+                    f"{_valor_texto(concurso.get('data'))}"
+                ),
+                (
+                    "Data limite: "
+                    f"{_valor_texto(concurso.get('data_limite'))}"
+                ),
+                (
+                    "Preço base: "
+                    f"{_valor_texto(concurso.get('preco_base'))}"
+                ),
+                (
+                    "Procedimento: "
+                    f"{_obter_procedimento(concurso)}"
+                ),
+                (
+                    "CPV: "
+                    f"{_obter_cpv(concurso)}"
                 ),
                 (
                     "Link: "
-                    f"{concurso.get('link') or 'Não indicado'}"
+                    f"{_valor_texto(concurso.get('link'))}"
                 ),
                 "",
             ]
@@ -367,7 +660,17 @@ def _criar_html_resumo_mensal(
     nome_mes,
     ano,
 ):
-    entidades = _contar_entidades(concursos)
+    entidades = _contar_entidades(
+        concursos
+    )
+
+    procedimentos = _contar_procedimentos(
+        concursos
+    )
+
+    estatisticas = _calcular_estatisticas_precos(
+        concursos
+    )
 
     if entidades:
         linhas_entidades = "".join(
@@ -384,28 +687,87 @@ def _criar_html_resumo_mensal(
             "<li>Não foram encontrados concursos.</li>"
         )
 
+    if procedimentos:
+        linhas_procedimentos = "".join(
+            (
+                "<li>"
+                f"{escape(procedimento)}: "
+                f"<strong>{total}</strong>"
+                "</li>"
+            )
+            for procedimento, total
+            in procedimentos[:10]
+        )
+    else:
+        linhas_procedimentos = (
+            "<li>Não existem dados de procedimento.</li>"
+        )
+
+    if estatisticas["total"] is not None:
+        resumo_precos = f"""
+        <p>
+            <strong>Valor total com preço conhecido:</strong>
+            {_formatar_euros(estatisticas["total"])}
+        </p>
+
+        <p>
+            <strong>Preço base médio:</strong>
+            {_formatar_euros(estatisticas["media"])}
+        </p>
+
+        <p>
+            <strong>Concursos com preço conhecido:</strong>
+            {estatisticas["quantidade"]}
+        </p>
+        """
+    else:
+        resumo_precos = """
+        <p>
+            Não existem preços base disponíveis
+            para este período.
+        </p>
+        """
+
     blocos_concursos = []
 
     for concurso in concursos:
         titulo = escape(
-            str(
-                concurso.get("titulo")
-                or "Sem título"
+            _valor_texto(
+                concurso.get("titulo"),
+                "Sem título",
             )
         )
 
         entidade = escape(
-            str(
+            _valor_texto(
                 concurso.get("entidade")
-                or "Não indicada"
             )
         )
 
         data = escape(
-            str(
+            _valor_texto(
                 concurso.get("data")
-                or "Não indicada"
             )
+        )
+
+        data_limite = escape(
+            _valor_texto(
+                concurso.get("data_limite")
+            )
+        )
+
+        preco_base = escape(
+            _valor_texto(
+                concurso.get("preco_base")
+            )
+        )
+
+        procedimento = escape(
+            _obter_procedimento(concurso)
+        )
+
+        cpv = escape(
+            _obter_cpv(concurso)
         )
 
         link = escape(
@@ -430,8 +792,8 @@ def _criar_html_resumo_mensal(
             <div style="
                 border: 1px solid #dddddd;
                 border-radius: 8px;
-                padding: 16px;
-                margin-bottom: 16px;
+                padding: 18px;
+                margin-bottom: 18px;
             ">
                 <h2 style="margin-top: 0;">
                     {titulo}
@@ -445,6 +807,26 @@ def _criar_html_resumo_mensal(
                 <p>
                     <strong>Data de publicação:</strong>
                     {data}
+                </p>
+
+                <p>
+                    <strong>Data limite:</strong>
+                    {data_limite}
+                </p>
+
+                <p>
+                    <strong>Preço base:</strong>
+                    {preco_base}
+                </p>
+
+                <p>
+                    <strong>Procedimento:</strong>
+                    {procedimento}
+                </p>
+
+                <p>
+                    <strong>CPV:</strong>
+                    {cpv}
                 </p>
 
                 <p>{link_html}</p>
@@ -478,7 +860,7 @@ def _criar_html_resumo_mensal(
     <body style="
         font-family: Arial, sans-serif;
         color: #222222;
-        max-width: 850px;
+        max-width: 900px;
         margin: 0 auto;
         padding: 24px;
     ">
@@ -490,16 +872,31 @@ def _criar_html_resumo_mensal(
             {nome_mes_html} de {ano}
         </h2>
 
-        <p>
-            Total de concursos encontrados:
-            <strong>{len(concursos)}</strong>
-        </p>
+        <div style="
+            border: 1px solid #dddddd;
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 24px;
+        ">
+            <p>
+                <strong>Total de concursos:</strong>
+                {len(concursos)}
+            </p>
+
+            {resumo_precos}
+        </div>
 
         <h2>Entidades que mais publicaram</h2>
 
         <ol>
             {linhas_entidades}
         </ol>
+
+        <h2>Tipos de procedimento</h2>
+
+        <ul>
+            {linhas_procedimentos}
+        </ul>
 
         <h2>Concursos</h2>
 
@@ -515,10 +912,8 @@ def enviar_email_resumo_mensal(
     ano,
 ):
     """
-    Envia o relatório mensal.
-
-    Ao contrário do email diário, envia o relatório
-    mesmo quando o total do mês é zero.
+    Envia o relatório mensal, mesmo quando
+    o total do mês é zero.
     """
     configuracao = _obter_configuracao_smtp()
 

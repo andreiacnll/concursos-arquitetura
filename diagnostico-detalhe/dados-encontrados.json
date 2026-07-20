@@ -1,0 +1,177 @@
+{
+  "id_anuncio": 451494,
+  "url": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=451494",
+  "url_final": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=451494",
+  "estado_http": 200,
+  "titulo_pagina": "Detalhe",
+  "tabelas": [],
+  "listas_descricao": [],
+  "pares_visuais": [
+    {
+      "chave": "Medidas especiais",
+      "valor": "Incluir MEC ao abrigo do CCP"
+    },
+    {
+      "chave": "Tipologia da medida especial",
+      "valor": "Todos Projetos financiados ou cofinanciados por fundos europeus – artigo 2º da Lei n.º30/2021 Habitação e descentralização – artigo 3º da Lei n.º30/2021 Tecnologias de informação e conhecimento – artigo 4º da Lei n.º30/2021 Setor da saúde e do apoio social – artigo 5º da Lei n.º30/2021 Plano de Recuperação e Resiliência (PRR) – artigo 2º da Lei n.º30/2021, DL n.º 78/2022 Sistema de Gestão Integrada de Fogos Rurais – artigo 7º da Lei n.º30/2021 Bens agro-alimentares – artigo 8º da Lei n.º30/2021 Programa de Estabilização Económica e Social (PEES) – artigo 6º da Lei n.º 30/2021 Plano de Recuperação e Resiliência (PRR) – artigo 6º da Lei n.º30/2021 Regime especial de empreitadas de conceção-construção – artigo 2º-A da Lei n.º30/2021, DL n.º 78/2022 Formação de contratos no âmbito da concentração de serviços no Campus XXI - artigo 25.º-C da Lei n.º 30/2021"
+    },
+    {
+      "chave": "Objeto do contrato",
+      "valor": "Entidade adjudicante Entidade adjudicatária"
+    },
+    {
+      "chave": "Entidade adjudicante",
+      "valor": "Entidade adjudicatária"
+    },
+    {
+      "chave": "Tipo de procedimento",
+      "valor": "Todos Consulta Prévia Ajuste Direto Regime Geral Concurso público Concurso limitado por prévia qualificação Procedimento de negociação Diálogo concorrencial Ao abrigo de acordo-quadro (art.º 258.º) Ao abrigo de acordo-quadro (art.º 259.º) Parceria para a inovação Disponibilização de bens móveis Serviços sociais e outros serviços específicos Concurso de conceção simplificado Concurso de ideias simplificado Consulta Prévia Simplificada Concurso público simplificado Concurso limitado por prévia qualificação simplificado Ajuste Direto Regime Geral ao abrigo do artigo 7º da Lei n.º 30/2021, de 21.05 Consulta prévia ao abrigo do artigo 7º da Lei n.º 30/2021, de 21.05 Ajuste direto simplificado Ajuste direto simplificado ao abrigo da Lei n.º 30/2021, de 21.05 Setores especiais – isenção parte II Contratação excluída II"
+    },
+    {
+      "chave": "Tipo de contrato",
+      "valor": "Todos Aquisição de bens móveis Aquisição de serviços Concessão de obras públicas Concessão de serviços públicos Empreitadas de obras públicas Locação de bens móveis Sociedade Outros"
+    },
+    {
+      "chave": "CPV",
+      "valor": "Nº ou descrição do acordo quadro Acordo quadro"
+    },
+    {
+      "chave": "Nº ou descrição do acordo quadro",
+      "valor": "Acordo quadro"
+    },
+    {
+      "chave": "Procedimento centralizado",
+      "valor": "Peças do procedimento"
+    },
+    {
+      "chave": "Peças do procedimento",
+      "valor": "Critérios ambientais"
+    },
+    {
+      "chave": "Prazo de execução (dias)",
+      "valor": "Preços Preço contratual Preço total efetivo"
+    },
+    {
+      "chave": "Preços",
+      "valor": "Preço contratual Preço total efetivo"
+    },
+    {
+      "chave": "Datas",
+      "valor": "Data do contrato Data da publicação Data do fecho"
+    },
+    {
+      "chave": "Descrição do anúncio",
+      "valor": "Nº do anúncio DR"
+    },
+    {
+      "chave": "Nº do anúncio DR",
+      "valor": "Entidade emissora"
+    },
+    {
+      "chave": "Entidade emissora",
+      "valor": "Tipo de contrato Todos Aquisição de bens móveis Aquisição de serviços Concessão de obras públicas Concessão de serviços públicos Empreitadas de obras públicas Locação de bens móveis Sociedade Outros"
+    },
+    {
+      "chave": "Tipo de contrato",
+      "valor": "Data da publicação"
+    },
+    {
+      "chave": "Data da publicação",
+      "valor": "Peças do procedimento Critérios ambientais"
+    },
+    {
+      "chave": "Critérios ambientais",
+      "valor": "Tipo de ato Todos Anúncio de procedimento Anúncio de concurso urgente Declaração de retificação de anúncio Aviso de prorrogação de prazo Anúncio de Alteração Tipo de modelo Todos Concurso público Concurso público urgente Concurso limitado por prévia qualificação Procedimento de negociação Diálogo concorrencial Concurso de concepção Anúncio simplificado Instituição de sistema de qualificação Intenção de celebração de empreitadas de obras publicas por concessionários que não sejam entidades adjudicantes Parceria para a inovação Concurso de ideias Instituição de sistema de aquisição dinâmico Hasta Pública de Alienação de Bens Móveis Aquisição de Serviços Sociais e de Outros Serviços Específicos Anúncio de Adjudicação de Aquisição de Serviços Sociais e de Outros Serviços Específicos Concurso público simplificado Concurso limitado por prévia qualificação simplificado CPV Preço base Anúncios ativos"
+    },
+    {
+      "chave": "Tipo de ato",
+      "valor": "Todos Anúncio de procedimento Anúncio de concurso urgente Declaração de retificação de anúncio Aviso de prorrogação de prazo Anúncio de Alteração"
+    },
+    {
+      "chave": "Tipo de modelo",
+      "valor": "Todos Concurso público Concurso público urgente Concurso limitado por prévia qualificação Procedimento de negociação Diálogo concorrencial Concurso de concepção Anúncio simplificado Instituição de sistema de qualificação Intenção de celebração de empreitadas de obras publicas por concessionários que não sejam entidades adjudicantes Parceria para a inovação Concurso de ideias Instituição de sistema de aquisição dinâmico Hasta Pública de Alienação de Bens Móveis Aquisição de Serviços Sociais e de Outros Serviços Específicos Anúncio de Adjudicação de Aquisição de Serviços Sociais e de Outros Serviços Específicos Concurso público simplificado Concurso limitado por prévia qualificação simplificado"
+    },
+    {
+      "chave": "CPV",
+      "valor": "Preço base"
+    },
+    {
+      "chave": "Preço base",
+      "valor": "Anúncios ativos"
+    },
+    {
+      "chave": "Anúncios ativos",
+      "valor": "Limpar Pesquisar"
+    },
+    {
+      "chave": "Objeto do contrato",
+      "valor": "Preços Preço contratual Preço alterado"
+    },
+    {
+      "chave": "Preços",
+      "valor": "Preço contratual Preço alterado"
+    },
+    {
+      "chave": "Datas",
+      "valor": "Data do contrato Data da modificação"
+    },
+    {
+      "chave": "Objeto do procedimento",
+      "valor": "Entidade adjudicante"
+    },
+    {
+      "chave": "Entidade adjudicante",
+      "valor": "Tipo de procedimento Todos Consulta Prévia Ajuste Direto Regime Geral Concurso público Concurso limitado por prévia qualificação Procedimento de negociação Diálogo concorrencial Ao abrigo de acordo-quadro (art.º 258.º) Ao abrigo de acordo-quadro (art.º 259.º) Parceria para a inovação Disponibilização de bens móveis Serviços sociais e outros serviços específicos Concurso de conceção simplificado Concurso de ideias simplificado Consulta Prévia Simplificada Concurso público simplificado Concurso limitado por prévia qualificação simplificado Ajuste Direto Regime Geral ao abrigo do artigo 7º da Lei n.º 30/2021, de 21.05 Consulta prévia ao abrigo do artigo 7º da Lei n.º 30/2021, de 21.05 Ajuste direto simplificado Ajuste direto simplificado ao abrigo da Lei n.º 30/2021, de 21.05 Setores especiais – isenção parte II Contratação excluída II"
+    },
+    {
+      "chave": "Motivo da não celebração de contrato",
+      "valor": "Todos Revogação da decisão de contratar Caducidade de adjudicação sem que seja possível a adjudicação de outra proposta Desvinculação da proposta pela entidade adjudicatária Outro Falta de manifestação de interesse Alteração da intenção da disponibilização Alteração da intenção da alienação"
+    },
+    {
+      "chave": "Datas",
+      "valor": "Data da decisão Data da publicação"
+    },
+    {
+      "chave": "Entidade adjudicante",
+      "valor": "Datas Data da decisão Data da publicação"
+    },
+    {
+      "chave": "Tipo de procedimento",
+      "valor": "Objeto da impugnação/reclamação Todos Ato de adjudicação Peças procedimentais Deliberações Júri Ajustamentos ao contrato Não entrega dos documentos de habilitação Outros Execução"
+    },
+    {
+      "chave": "Objeto da impugnação/reclamação",
+      "valor": "Todos Ato de adjudicação Peças procedimentais Deliberações Júri Ajustamentos ao contrato Não entrega dos documentos de habilitação Outros Execução"
+    },
+    {
+      "chave": "Fase do procedimento",
+      "valor": "Todos Apagado Procedimento registado Anúncio publicado Convites Enviados Análise de propostas Análise de candidaturas Análise de soluções Habilitação do adjudicatário Contrato comunicado Concluído Fim de Procedimento Descontinuado Em execução"
+    },
+    {
+      "chave": "Objeto da consulta preliminar",
+      "valor": "Entidade adjudicante"
+    },
+    {
+      "chave": "Entidade adjudicante",
+      "valor": "CPV"
+    },
+    {
+      "chave": "CPV",
+      "valor": "Consultas ativas"
+    },
+    {
+      "chave": "Consultas ativas",
+      "valor": "Data da receção de respostas Local de execução (Distrito, Concelho, Freguesia) Todos Aveiro Beja Braga Braganca Castelo Branco Coimbra Évora Faro Guarda Leiria Lisboa Portalegre Porto Santarém Setúbal Viana do Castelo Vila Real Viseu Região Autónoma dos Açores Região Autónoma da Madeira Portugal Continental Distrito não determinado Consulado situados no estrangeiro Todos Todos"
+    },
+    {
+      "chave": "Data da receção de respostas",
+      "valor": "Local de execução (Distrito, Concelho, Freguesia) Todos Aveiro Beja Braga Braganca Castelo Branco Coimbra Évora Faro Guarda Leiria Lisboa Portalegre Porto Santarém Setúbal Viana do Castelo Vila Real Viseu Região Autónoma dos Açores Região Autónoma da Madeira Portugal Continental Distrito não determinado Consulado situados no estrangeiro Todos Todos"
+    },
+    {
+      "chave": "Local de execução (Distrito, Concelho, Freguesia)",
+      "valor": "Todos Aveiro Beja Braga Braganca Castelo Branco Coimbra Évora Faro Guarda Leiria Lisboa Portalegre Porto Santarém Setúbal Viana do Castelo Vila Real Viseu Região Autónoma dos Açores Região Autónoma da Madeira Portugal Continental Distrito não determinado Consulado situados no estrangeiro"
+    }
+  ],
+  "scripts_json": [],
+  "possiveis_json_inline": []
+}

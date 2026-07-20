@@ -60,7 +60,9 @@ def obter_periodo_mes_anterior():
 
 def main():
     print("=" * 60)
-    print("Resumo mensal de concursos de arquitetura")
+    print(
+        "Resumo mensal de concursos de arquitetura"
+    )
     print("=" * 60)
 
     criar_base_dados()
@@ -88,6 +90,28 @@ def main():
     print(
         "Concursos encontrados: "
         f"{len(concursos)}"
+    )
+
+    concursos_com_preco = sum(
+        1
+        for concurso in concursos
+        if concurso.get("preco_base")
+    )
+
+    concursos_com_prazo = sum(
+        1
+        for concurso in concursos
+        if concurso.get("data_limite")
+    )
+
+    print(
+        "Concursos com preço base: "
+        f"{concursos_com_preco}"
+    )
+
+    print(
+        "Concursos com data limite: "
+        f"{concursos_com_prazo}"
     )
 
     print("\nA enviar resumo mensal...")
