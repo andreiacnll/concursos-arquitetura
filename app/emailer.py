@@ -1,4 +1,3 @@
-cat > app/emailer.py <<'PY'
 import os
 import smtplib
 from collections import Counter
@@ -561,4 +560,3 @@ def enviar_email_resumo_mensal(
     )
 
     return True
-PY
