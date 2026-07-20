@@ -1,0 +1,314 @@
+from __future__ import annotations
+
+import sqlite3
+from contextlib import closing
+from pathlib import Path
+from typing import Any
+
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+DB_PATH = BASE_DIR / "concursos.db"
+
+
+app = FastAPI(
+    title="ArquiConcursos API",
+    description=(
+        "API para consulta de concursos públicos "
+        "relacionados com arquitetura."
+    ),
+    version="0.1.0",
+)
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["GET"],
+    allow_headers=["*"],
+)
+
+
+def obter_conexao() -> sqlite3.Connection:
+    if not DB_PATH.exists():
+        raise RuntimeError(
+            f"Base de dados não encontrada: {DB_PATH}"
+        )
+
+    conexao = sqlite3.connect(DB_PATH)
+    conexao.row_factory = sqlite3.Row
+
+    return conexao
+
+
+def linha_para_dicionario(
+    linha: sqlite3.Row,
+) -> dict[str, Any]:
+    return dict(linha)
+
+
+@app.get("/")
+def inicio() -> dict[str, str]:
+    return {
+        "nome": "ArquiConcursos API",
+        "estado": "online",
+        "documentacao": "/docs",
+    }
+
+
+@app.get("/health")
+def healthcheck() -> dict[str, str]:
+    try:
+        with closing(obter_conexao()) as conexao:
+            conexao.execute("SELECT 1").fetchone()
+
+    except Exception as erro:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Base de dados indisponível: {erro}",
+        ) from erro
+
+    return {
+        "status": "ok",
+        "database": "ok",
+    }
+
+
+@app.get("/concursos")
+def listar_concursos(
+    pesquisa: str | None = Query(
+        default=None,
+        description="Pesquisa no título ou entidade.",
+    ),
+    entidade: str | None = Query(
+        default=None,
+        description="Filtrar por entidade.",
+    ),
+    tipo_procedimento: str | None = Query(
+        default=None,
+        description="Filtrar por tipo de procedimento.",
+    ),
+    apenas_relevantes: bool = Query(
+        default=True,
+        description="Mostrar apenas concursos relevantes.",
+    ),
+    limite: int = Query(
+        default=20,
+        ge=1,
+        le=100,
+    ),
+    pagina: int = Query(
+        default=1,
+        ge=1,
+    ),
+) -> dict[str, Any]:
+    condicoes: list[str] = []
+    parametros: list[Any] = []
+
+    if apenas_relevantes:
+        condicoes.append("relevante = 1")
+
+    if pesquisa:
+        condicoes.append(
+            """
+            (
+                titulo LIKE ?
+                OR entidade LIKE ?
+                OR cpv LIKE ?
+            )
+            """
+        )
+
+        termo = f"%{pesquisa.strip()}%"
+
+        parametros.extend(
+            [
+                termo,
+                termo,
+                termo,
+            ]
+        )
+
+    if entidade:
+        condicoes.append(
+            "entidade LIKE ?"
+        )
+        parametros.append(
+            f"%{entidade.strip()}%"
+        )
+
+    if tipo_procedimento:
+        condicoes.append(
+            "tipo_procedimento LIKE ?"
+        )
+        parametros.append(
+            f"%{tipo_procedimento.strip()}%"
+        )
+
+    where = ""
+
+    if condicoes:
+        where = (
+            "WHERE "
+            + " AND ".join(condicoes)
+        )
+
+    offset = (pagina - 1) * limite
+
+    consulta_total = f"""
+        SELECT COUNT(*)
+        FROM concursos
+        {where}
+    """
+
+    consulta_dados = f"""
+        SELECT
+            id,
+            titulo,
+            entidade,
+            link,
+            data,
+            relevante,
+            data_limite,
+            preco_base,
+            cpv,
+            tipo_procedimento
+        FROM concursos
+        {where}
+        ORDER BY
+            id DESC
+        LIMIT ?
+        OFFSET ?
+    """
+
+    with closing(obter_conexao()) as conexao:
+        total = conexao.execute(
+            consulta_total,
+            parametros,
+        ).fetchone()[0]
+
+        linhas = conexao.execute(
+            consulta_dados,
+            [
+                *parametros,
+                limite,
+                offset,
+            ],
+        ).fetchall()
+
+    concursos = [
+        linha_para_dicionario(linha)
+        for linha in linhas
+    ]
+
+    return {
+        "pagina": pagina,
+        "limite": limite,
+        "total": total,
+        "resultados": concursos,
+    }
+
+
+@app.get("/concursos/{concurso_id}")
+def obter_concurso(
+    concurso_id: int,
+) -> dict[str, Any]:
+    with closing(obter_conexao()) as conexao:
+        linha = conexao.execute(
+            """
+            SELECT
+                id,
+                titulo,
+                entidade,
+                link,
+                data,
+                relevante,
+                data_limite,
+                preco_base,
+                cpv,
+                tipo_procedimento
+            FROM concursos
+            WHERE id = ?
+            """,
+            (concurso_id,),
+        ).fetchone()
+
+    if linha is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Concurso não encontrado.",
+        )
+
+    return linha_para_dicionario(linha)
+
+
+@app.get("/estatisticas")
+def obter_estatisticas() -> dict[str, Any]:
+    with closing(obter_conexao()) as conexao:
+        total = conexao.execute(
+            """
+            SELECT COUNT(*)
+            FROM concursos
+            """
+        ).fetchone()[0]
+
+        relevantes = conexao.execute(
+            """
+            SELECT COUNT(*)
+            FROM concursos
+            WHERE relevante = 1
+            """
+        ).fetchone()[0]
+
+        com_preco = conexao.execute(
+            """
+            SELECT COUNT(*)
+            FROM concursos
+            WHERE
+                preco_base IS NOT NULL
+                AND TRIM(preco_base) != ''
+            """
+        ).fetchone()[0]
+
+        com_prazo = conexao.execute(
+            """
+            SELECT COUNT(*)
+            FROM concursos
+            WHERE
+                data_limite IS NOT NULL
+                AND TRIM(data_limite) != ''
+            """
+        ).fetchone()[0]
+
+        entidades = conexao.execute(
+            """
+            SELECT
+                entidade,
+                COUNT(*) AS total
+            FROM concursos
+            WHERE
+                entidade IS NOT NULL
+                AND TRIM(entidade) != ''
+            GROUP BY entidade
+            ORDER BY total DESC
+            LIMIT 10
+            """
+        ).fetchall()
+
+    return {
+        "total_concursos": total,
+        "concursos_relevantes": relevantes,
+        "concursos_com_preco": com_preco,
+        "concursos_com_prazo": com_prazo,
+        "principais_entidades": [
+            {
+                "entidade": linha["entidade"],
+                "total": linha["total"],
+            }
+            for linha in entidades
+        ],
+   
+     }
