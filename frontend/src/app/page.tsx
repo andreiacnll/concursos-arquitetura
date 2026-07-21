@@ -5,7 +5,7 @@ import type { Concurso } from "@/components/competition-types";
 async function getConcursos(): Promise<Concurso[]> {
   try {
     const response = await fetch(
-      "http://127.0.0.1:8000/concursos?estado=todos&limite=100",
+      `${process.env.NEXT_PUBLIC_API_URL}/concursos?estado=todos&limite=100`,
       { cache: "no-store" },
     );
 
