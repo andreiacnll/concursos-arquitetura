@@ -2,10 +2,14 @@ import Link from "next/link";
 import { ArrowLeft, Archive, CalendarDays, ExternalLink } from "lucide-react";
 import type { Concurso } from "@/components/competition-types";
 
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ??
+  "https://concursos-arquitetura.onrender.com";
+
 async function getHistorico(): Promise<Concurso[]> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/historico?estado=todos&limite=100`,
+      `${API_URL}/historico?estado=todos&limite=100`,
       { cache: "no-store" },
     );
 
