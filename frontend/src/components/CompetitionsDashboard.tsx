@@ -25,6 +25,14 @@ const categories = [
   "Património",
 ];
 
+const moreCategories = [
+  "Paisagismo",
+  "Cultura",
+  "Equipamentos públicos",
+  "Mobilidade",
+  "Outros",
+];
+
 function categoryForTitle(title: string) {
   const text = title.toLowerCase();
 
@@ -38,6 +46,39 @@ function categoryForTitle(title: string) {
     text.includes("espaço público")
   )
     return "Espaço público";
+  if (
+    text.includes("jardim") ||
+    text.includes("parque") ||
+    text.includes("paisag")
+  )
+    return "Paisagismo";
+
+  if (
+    text.includes("cultura") ||
+    text.includes("teatro") ||
+    text.includes("biblioteca") ||
+    text.includes("centro cultural")
+  )
+    return "Cultura";
+
+  if (
+    text.includes("equipamento público") ||
+    text.includes("equipamento municipal") ||
+    text.includes("edifício municipal") ||
+    text.includes("serviços municipais")
+  )
+    return "Equipamentos públicos";
+
+  if (
+    text.includes("mobilidade") ||
+    text.includes("estação") ||
+    text.includes("terminal") ||
+    text.includes("metro") ||
+    text.includes("ferrovi") ||
+    text.includes("ciclovia")
+  )
+    return "Mobilidade";
+
   if (text.includes("patrim") || text.includes("museu")) return "Património";
 
   return "Outros";
@@ -138,6 +179,7 @@ export default function CompetitionsDashboard({
 }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("Todos");
+  const [moreCategoriesOpen, setMoreCategoriesOpen] = useState(false);
   const [district, setDistrict] = useState("Todos os distritos");
   const [sort, setSort] = useState("recentes");
   const [selectedProcedures, setSelectedProcedures] = useState<string[]>([]);
@@ -329,9 +371,52 @@ export default function CompetitionsDashboard({
                   {item}
                 </button>
               ))}
-              <button type="button">
-                Mais <ChevronDown size={15} />
-              </button>
+              <div className="more-categories">
+                <button
+                  type="button"
+                  className={
+                    moreCategories.includes(category) ||
+                    moreCategoriesOpen
+                      ? "active"
+                      : ""
+                  }
+                  aria-expanded={moreCategoriesOpen}
+                  aria-haspopup="menu"
+                  onClick={() =>
+                    setMoreCategoriesOpen((current) => !current)
+                  }
+                >
+                  {moreCategories.includes(category) ? category : "Mais"}
+
+                  <ChevronDown
+                    size={15}
+                    className={moreCategoriesOpen ? "is-open" : ""}
+                  />
+                </button>
+
+                {moreCategoriesOpen && (
+                  <div
+                    className="more-categories-menu"
+                    role="menu"
+                    aria-label="Mais categorias"
+                  >
+                    {moreCategories.map((item) => (
+                      <button
+                        key={item}
+                        type="button"
+                        role="menuitem"
+                        className={category === item ? "active" : ""}
+                        onClick={() => {
+                          setCategory(item);
+                          setMoreCategoriesOpen(false);
+                        }}
+                      >
+                        {item}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
