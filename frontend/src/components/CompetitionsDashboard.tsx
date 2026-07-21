@@ -47,6 +47,90 @@ function uniqueCount(values: Array<string | null | undefined>) {
   return new Set(values.filter(Boolean)).size;
 }
 
+const procedureOptions = [
+  "Concurso público",
+  "Concurso limitado por prévia qualificação",
+  "Concurso de conceção",
+  "Consulta prévia",
+  "Ajuste direto",
+];
+
+const serviceOptions = [
+  "Elaboração de projeto",
+  "Revisão / Análise de projeto",
+  "Concurso de conceção",
+  "Fiscalização / Coordenação",
+];
+
+function normalizeText(value: string | null | undefined) {
+  return (value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function matchesProcedure(
+  concurso: Concurso,
+  selectedProcedures: string[],
+) {
+  if (selectedProcedures.length === 0) return true;
+
+  const source = normalizeText(concurso.tipo_procedimento);
+
+  return selectedProcedures.some((procedure) =>
+    source.includes(normalizeText(procedure)),
+  );
+}
+
+function serviceForCompetition(concurso: Concurso) {
+  const source = normalizeText(
+    [concurso.titulo, concurso.tipo_procedimento]
+      .filter(Boolean)
+      .join(" "),
+  );
+
+  if (
+    source.includes("fiscalizacao") ||
+    source.includes("coordenacao de seguranca") ||
+    source.includes("coordenacao")
+  ) {
+    return "Fiscalização / Coordenação";
+  }
+
+  if (
+    source.includes("revisao") ||
+    source.includes("analise de projeto") ||
+    source.includes("verificacao de projeto")
+  ) {
+    return "Revisão / Análise de projeto";
+  }
+
+  if (
+    source.includes("concurso de concecao") ||
+    source.includes("concurso de concepcao")
+  ) {
+    return "Concurso de conceção";
+  }
+
+  if (
+    source.includes("elaboracao de projeto") ||
+    source.includes("projeto de arquitetura") ||
+    source.includes("projecto de arquitectura") ||
+    source.includes("projeto")
+  ) {
+    return "Elaboração de projeto";
+  }
+
+  return null;
+}
+
+function matchesService(concurso: Concurso, selectedServices: string[]) {
+  if (selectedServices.length === 0) return true;
+
+  const service = serviceForCompetition(concurso);
+  return service !== null && selectedServices.includes(service);
+}
+
 export default function CompetitionsDashboard({
   concursos,
 }: {
@@ -56,6 +140,9 @@ export default function CompetitionsDashboard({
   const [category, setCategory] = useState("Todos");
   const [district, setDistrict] = useState("Todos os distritos");
   const [sort, setSort] = useState("recentes");
+  const [selectedProcedures, setSelectedProcedures] = useState<string[]>([]);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [view, setView] = useState<"grid" | "list">("grid");
   const [activeTab, setActiveTab] = useState<"todos" | "favoritos">("todos");
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const [favoritesLoaded, setFavoritesLoaded] = useState(false);
@@ -94,6 +181,30 @@ export default function CompetitionsDashboard({
     );
   }
 
+  function toggleProcedure(procedure: string) {
+    setSelectedProcedures((current) =>
+      current.includes(procedure)
+        ? current.filter((item) => item !== procedure)
+        : [...current, procedure],
+    );
+  }
+
+  function toggleService(service: string) {
+    setSelectedServices((current) =>
+      current.includes(service)
+        ? current.filter((item) => item !== service)
+        : [...current, service],
+    );
+  }
+
+  function clearFilters() {
+    setQuery("");
+    setCategory("Todos");
+    setDistrict("Todos os distritos");
+    setSelectedProcedures([]);
+    setSelectedServices([]);
+  }
+
   const districts = useMemo(
     () =>
       Array.from(
@@ -129,12 +240,19 @@ export default function CompetitionsDashboard({
         category === "Todos" || categoryForTitle(item.titulo) === category;
       const matchesDistrict =
         district === "Todos os distritos" || item.distrito === district;
+      const matchesSelectedProcedure = matchesProcedure(
+        item,
+        selectedProcedures,
+      );
+      const matchesSelectedService = matchesService(item, selectedServices);
 
       return (
         matchesFavorites &&
         matchesQuery &&
         matchesCategory &&
-        matchesDistrict
+        matchesDistrict &&
+        matchesSelectedProcedure &&
+        matchesSelectedService
       );
     });
 
@@ -148,6 +266,8 @@ export default function CompetitionsDashboard({
     query,
     category,
     district,
+    selectedProcedures,
+    selectedServices,
     sort,
     activeTab,
     favoriteIds,
@@ -276,14 +396,13 @@ export default function CompetitionsDashboard({
 
             <div className="filter-group">
               <p>Tipo de procedimento</p>
-              {[
-                "Concurso público",
-                "Concurso limitado por prévia qualificação",
-                "Concurso de conceção",
-                "Consulta prévia",
-              ].map((label, index) => (
+              {procedureOptions.map((label) => (
                 <label className="check-row" key={label}>
-                  <input type="checkbox" defaultChecked={index === 0} />
+                  <input
+                    type="checkbox"
+                    checked={selectedProcedures.includes(label)}
+                    onChange={() => toggleProcedure(label)}
+                  />
                   <span>{label}</span>
                 </label>
               ))}
@@ -291,28 +410,26 @@ export default function CompetitionsDashboard({
 
             <div className="filter-group">
               <p>Tipo de serviço</p>
-              {[
-                "Elaboração de projeto",
-                "Revisão / Análise de projeto",
-                "Concurso de conceção",
-                "Fiscalização / Coordenação",
-              ].map((label) => (
+              {serviceOptions.map((label) => (
                 <label className="check-row" key={label}>
-                  <input type="checkbox" />
+                  <input
+                    type="checkbox"
+                    checked={selectedServices.includes(label)}
+                    onChange={() => toggleService(label)}
+                  />
                   <span>{label}</span>
                 </label>
               ))}
             </div>
 
-            <div className="filter-group value-filter">
-              <p>Valor estimado</p>
-              <div className="range-track">
-                <span />
-              </div>
-              <div className="range-labels">
-                <span>€ 0</span>
-                <span>€ 5M+</span>
-              </div>
+            <div className="filter-group">
+              <button
+                type="button"
+                className="clear-filters-button"
+                onClick={clearFilters}
+              >
+                Limpar filtros
+              </button>
             </div>
           </aside>
 
@@ -357,10 +474,22 @@ export default function CompetitionsDashboard({
                   <option value="antigos">Mais antigos</option>
                 </select>
                 <div className="view-toggle">
-                  <button type="button" className="active" aria-label="Vista em grelha">
+                  <button
+                    type="button"
+                    className={view === "grid" ? "active" : ""}
+                    aria-label="Vista em grelha"
+                    aria-pressed={view === "grid"}
+                    onClick={() => setView("grid")}
+                  >
                     <Grid2X2 size={18} />
                   </button>
-                  <button type="button" aria-label="Vista em lista">
+                  <button
+                    type="button"
+                    className={view === "list" ? "active" : ""}
+                    aria-label="Vista em lista"
+                    aria-pressed={view === "list"}
+                    onClick={() => setView("list")}
+                  >
                     <List size={19} />
                   </button>
                 </div>
@@ -368,7 +497,11 @@ export default function CompetitionsDashboard({
             </div>
 
             {filtered.length > 0 ? (
-              <div className="competition-grid">
+              <div
+                className={`competition-grid ${
+                  view === "list" ? "is-list" : ""
+                }`}
+              >
                 {filtered.map((concurso, index) => (
                   <CompetitionCard
                     key={concurso.id}
