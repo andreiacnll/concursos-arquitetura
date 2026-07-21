@@ -15,3 +15,7 @@ frontend/.next/
 .env
 app/.env
 frontend/.env.local
+
+.venv/
+frontend/node_modules/
+frontend/.next/
