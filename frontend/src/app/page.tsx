@@ -2,10 +2,14 @@ import CompetitionsDashboard from "@/components/CompetitionsDashboard";
 import Navbar from "@/components/Navbar";
 import type { Concurso } from "@/components/competition-types";
 
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ??
+  "https://concursos-arquitetura.onrender.com";
+
 async function getConcursos(): Promise<Concurso[]> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/concursos?estado=todos&limite=100`,
+      `${API_URL}/concursos?estado=todos&limite=100`,
       { cache: "no-store" },
     );
 
