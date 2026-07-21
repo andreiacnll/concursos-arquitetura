@@ -9,7 +9,7 @@ import {
   Grid2X2,
   Landmark,
   List,
-  MapPin,
+  Clock3,
   Search,
   SlidersHorizontal,
 } from "lucide-react";
@@ -186,6 +186,9 @@ export default function CompetitionsDashboard({
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [view, setView] = useState<"grid" | "list">("grid");
   const [activeTab, setActiveTab] = useState<"todos" | "favoritos">("todos");
+  const [statFilter, setStatFilter] = useState<
+    "todos" | "ativos" | "novos" | "terminam" | "entidades"
+  >("todos");
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const [favoritesLoaded, setFavoritesLoaded] = useState(false);
 
@@ -288,13 +291,43 @@ export default function CompetitionsDashboard({
       );
       const matchesSelectedService = matchesService(item, selectedServices);
 
+      const publicationDate = new Date(item.data);
+      const deadlineDate = item.data_limite
+        ? new Date(item.data_limite)
+        : null;
+
+      const todayFilter = new Date();
+      todayFilter.setHours(0, 0, 0, 0);
+
+      const sevenDaysAgoFilter = new Date(todayFilter);
+      sevenDaysAgoFilter.setDate(todayFilter.getDate() - 7);
+
+      const sevenDaysAheadFilter = new Date(todayFilter);
+      sevenDaysAheadFilter.setDate(todayFilter.getDate() + 7);
+      sevenDaysAheadFilter.setHours(23, 59, 59, 999);
+
+      const matchesStatFilter =
+        statFilter === "todos" ||
+        (statFilter === "ativos" && item.estado === "aberto") ||
+        (statFilter === "novos" &&
+          !Number.isNaN(publicationDate.getTime()) &&
+          publicationDate >= sevenDaysAgoFilter &&
+          publicationDate <= sevenDaysAheadFilter) ||
+        (statFilter === "terminam" &&
+          deadlineDate !== null &&
+          !Number.isNaN(deadlineDate.getTime()) &&
+          deadlineDate >= todayFilter &&
+          deadlineDate <= sevenDaysAheadFilter) ||
+        (statFilter === "entidades" && Boolean(item.entidade));
+
       return (
         matchesFavorites &&
         matchesQuery &&
         matchesCategory &&
         matchesDistrict &&
         matchesSelectedProcedure &&
-        matchesSelectedService
+        matchesSelectedService &&
+        matchesStatFilter
       );
     });
 
@@ -313,6 +346,7 @@ export default function CompetitionsDashboard({
     sort,
     activeTab,
     favoriteIds,
+    statFilter,
   ]);
 
   const now = new Date();
@@ -325,25 +359,60 @@ export default function CompetitionsDashboard({
   }).length;
 
   const active = concursos.filter((item) => item.estado === "aberto").length;
-  const municipalityCount =
-    uniqueCount(concursos.map((item) => item.municipio)) ||
-    uniqueCount(concursos.map((item) => item.distrito));
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const sevenDaysAhead = new Date(today);
+  sevenDaysAhead.setDate(today.getDate() + 7);
+  sevenDaysAhead.setHours(23, 59, 59, 999);
+
+  const endingSoon = concursos.filter((item) => {
+    if (!item.data_limite) return false;
+
+    const deadline = new Date(item.data_limite);
+
+    return (
+      !Number.isNaN(deadline.getTime()) &&
+      deadline >= today &&
+      deadline <= sevenDaysAhead
+    );
+  }).length;
+
   const entityCount = uniqueCount(concursos.map((item) => item.entidade));
+
+  function applyStatFilter(
+    filter: "todos" | "ativos" | "novos" | "terminam" | "entidades",
+  ) {
+    setStatFilter((current) => (current === filter ? "todos" : filter));
+    setActiveTab("todos");
+    setQuery("");
+    setCategory("Todos");
+    setDistrict("Todos os distritos");
+    setSelectedProcedures([]);
+    setSelectedServices([]);
+
+    window.setTimeout(() => {
+      document
+        .getElementById("concursos")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 80);
+  }
 
   return (
     <>
       <section className="hero-section">
         <div className="site-container hero-grid">
           <div className="hero-copy">
-            <p className="eyebrow">Concursos públicos de arquitetura</p>
+            <p className="eyebrow">Concursos públicos</p>
             <h1>
-              Encontra oportunidades.
+              Plataforma de
               <br />
-              Constrói o futuro.
+              acompanhamento de concursos
             </h1>
             <p className="hero-description">
-              Acompanha concursos públicos de arquitetura em Portugal de forma
-              simples, rápida e organizada.
+              Consulta, pesquisa e acompanhamento de concursos públicos de
+              arquitetura, urbanismo e paisagismo em Portugal.
             </p>
 
             <div className="search-row">
@@ -352,7 +421,7 @@ export default function CompetitionsDashboard({
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Pesquisar concursos, entidades, locais..."
+                  placeholder="Pesquisar por entidade, município ou palavra-chave..."
                 />
               </label>
               <button className="search-button" type="button" aria-label="Pesquisar">
@@ -425,34 +494,61 @@ export default function CompetitionsDashboard({
           </div>
 
           <div className="stats-panel">
-            <div className="stat">
+            <button
+              type="button"
+              className={`stat ${statFilter === "ativos" ? "active" : ""}`}
+              onClick={() => applyStatFilter("ativos")}
+              title="Ver todos os concursos ativos"
+              aria-pressed={statFilter === "ativos"}
+            >
               <Building2 />
               <div>
                 <strong>{active || concursos.length}</strong>
                 <span>Concursos ativos</span>
               </div>
-            </div>
-            <div className="stat">
+            </button>
+
+            <button
+              type="button"
+              className={`stat ${statFilter === "novos" ? "active" : ""}`}
+              onClick={() => applyStatFilter("novos")}
+              title="Ver concursos publicados nos últimos 7 dias"
+              aria-pressed={statFilter === "novos"}
+            >
               <CalendarDays />
               <div>
                 <strong>{newThisWeek}</strong>
                 <span>Novos esta semana</span>
               </div>
-            </div>
-            <div className="stat">
-              <MapPin />
+            </button>
+
+            <button
+              type="button"
+              className={`stat ${statFilter === "terminam" ? "active" : ""}`}
+              onClick={() => applyStatFilter("terminam")}
+              title="Ver concursos que terminam nos próximos 7 dias"
+              aria-pressed={statFilter === "terminam"}
+            >
+              <Clock3 />
               <div>
-                <strong>{municipalityCount}</strong>
-                <span>Municípios</span>
+                <strong>{endingSoon}</strong>
+                <span>Terminam em 7 dias</span>
               </div>
-            </div>
-            <div className="stat">
+            </button>
+
+            <button
+              type="button"
+              className={`stat ${statFilter === "entidades" ? "active" : ""}`}
+              onClick={() => applyStatFilter("entidades")}
+              title="Ver concursos com entidade identificada"
+              aria-pressed={statFilter === "entidades"}
+            >
               <Landmark />
               <div>
                 <strong>{entityCount}</strong>
                 <span>Entidades públicas</span>
               </div>
-            </div>
+            </button>
           </div>
         </div>
       </section>
