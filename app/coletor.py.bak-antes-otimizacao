@@ -14,12 +14,10 @@ from __future__ import annotations
 
 import json
 import os
-import random
 import re
 import time
 import unicodedata
 from datetime import date, datetime, timedelta
-from pathlib import Path
 from typing import Any
 from urllib.parse import urlencode
 from zoneinfo import ZoneInfo
@@ -43,7 +41,7 @@ URL_DETALHE = f"{BASE_URL}/Base4/pt/detalhe/"
 VERSAO_PORTAL = os.getenv("BASE_VERSAO_PORTAL", "126.0")
 TIMEOUT_SEGUNDOS = int(os.getenv("BASE_TIMEOUT_SEGUNDOS", "45"))
 TAMANHO_PAGINA = int(os.getenv("BASE_PAGE_SIZE", "25"))
-DIAS_PADRAO_PESQUISA = 30
+DIAS_PADRAO_PESQUISA = 90
 DIAS_MAXIMOS_PESQUISA = 90
 
 dias_pedidos = int(
@@ -66,8 +64,8 @@ DIAS_A_PESQUISAR = min(
 )
 MAXIMO_PAGINAS = int(os.getenv("BASE_MAX_PAGINAS", "100"))
 MAXIMO_DETALHES = int(os.getenv("BASE_MAX_DETALHES", "300"))
-INTERVALO_PEDIDOS = float(os.getenv("BASE_INTERVALO_PEDIDOS", "2.0"))
-INTERVALO_DETALHES = float(os.getenv("BASE_INTERVALO_DETALHES", "2.0"))
+INTERVALO_PEDIDOS = float(os.getenv("BASE_INTERVALO_PEDIDOS", "0.3"))
+INTERVALO_DETALHES = float(os.getenv("BASE_INTERVALO_DETALHES", "0.25"))
 MOSTRAR_DIAGNOSTICO = os.getenv(
     "BASE_MOSTRAR_DIAGNOSTICO",
     "1",
@@ -210,76 +208,6 @@ PALAVRAS_EXCLUSAO = {
 }
 
 PREFIXOS_CPV_ARQUITETURA = ("712", "714")
-
-MAXIMO_TENTATIVAS = int(
-    os.getenv("BASE_MAX_TENTATIVAS", "5")
-)
-ESPERA_BASE_BLOQUEIO = float(
-    os.getenv("BASE_ESPERA_BLOQUEIO", "30")
-)
-JITTER_MAXIMO = float(
-    os.getenv("BASE_JITTER_MAXIMO", "1.5")
-)
-
-FICHEIRO_CHECKPOINT = Path(
-    os.getenv(
-        "BASE_FICHEIRO_CHECKPOINT",
-        "concursos_recolhidos.json",
-    )
-)
-
-
-def esperar_intervalo(valor_base: float) -> None:
-    """Espera o intervalo configurado com uma pequena variação aleatória."""
-    if valor_base <= 0:
-        return
-
-    time.sleep(
-        valor_base + random.uniform(0, JITTER_MAXIMO)
-    )
-
-
-def guardar_checkpoint(concursos: list[dict[str, Any]]) -> None:
-    """Guarda os resultados de forma atómica para evitar ficheiros incompletos."""
-    temporario = FICHEIRO_CHECKPOINT.with_suffix(
-        FICHEIRO_CHECKPOINT.suffix + ".tmp"
-    )
-
-    temporario.write_text(
-        json.dumps(
-            concursos,
-            ensure_ascii=False,
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
-
-    temporario.replace(FICHEIRO_CHECKPOINT)
-
-
-def carregar_checkpoint() -> list[dict[str, Any]]:
-    if not FICHEIRO_CHECKPOINT.exists():
-        return []
-
-    try:
-        dados = json.loads(
-            FICHEIRO_CHECKPOINT.read_text(encoding="utf-8")
-        )
-    except (OSError, json.JSONDecodeError) as erro:
-        print(
-            "Aviso: não foi possível carregar o checkpoint: "
-            f"{erro}"
-        )
-        return []
-
-    if not isinstance(dados, list):
-        return []
-
-    return [
-        item
-        for item in dados
-        if isinstance(item, dict)
-    ]
 
 
 def normalizar_texto(valor: Any) -> str:
@@ -458,120 +386,75 @@ class PortalBaseBrowser:
             print(f"Portal BASE aberto no browser: {titulo or '(sem título)'}")
 
     def post_json(self, dados: dict[str, Any]) -> dict[str, Any]:
-        ultimo_erro = ""
+        resultado = self.page.evaluate(
+            """
+            async ({url, dados}) => {
+                const corpo = new URLSearchParams();
 
-        for tentativa in range(1, MAXIMO_TENTATIVAS + 1):
-            resultado = self.page.evaluate(
-                """
-                async ({url, dados}) => {
-                    const corpo = new URLSearchParams();
-
-                    for (const [chave, valor] of Object.entries(dados)) {
-                        corpo.append(chave, String(valor ?? ""));
-                    }
-
-                    const resposta = await fetch(url, {
-                        method: "POST",
-                        credentials: "include",
-                        headers: {
-                            "Accept":
-                                "application/json, text/javascript, */*; q=0.01",
-                            "Content-Type":
-                                "application/x-www-form-urlencoded; charset=UTF-8",
-                            "X-Requested-With": "XMLHttpRequest"
-                        },
-                        body: corpo.toString()
-                    });
-
-                    return {
-                        status: resposta.status,
-                        url: resposta.url,
-                        contentType:
-                            resposta.headers.get("content-type") || "",
-                        texto: await resposta.text()
-                    };
+                for (const [chave, valor] of Object.entries(dados)) {
+                    corpo.append(chave, String(valor ?? ""));
                 }
-                """,
-                {
-                    "url": URL_RESULTADOS,
-                    "dados": dados,
-                },
-            )
 
-            estado = int(resultado.get("status", 0))
-            resposta_texto = str(
-                resultado.get("texto", "")
-            ).strip()
+                const resposta = await fetch(url, {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Accept": "application/json, text/javascript, */*; q=0.01",
+                        "Content-Type":
+                            "application/x-www-form-urlencoded; charset=UTF-8",
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
+                    body: corpo.toString()
+                });
 
-            bloqueio_temporario = (
-                estado in {429, 999}
-                or 500 <= estado <= 599
-            )
-
-            if bloqueio_temporario:
-                ultimo_erro = (
-                    f"HTTP {estado}: {resposta_texto[:300]}"
-                )
-
-                if tentativa >= MAXIMO_TENTATIVAS:
-                    break
-
-                espera = (
-                    ESPERA_BASE_BLOQUEIO
-                    * (2 ** (tentativa - 1))
-                    + random.uniform(0, JITTER_MAXIMO)
-                )
-
-                print(
-                    "\nAviso: o Portal BASE limitou o acesso "
-                    f"(HTTP {estado})."
-                )
-                print(
-                    f"Nova tentativa em {espera:.0f} segundos "
-                    f"({tentativa}/{MAXIMO_TENTATIVAS})..."
-                )
-
-                time.sleep(espera)
-                continue
-
-            if estado >= 400:
-                raise RuntimeError(
-                    "O Portal BASE devolveu "
-                    f"HTTP {estado} em "
-                    f"{resultado.get('url', URL_RESULTADOS)}. "
-                    f"Excerto: {resposta_texto[:500]}"
-                )
-
-            if (
-                resposta_texto.startswith("(")
-                and resposta_texto.endswith(")")
-            ):
-                resposta_texto = resposta_texto[1:-1].strip()
-
-            try:
-                convertido = json.loads(resposta_texto)
-            except json.JSONDecodeError as erro:
-                raise RuntimeError(
-                    "O Portal BASE devolveu uma resposta "
-                    "que não é JSON. "
-                    f"HTTP {estado}; content-type="
-                    f"{resultado.get('contentType', '')}; "
-                    f"excerto={resposta_texto[:500]}"
-                ) from erro
-
-            if not isinstance(convertido, dict):
-                raise RuntimeError(
-                    "A resposta do Portal BASE não contém "
-                    "um objeto JSON."
-                )
-
-            return convertido
-
-        raise RuntimeError(
-            "O Portal BASE continuou a bloquear o acesso após "
-            f"{MAXIMO_TENTATIVAS} tentativas. "
-            f"Último erro: {ultimo_erro}"
+                return {
+                    status: resposta.status,
+                    url: resposta.url,
+                    contentType: resposta.headers.get("content-type") || "",
+                    texto: await resposta.text()
+                };
+            }
+            """,
+            {
+                "url": URL_RESULTADOS,
+                "dados": dados,
+            },
         )
+
+        estado = int(resultado.get("status", 0))
+        texto = str(resultado.get("texto", "")).strip()
+
+        if estado >= 400:
+            raise RuntimeError(
+                "O Portal BASE devolveu "
+                f"HTTP {estado} em {resultado.get('url', URL_RESULTADOS)}. "
+                f"Excerto: {texto[:500]}"
+            )
+
+        if texto.startswith("(") and texto.endswith(")"):
+            texto = texto[1:-1].strip()
+
+        try:
+            convertido = json.loads(texto)
+        except json.JSONDecodeError as erro:
+            raise RuntimeError(
+                "O Portal BASE devolveu uma resposta que não é JSON. "
+                f"HTTP {estado}; content-type="
+                f"{resultado.get('contentType', '')}; excerto={texto[:500]}"
+            ) from erro
+
+        if not isinstance(convertido, dict):
+            print("\n========== RESPOSTA DO PORTAL BASE ==========")
+            print("Tipo recebido:", type(convertido).__name__)
+            print("Conteúdo:")
+            print(repr(convertido)[:3000])
+            print("=============================================\n")
+
+            raise RuntimeError(
+                "A resposta do Portal BASE não contém um objeto JSON."
+            )
+
+        return convertido
 
     def pesquisar_pagina(self, pagina: int) -> dict[str, Any]:
         return self.post_json(
@@ -870,7 +753,8 @@ def recolher_listagem(
         if encontrou_antigo or len(itens) < TAMANHO_PAGINA:
             break
 
-        esperar_intervalo(INTERVALO_PEDIDOS)
+        if INTERVALO_PEDIDOS > 0:
+            time.sleep(INTERVALO_PEDIDOS)
 
     return resultados
 
@@ -879,40 +763,19 @@ def enriquecer(
     portal: PortalBaseBrowser,
     listagem: list[dict[str, Any]],
 ) -> tuple[list[dict[str, Any]], int, int]:
-    guardados = carregar_checkpoint()
-
-    por_id: dict[str, dict[str, Any]] = {
-        normalizar_texto(item.get("id_portal_base")): item
-        for item in guardados
-        if normalizar_texto(item.get("id_portal_base"))
-    }
-
     candidatos = [
-        anuncio
-        for anuncio in listagem
-        if deve_consultar_detalhe(anuncio)
+        anuncio for anuncio in listagem if deve_consultar_detalhe(anuncio)
     ]
 
     if MAXIMO_DETALHES > 0:
         candidatos = candidatos[:MAXIMO_DETALHES]
 
+    resultados: list[dict[str, Any]] = []
     erros = 0
-    novos = 0
 
     for indice, candidato in enumerate(candidatos, start=1):
-        identificador = normalizar_texto(
-            candidato.get("id")
-        )
-
+        identificador = normalizar_texto(candidato.get("id"))
         if not identificador:
-            continue
-
-        if identificador in por_id:
-            if MOSTRAR_DIAGNOSTICO:
-                print(
-                    f"Já guardado {indice}/{len(candidatos)}: "
-                    f"{identificador}"
-                )
             continue
 
         if MOSTRAR_DIAGNOSTICO:
@@ -936,27 +799,11 @@ def enriquecer(
             continue
 
         completo = combinar(candidato, detalhe)
-
         if parece_relevante(completo):
-            normalizado = normalizar_anuncio(completo)
-            por_id[identificador] = normalizado
-            novos += 1
+            resultados.append(normalizar_anuncio(completo))
 
-            # Guarda imediatamente cada resultado relevante.
-            guardar_checkpoint(list(por_id.values()))
-
-            if MOSTRAR_DIAGNOSTICO:
-                print(
-                    f"Checkpoint atualizado: "
-                    f"{len(por_id)} anúncios guardados."
-                )
-
-        esperar_intervalo(INTERVALO_DETALHES)
-
-    resultados = list(por_id.values())
-    guardar_checkpoint(resultados)
-
-    print(f"Novos anúncios adicionados ao checkpoint: {novos}")
+        if INTERVALO_DETALHES > 0:
+            time.sleep(INTERVALO_DETALHES)
 
     return resultados, len(candidatos), erros
 

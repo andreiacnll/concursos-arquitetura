@@ -330,33 +330,23 @@ def main():
             "no terminal."
         )
 
-    print("\nA enviar email...")
-
-    try:
-        email_enviado = enviar_email_concursos(
+    quantidade_guardada = (
+        guardar_concursos_enviados(
             concursos_novos
         )
+    )
 
-        if not email_enviado:
-            raise RuntimeError(
-                "A função de email não confirmou "
-                "o envio."
-            )
+    total_final_base_dados = contar_concursos()
 
-    except Exception as erro:
-        print(
-            "\nERRO: não foi possível enviar "
-            "o email."
-        )
-        print(f"Detalhe: {erro}")
+    print(
+        f"\nConcursos guardados: {quantidade_guardada}"
+    )
 
-        print(
-            "\nOs concursos não foram guardados. "
-            "O programa poderá tentar novamente "
-            "na próxima execução."
-        )
-
-        return
+    print(
+        "Total na base de dados: "
+        f"{total_inicial_base_dados} -> "
+        f"{total_final_base_dados}"
+    )
 
     quantidade_guardada = (
         guardar_concursos_enviados(
@@ -366,17 +356,36 @@ def main():
 
     total_final_base_dados = contar_concursos()
 
-    print("\nEmail enviado com sucesso.")
-
     print(
-        "Concursos guardados depois do envio: "
-        f"{quantidade_guardada}"
+        f"\nConcursos guardados: {quantidade_guardada}"
     )
 
     print(
         "Total na base de dados: "
         f"{total_inicial_base_dados} -> "
         f"{total_final_base_dados}"
+    )
+
+    print("\nA enviar email...")
+
+    try:
+        email_enviado = enviar_email_concursos(
+            concursos_novos
+        )
+
+        if email_enviado:
+            print("\nEmail enviado com sucesso.")
+        else:
+            print("\nO email não foi enviado.")
+
+    except Exception as erro:
+        print(
+            "\nAviso: não foi possível enviar o email."
+        )
+        print(f"Detalhe: {erro}")
+
+    print(
+        "\nOs concursos já ficaram guardados na base de dados."
     )
 
 
