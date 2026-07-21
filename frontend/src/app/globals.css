@@ -1344,3 +1344,247 @@ a {
     border-radius: 8px 8px 0 0;
   }
 }
+
+/* Tema escuro */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --background: #111311;
+  --surface: #1b1e1a;
+  --foreground: #f1f2ed;
+  --muted: #a8ada5;
+  --line: #343833;
+  --accent: #a2bd7f;
+  --accent-soft: #263021;
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+}
+
+:root[data-theme="dark"] body {
+  background:
+    radial-gradient(
+      circle at 12% 4%,
+      rgba(52, 61, 47, 0.28),
+      transparent 32rem
+    ),
+    var(--background);
+}
+
+:root[data-theme="dark"] .site-header,
+:root[data-theme="dark"] .history-header {
+  border-color: var(--line);
+  background: rgba(19, 22, 19, 0.88);
+}
+
+:root[data-theme="dark"] .desktop-nav a {
+  color: #d5d8d1;
+}
+
+:root[data-theme="dark"] .icon-button {
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--foreground);
+}
+
+:root[data-theme="dark"] .icon-button:hover {
+  background: #292d27;
+}
+
+:root[data-theme="dark"] .primary-button,
+:root[data-theme="dark"] .search-button {
+  background: #e7e9e3;
+  color: #171917;
+}
+
+:root[data-theme="dark"] .primary-button:hover,
+:root[data-theme="dark"] .search-button:hover {
+  background: #ffffff;
+}
+
+:root[data-theme="dark"] .search-box,
+:root[data-theme="dark"] .category-pills button {
+  border-color: var(--line);
+  background: rgba(28, 31, 27, 0.92);
+  color: var(--foreground);
+}
+
+:root[data-theme="dark"] .category-pills button:hover,
+:root[data-theme="dark"] .category-pills button.active {
+  border-color: #dce1d8;
+  background: #e6e9e2;
+  color: #181a18;
+}
+
+:root[data-theme="dark"] .stats-panel,
+:root[data-theme="dark"] .listing-shell,
+:root[data-theme="dark"] .filters-panel {
+  border-color: var(--line);
+  background: rgba(27, 30, 26, 0.94);
+}
+
+:root[data-theme="dark"] .filter-group + .filter-group {
+  border-color: var(--line);
+}
+
+:root[data-theme="dark"] .filter-group > label:first-child,
+:root[data-theme="dark"] .filter-group > p,
+:root[data-theme="dark"] .check-row {
+  color: var(--foreground) !important;
+}
+
+:root[data-theme="dark"] .filter-group select,
+:root[data-theme="dark"] .results-toolbar select,
+:root[data-theme="dark"] .view-toggle button,
+:root[data-theme="dark"] .clear-filters-button {
+  border-color: var(--line);
+  background: #222620;
+  color: var(--foreground);
+}
+
+:root[data-theme="dark"] .clear-filters-button:hover,
+:root[data-theme="dark"] .view-toggle button.active {
+  background: #30352d;
+}
+
+:root[data-theme="dark"] .competition-card {
+  border-color: var(--line);
+  background: var(--surface);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
+}
+
+:root[data-theme="dark"] .competition-card:hover {
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.34);
+}
+
+:root[data-theme="dark"] .card-footer {
+  border-color: var(--line);
+}
+
+:root[data-theme="dark"] .card-footer strong {
+  color: #e0e3dc;
+}
+
+:root[data-theme="dark"] .bookmark-button {
+  color: #bec3b9;
+}
+
+:root[data-theme="dark"] .bookmark-button:hover {
+  background: #2b3028;
+}
+
+:root[data-theme="dark"] .bookmark-button.is-favorite {
+  color: #b7d18f;
+  background: #303d28;
+}
+
+:root[data-theme="dark"] .card-link {
+  border-color: #495441;
+  background: #283023;
+  color: #c5d9ad;
+}
+
+:root[data-theme="dark"] .card-link:hover {
+  border-color: #68795c;
+  background: #333e2d;
+}
+
+:root[data-theme="dark"] .results-tabs {
+  border-color: var(--line);
+  background: #171a16;
+}
+
+:root[data-theme="dark"] .results-tabs button {
+  color: var(--muted);
+}
+
+:root[data-theme="dark"] .results-tabs button.active {
+  color: var(--foreground);
+  background: #30342e;
+}
+
+:root[data-theme="dark"] .results-tabs button span {
+  background: #3a4036;
+}
+
+:root[data-theme="dark"] .freshness-badge {
+  background: rgba(235, 238, 230, 0.9);
+  color: #171917;
+}
+
+:root[data-theme="dark"] .history-counter {
+  border-color: var(--line);
+  background: var(--surface);
+}
+
+:root[data-theme="dark"] .history-item,
+:root[data-theme="dark"] .history-empty {
+  border-color: var(--line);
+}
+
+/* Menu de categorias adicionais */
+.more-categories {
+  position: relative;
+}
+
+.more-categories > button svg {
+  transition: transform 180ms ease;
+}
+
+.more-categories > button svg.is-open {
+  transform: rotate(180deg);
+}
+
+.more-categories-menu {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 220px;
+  overflow: hidden;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 18px 45px rgba(24, 26, 29, 0.16);
+}
+
+.category-pills .more-categories-menu button {
+  width: 100%;
+  min-height: 39px;
+  justify-content: flex-start;
+  margin: 0;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--foreground);
+  text-align: left;
+}
+
+.category-pills .more-categories-menu button:hover {
+  border: 0;
+  background: var(--accent-soft);
+  color: var(--foreground);
+  box-shadow: none;
+}
+
+.category-pills .more-categories-menu button.active {
+  border: 0;
+  background: var(--accent);
+  color: white;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .more-categories-menu {
+  border-color: var(--line);
+  background: #20231f;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.4);
+}
+
+:root[data-theme="dark"]
+  .category-pills
+  .more-categories-menu
+  button:hover {
+  background: #30362c;
+  color: var(--foreground);
+}
