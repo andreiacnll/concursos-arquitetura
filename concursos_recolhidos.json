@@ -1407,5 +1407,71 @@
     "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/QUFNK2NUR1lpdnJ5TjduaHYvSS9sRWFBVHBPV2dXbEF1QzRCdFZDbnZLdE5yNFp3K0NzOW1mVnpHeGR1VVhRbVBNNHdtNWJNMUJaZzFFS2pWSGxlNWc9PWtnKFlh",
     "id_portal_base": "449086",
     "id_procedimento": "19793260"
+  },
+  {
+    "titulo": "Beneficiação do CM 1074 entre Lagoa Parada e Urjariça: Elaboração de Projetos.",
+    "entidade": "Município de Ansião",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=451733",
+    "data": "21-07-2026",
+    "data_limite": "9 dias.",
+    "texto": "Descrição: Beneficiação do CM 1074 entre Lagoa Parada e Urjariça: Elaboração de Projetos.\nEntidade: Município de Ansião\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71240000-2, Serviços de arquitectura, engenharia e planeamento\nPreço base: 100.000,00 €\nPrazo para propostas: 9 dias.\nData de publicação: 21-07-2026\nNúmero do anúncio: 18587/2026",
+    "numero_anuncio": "18587/2026",
+    "preco_base": "100.000,00 €",
+    "cpvs": [
+      "71240000-2, Serviços de arquitectura, engenharia e planeamento"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/07/139/419967878.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEyNDE0Mg",
+    "id_portal_base": "451733",
+    "id_procedimento": "19981707"
+  },
+  {
+    "titulo": "Aquisição de Serviços - Projeto de Execução - IC2(EN1) - MEIRINHAS (KM 136+700) / POMBAL (KM 148+500) - REQUALIFICAÇÃO",
+    "entidade": "Infraestruturas de Portugal, SA",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=451709",
+    "data": "21-07-2026",
+    "data_limite": "28 dias.",
+    "texto": "Descrição: Aquisição de Serviços - Projeto de Execução - IC2(EN1) - MEIRINHAS (KM 136+700) / POMBAL (KM 148+500) - REQUALIFICAÇÃO\nEntidade: Infraestruturas de Portugal, SA\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71335000-5, Estudos de engenharia\nPreço base: 450.000,00 €\nPrazo para propostas: 28 dias.\nData de publicação: 21-07-2026\nNúmero do anúncio: 18611/2026",
+    "numero_anuncio": "18611/2026",
+    "preco_base": "450.000,00 €",
+    "cpvs": [
+      "71335000-5, Estudos de engenharia"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/07/139/419967679.pdf",
+    "link_pecas": "https://www.anogov.com/infraestruturasdeportugal-ip/faces/app/acessoDocs.jsp?codigoAcesso=SIKN0JEdTAPgFgr8WrWDLMd8SIx1csHZEUfsOvwLCeFGggnsXr",
+    "id_portal_base": "451709",
+    "id_procedimento": "19981664"
+  },
+  {
+    "titulo": "Prestação de Serviços de Fiscalização da Empreitada de Beneficiação do Subsistema de Ossela",
+    "entidade": "Associação de Municípios das Terras de Santa Maria",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=451699",
+    "data": "21-07-2026",
+    "data_limite": "26 dias.",
+    "texto": "Descrição: Prestação de Serviços de Fiscalização da Empreitada de Beneficiação do Subsistema de Ossela\nEntidade: Associação de Municípios das Terras de Santa Maria\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71520000-9, Serviços de supervisão da construção\nPreço base: 200.000,00 €\nPrazo para propostas: 26 dias.\nData de publicação: 21-07-2026\nNúmero do anúncio: 18621/2026",
+    "numero_anuncio": "18621/2026",
+    "preco_base": "200.000,00 €",
+    "cpvs": [
+      "71520000-9, Serviços de supervisão da construção"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/07/139/419967735.pdf",
+    "link_pecas": "https://www.anogov.com/ap-tsm/faces/app/acessoDocs.jsp?codigoAcesso=M3cNBJmSeidu3leFZp2IEDC80MIGMhflrU1V5BPfzcvf9Ont6W",
+    "id_portal_base": "451699",
+    "id_procedimento": "19981633"
   }
 ]
