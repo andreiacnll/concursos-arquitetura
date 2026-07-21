@@ -5,7 +5,7 @@ import type { Concurso } from "@/components/competition-types";
 async function getHistorico(): Promise<Concurso[]> {
   try {
     const response = await fetch(
-      "http://127.0.0.1:8000/historico?estado=todos&limite=100",
+      "http://127.0.0.1:8000/concursos?estado=encerrado&limite=100",
       { cache: "no-store" },
     );
 
@@ -88,12 +88,12 @@ export default async function HistoricoPage() {
                 <div className="history-meta">
                   <span>
                     <CalendarDays size={15} />
-                    Publicado em {formatDate(concurso.data_publicacao_iso ?? concurso.data)}
+                    Publicado em {formatDate(concurso.data)}
                   </span>
 
                   <span>
                     <CalendarDays size={15} />
-                    Prazo terminou em {formatDate(concurso.data_fim_calculada)}
+                    Prazo: {formatDate(concurso.data_limite)}
                   </span>
                 </div>
               </div>

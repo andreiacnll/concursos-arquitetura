@@ -1,10 +1,7 @@
 from __future__ import annotations
 
-import json
-import re
 import sqlite3
 from contextlib import closing
-from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any, Literal
 
@@ -14,7 +11,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DB_PATH = BASE_DIR / "concursos.db"
-CHECKPOINT_PATH = BASE_DIR / "concursos_recolhidos.json"
 
 
 app = FastAPI(
@@ -124,184 +120,6 @@ END
 """
 
 
-def converter_data(valor: Any) -> date | None:
-    """Converte os formatos de data usados nos registos."""
-    if not valor:
-        return None
-
-    texto = str(valor).strip()
-
-    formatos = (
-        "%d-%m-%Y",
-        "%d/%m/%Y",
-        "%Y-%m-%d",
-        "%Y-%m-%dT%H:%M:%S",
-        "%Y-%m-%d %H:%M:%S",
-    )
-
-    for formato in formatos:
-        try:
-            return datetime.strptime(texto, formato).date()
-        except ValueError:
-            continue
-
-    return None
-
-
-def calcular_data_fim(
-    data_publicacao: date | None,
-    valor_prazo: Any,
-) -> date | None:
-    """Calcula a data final a partir da publicação e do prazo."""
-    if not data_publicacao or not valor_prazo:
-        return None
-
-    texto = str(valor_prazo).strip()
-
-    # O valor pode já ser uma data completa.
-    data_absoluta = converter_data(texto)
-
-    if data_absoluta:
-        return data_absoluta
-
-    # Exemplos: "18 dias.", "34 dias" ou "31 dias úteis".
-    correspondencia = re.search(r"\d+", texto)
-
-    if not correspondencia:
-        return None
-
-    numero_dias = int(correspondencia.group())
-
-    if numero_dias <= 0:
-        return None
-
-    return data_publicacao + timedelta(days=numero_dias)
-
-
-def calcular_estado(data_fim: date | None) -> str:
-    if data_fim is None:
-        return "sem_prazo"
-
-    if data_fim >= date.today():
-        return "aberto"
-
-    return "encerrado"
-
-
-def carregar_concursos_checkpoint() -> list[dict[str, Any]]:
-    """Lê os concursos completos acumulados pelo coletor."""
-    if not CHECKPOINT_PATH.exists():
-        raise HTTPException(
-            status_code=503,
-            detail=(
-                "O ficheiro de concursos não foi encontrado: "
-                f"{CHECKPOINT_PATH}"
-            ),
-        )
-
-    try:
-        dados = json.loads(
-            CHECKPOINT_PATH.read_text(encoding="utf-8")
-        )
-    except (OSError, json.JSONDecodeError) as erro:
-        raise HTTPException(
-            status_code=503,
-            detail=f"Não foi possível ler os concursos: {erro}",
-        ) from erro
-
-    if not isinstance(dados, list):
-        raise HTTPException(
-            status_code=503,
-            detail="O ficheiro de concursos não contém uma lista válida.",
-        )
-
-    return [
-        item
-        for item in dados
-        if isinstance(item, dict)
-    ]
-
-
-def juntar_valores(valor: Any) -> str | None:
-    """Transforma listas e outros valores num texto para a API."""
-    if isinstance(valor, list):
-        valores = [
-            str(item).strip()
-            for item in valor
-            if item is not None and str(item).strip()
-        ]
-        return ", ".join(valores) or None
-
-    if valor is None:
-        return None
-
-    texto = str(valor).strip()
-    return texto or None
-
-
-def normalizar_concurso_json(
-    item: dict[str, Any],
-    indice: int,
-) -> dict[str, Any]:
-    data_publicacao = converter_data(item.get("data"))
-
-    data_fim = calcular_data_fim(
-        data_publicacao,
-        item.get("data_limite"),
-    )
-
-    cpv = juntar_valores(
-        item.get("cpvs")
-        or item.get("cpv")
-    )
-
-    tipo_procedimento = juntar_valores(
-        item.get("tipos_contrato")
-        or item.get("tipo_procedimento")
-    )
-
-    identificador = (
-        item.get("id_portal_base")
-        or item.get("id_procedimento")
-        or item.get("numero_anuncio")
-        or indice
-    )
-
-    return {
-        "id": str(identificador),
-        "titulo": item.get("titulo") or "Concurso sem título",
-        "entidade": item.get("entidade") or "Entidade não indicada",
-        "link": (
-            item.get("link")
-            or item.get("link_anuncio_dr")
-            or ""
-        ),
-        "data": item.get("data"),
-        "relevante": 1,
-        "data_limite": item.get("data_limite"),
-        "preco_base": item.get("preco_base"),
-        "cpv": cpv,
-        "tipo_procedimento": tipo_procedimento,
-        "numero_anuncio": item.get("numero_anuncio"),
-        "link_anuncio_dr": item.get("link_anuncio_dr"),
-        "link_pecas": item.get("link_pecas"),
-        "id_portal_base": item.get("id_portal_base"),
-        "id_procedimento": item.get("id_procedimento"),
-        "texto": item.get("texto"),
-        "data_publicacao_iso": (
-            data_publicacao.isoformat()
-            if data_publicacao
-            else None
-        ),
-        "data_fim_calculada": (
-            data_fim.isoformat()
-            if data_fim
-            else None
-        ),
-        "estado": calcular_estado(data_fim),
-    }
-
-
 def executar_listagem(
     *,
     periodo: Literal["atual", "historico"],
@@ -318,94 +136,133 @@ def executar_listagem(
     limite: int,
     pagina: int,
 ) -> dict[str, Any]:
-    dados = carregar_concursos_checkpoint()
-
-    concursos = [
-        normalizar_concurso_json(item, indice)
-        for indice, item in enumerate(dados, start=1)
-    ]
+    condicoes: list[str] = []
+    parametros: list[Any] = []
 
     if periodo == "atual":
-        concursos = [
-            concurso
-            for concurso in concursos
-            if concurso["estado"] != "encerrado"
-        ]
+        condicoes.append(
+            f"""
+            STRFTIME(
+                '%Y',
+                {DATA_PUBLICACAO_SQL}
+            ) = STRFTIME('%Y', 'now')
+            """
+        )
     else:
-        concursos = [
-            concurso
-            for concurso in concursos
-            if concurso["estado"] == "encerrado"
-        ]
+        condicoes.append(
+            f"""
+            STRFTIME(
+                '%Y',
+                {DATA_PUBLICACAO_SQL}
+            ) < STRFTIME('%Y', 'now')
+            """
+        )
 
     if apenas_relevantes:
-        concursos = [
-            concurso
-            for concurso in concursos
-            if concurso["relevante"] == 1
-        ]
+        condicoes.append("relevante = 1")
 
     if estado != "todos":
-        concursos = [
-            concurso
-            for concurso in concursos
-            if concurso["estado"] == estado
-        ]
+        condicoes.append(
+            f"({ESTADO_SQL}) = ?"
+        )
+        parametros.append(estado)
 
     if pesquisa:
-        termo = pesquisa.strip().casefold()
-
-        concursos = [
-            concurso
-            for concurso in concursos
-            if (
-                termo in str(
-                    concurso.get("titulo") or ""
-                ).casefold()
-                or termo in str(
-                    concurso.get("entidade") or ""
-                ).casefold()
-                or termo in str(
-                    concurso.get("cpv") or ""
-                ).casefold()
+        condicoes.append(
+            """
+            (
+                titulo LIKE ?
+                OR entidade LIKE ?
+                OR cpv LIKE ?
             )
-        ]
+            """
+        )
+
+        termo = f"%{pesquisa.strip()}%"
+
+        parametros.extend(
+            [
+                termo,
+                termo,
+                termo,
+            ]
+        )
 
     if entidade:
-        termo_entidade = entidade.strip().casefold()
-
-        concursos = [
-            concurso
-            for concurso in concursos
-            if termo_entidade
-            in str(
-                concurso.get("entidade") or ""
-            ).casefold()
-        ]
+        condicoes.append(
+            "entidade LIKE ?"
+        )
+        parametros.append(
+            f"%{entidade.strip()}%"
+        )
 
     if tipo_procedimento:
-        termo_tipo = tipo_procedimento.strip().casefold()
+        condicoes.append(
+            "tipo_procedimento LIKE ?"
+        )
+        parametros.append(
+            f"%{tipo_procedimento.strip()}%"
+        )
 
-        concursos = [
-            concurso
-            for concurso in concursos
-            if termo_tipo
-            in str(
-                concurso.get("tipo_procedimento") or ""
-            ).casefold()
-        ]
-
-    concursos.sort(
-        key=lambda concurso: (
-            concurso.get("data_publicacao_iso") or "",
-            str(concurso.get("id") or ""),
-        ),
-        reverse=True,
+    where = (
+        "WHERE "
+        + " AND ".join(condicoes)
     )
 
-    total = len(concursos)
-    inicio_pagina = (pagina - 1) * limite
-    fim_pagina = inicio_pagina + limite
+    offset = (pagina - 1) * limite
+
+    consulta_total = f"""
+        SELECT COUNT(*)
+        FROM concursos
+        {where}
+    """
+
+    consulta_dados = f"""
+        SELECT
+            id,
+            titulo,
+            entidade,
+            link,
+            data,
+            relevante,
+            data_limite,
+            preco_base,
+            cpv,
+            tipo_procedimento,
+            {DATA_PUBLICACAO_SQL}
+                AS data_publicacao_iso,
+            {DATA_FIM_SQL}
+                AS data_fim_calculada,
+            {ESTADO_SQL}
+                AS estado
+        FROM concursos
+        {where}
+        ORDER BY
+            {DATA_PUBLICACAO_SQL} DESC,
+            id DESC
+        LIMIT ?
+        OFFSET ?
+    """
+
+    with closing(obter_conexao()) as conexao:
+        total = conexao.execute(
+            consulta_total,
+            parametros,
+        ).fetchone()[0]
+
+        linhas = conexao.execute(
+            consulta_dados,
+            [
+                *parametros,
+                limite,
+                offset,
+            ],
+        ).fetchall()
+
+    concursos = [
+        linha_para_dicionario(linha)
+        for linha in linhas
+    ]
 
     return {
         "pagina": pagina,
@@ -413,7 +270,7 @@ def executar_listagem(
         "total": total,
         "periodo": periodo,
         "estado": estado,
-        "resultados": concursos[inicio_pagina:fim_pagina],
+        "resultados": concursos,
     }
 
 
