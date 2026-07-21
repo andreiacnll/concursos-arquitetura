@@ -3,7 +3,7 @@ from __future__ import annotations
 import sqlite3
 from contextlib import closing
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -77,95 +77,39 @@ def healthcheck() -> dict[str, str]:
     }
 
 
-
-DATA_PUBLICACAO_SQL = """
-CASE
-    WHEN data IS NOT NULL
-         AND LENGTH(TRIM(data)) = 10
-    THEN
-        SUBSTR(TRIM(data), 7, 4)
-        || '-'
-        || SUBSTR(TRIM(data), 4, 2)
-        || '-'
-        || SUBSTR(TRIM(data), 1, 2)
-    ELSE NULL
-END
-"""
-
-
-DATA_FIM_SQL = f"""
-CASE
-    WHEN data_limite IS NOT NULL
-         AND TRIM(data_limite) != ''
-         AND CAST(data_limite AS INTEGER) > 0
-    THEN DATE(
-        {DATA_PUBLICACAO_SQL},
-        '+'
-        || CAST(data_limite AS INTEGER)
-        || ' days'
-    )
-    ELSE NULL
-END
-"""
-
-
-ESTADO_SQL = f"""
-CASE
-    WHEN {DATA_FIM_SQL} IS NULL
-        THEN 'sem_prazo'
-    WHEN {DATA_FIM_SQL} >= DATE('now')
-        THEN 'aberto'
-    ELSE 'encerrado'
-END
-"""
-
-
-def executar_listagem(
-    *,
-    periodo: Literal["atual", "historico"],
-    pesquisa: str | None,
-    entidade: str | None,
-    tipo_procedimento: str | None,
-    apenas_relevantes: bool,
-    estado: Literal[
-        "todos",
-        "aberto",
-        "encerrado",
-        "sem_prazo",
-    ],
-    limite: int,
-    pagina: int,
+@app.get("/concursos")
+def listar_concursos(
+    pesquisa: str | None = Query(
+        default=None,
+        description="Pesquisa no título ou entidade.",
+    ),
+    entidade: str | None = Query(
+        default=None,
+        description="Filtrar por entidade.",
+    ),
+    tipo_procedimento: str | None = Query(
+        default=None,
+        description="Filtrar por tipo de procedimento.",
+    ),
+    apenas_relevantes: bool = Query(
+        default=False,
+        description="Mostrar apenas concursos relevantes.",
+    ),
+    limite: int = Query(
+        default=20,
+        ge=1,
+        le=100,
+    ),
+    pagina: int = Query(
+        default=1,
+        ge=1,
+    ),
 ) -> dict[str, Any]:
     condicoes: list[str] = []
     parametros: list[Any] = []
 
-    if periodo == "atual":
-        condicoes.append(
-            f"""
-            STRFTIME(
-                '%Y',
-                {DATA_PUBLICACAO_SQL}
-            ) = STRFTIME('%Y', 'now')
-            """
-        )
-    else:
-        condicoes.append(
-            f"""
-            STRFTIME(
-                '%Y',
-                {DATA_PUBLICACAO_SQL}
-            ) < STRFTIME('%Y', 'now')
-            """
-        )
-
     if apenas_relevantes:
         condicoes.append("relevante = 1")
-
-    if estado != "todos":
-        condicoes.append(
-            f"({ESTADO_SQL}) = ?"
-        )
-        parametros.append(estado)
 
     if pesquisa:
         condicoes.append(
@@ -204,10 +148,13 @@ def executar_listagem(
             f"%{tipo_procedimento.strip()}%"
         )
 
-    where = (
-        "WHERE "
-        + " AND ".join(condicoes)
-    )
+    where = ""
+
+    if condicoes:
+        where = (
+            "WHERE "
+            + " AND ".join(condicoes)
+        )
 
     offset = (pagina - 1) * limite
 
@@ -228,17 +175,10 @@ def executar_listagem(
             data_limite,
             preco_base,
             cpv,
-            tipo_procedimento,
-            {DATA_PUBLICACAO_SQL}
-                AS data_publicacao_iso,
-            {DATA_FIM_SQL}
-                AS data_fim_calculada,
-            {ESTADO_SQL}
-                AS estado
+            tipo_procedimento
         FROM concursos
         {where}
         ORDER BY
-            {DATA_PUBLICACAO_SQL} DESC,
             id DESC
         LIMIT ?
         OFFSET ?
@@ -268,108 +208,8 @@ def executar_listagem(
         "pagina": pagina,
         "limite": limite,
         "total": total,
-        "periodo": periodo,
-        "estado": estado,
         "resultados": concursos,
     }
-
-
-@app.get("/concursos")
-def listar_concursos(
-    pesquisa: str | None = Query(
-        default=None,
-        description="Pesquisa no título, entidade ou CPV.",
-    ),
-    entidade: str | None = Query(
-        default=None,
-        description="Filtrar por entidade.",
-    ),
-    tipo_procedimento: str | None = Query(
-        default=None,
-        description="Filtrar por tipo de procedimento.",
-    ),
-    apenas_relevantes: bool = Query(
-        default=False,
-        description="Mostrar apenas concursos relevantes.",
-    ),
-    estado: Literal[
-        "todos",
-        "aberto",
-        "encerrado",
-        "sem_prazo",
-    ] = Query(
-        default="todos",
-        description="Filtrar pelo estado do concurso.",
-    ),
-    limite: int = Query(
-        default=20,
-        ge=1,
-        le=100,
-    ),
-    pagina: int = Query(
-        default=1,
-        ge=1,
-    ),
-) -> dict[str, Any]:
-    return executar_listagem(
-        periodo="atual",
-        pesquisa=pesquisa,
-        entidade=entidade,
-        tipo_procedimento=tipo_procedimento,
-        apenas_relevantes=apenas_relevantes,
-        estado=estado,
-        limite=limite,
-        pagina=pagina,
-    )
-
-
-@app.get("/historico")
-def listar_historico(
-    pesquisa: str | None = Query(
-        default=None,
-        description="Pesquisa no título, entidade ou CPV.",
-    ),
-    entidade: str | None = Query(
-        default=None,
-        description="Filtrar por entidade.",
-    ),
-    tipo_procedimento: str | None = Query(
-        default=None,
-        description="Filtrar por tipo de procedimento.",
-    ),
-    apenas_relevantes: bool = Query(
-        default=False,
-        description="Mostrar apenas concursos relevantes.",
-    ),
-    estado: Literal[
-        "todos",
-        "aberto",
-        "encerrado",
-        "sem_prazo",
-    ] = Query(
-        default="todos",
-        description="Filtrar pelo estado do concurso.",
-    ),
-    limite: int = Query(
-        default=20,
-        ge=1,
-        le=100,
-    ),
-    pagina: int = Query(
-        default=1,
-        ge=1,
-    ),
-) -> dict[str, Any]:
-    return executar_listagem(
-        periodo="historico",
-        pesquisa=pesquisa,
-        entidade=entidade,
-        tipo_procedimento=tipo_procedimento,
-        apenas_relevantes=apenas_relevantes,
-        estado=estado,
-        limite=limite,
-        pagina=pagina,
-    )
 
 
 @app.get("/concursos/{concurso_id}")
@@ -426,7 +266,6 @@ def obter_estatisticas() -> dict[str, Any]:
             """
             SELECT COUNT(*)
             FROM concursos
-            WHERE
                 preco_base IS NOT NULL
                 AND TRIM(preco_base) != ''
             """
