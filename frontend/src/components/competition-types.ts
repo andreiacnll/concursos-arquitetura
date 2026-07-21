@@ -1,4 +1,6 @@
 export type Concurso = {
+  data_fim_calculada?: string;
+  data_publicacao_iso?: string;
   id: number;
   titulo: string;
   entidade: string;
