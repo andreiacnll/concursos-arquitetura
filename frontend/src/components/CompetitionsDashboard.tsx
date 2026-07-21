@@ -172,6 +172,72 @@ function matchesService(concurso: Concurso, selectedServices: string[]) {
   return service !== null && selectedServices.includes(service);
 }
 
+
+function parseCompetitionDate(value?: string | null) {
+  if (!value) return null;
+
+  const cleanValue = String(value).trim();
+
+  // Formato YYYY-MM-DD, evitando alterações por fuso horário
+  const isoMatch = cleanValue.match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+  if (isoMatch) {
+    const [, year, month, day] = isoMatch;
+
+    return new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day),
+      12,
+      0,
+      0,
+      0,
+    );
+  }
+
+  // Formatos DD-MM-YYYY, DD/MM/YYYY e DD.MM.YYYY
+  const portugueseMatch = cleanValue.match(
+    /^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/,
+  );
+
+  if (portugueseMatch) {
+    const [, day, month, year] = portugueseMatch;
+
+    const parsedDate = new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day),
+      12,
+      0,
+      0,
+      0,
+    );
+
+    return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+  }
+
+  const parsedDate = new Date(cleanValue);
+
+  return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+}
+
+function isPublishedInLast7Days(value?: string | null) {
+  const publicationDate = parseCompetitionDate(value);
+
+  if (!publicationDate) return false;
+
+  publicationDate.setHours(0, 0, 0, 0);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Hoje + seis dias anteriores = sete dias de calendário
+  const firstDay = new Date(today);
+  firstDay.setDate(today.getDate() - 6);
+
+  return publicationDate >= firstDay && publicationDate <= today;
+}
+
 export default function CompetitionsDashboard({
   concursos,
 }: {
@@ -291,16 +357,12 @@ export default function CompetitionsDashboard({
       );
       const matchesSelectedService = matchesService(item, selectedServices);
 
-      const publicationDate = new Date(item.data);
       const deadlineDate = item.data_limite
         ? new Date(item.data_limite)
         : null;
 
       const todayFilter = new Date();
       todayFilter.setHours(0, 0, 0, 0);
-
-      const sevenDaysAgoFilter = new Date(todayFilter);
-      sevenDaysAgoFilter.setDate(todayFilter.getDate() - 7);
 
       const sevenDaysAheadFilter = new Date(todayFilter);
       sevenDaysAheadFilter.setDate(todayFilter.getDate() + 7);
@@ -309,10 +371,7 @@ export default function CompetitionsDashboard({
       const matchesStatFilter =
         statFilter === "todos" ||
         (statFilter === "ativos" && item.estado === "aberto") ||
-        (statFilter === "novos" &&
-          !Number.isNaN(publicationDate.getTime()) &&
-          publicationDate >= sevenDaysAgoFilter &&
-          publicationDate <= sevenDaysAheadFilter) ||
+        (statFilter === "novos" && isPublishedInLast7Days(item.data_publicacao_iso ?? item.data)) ||
         (statFilter === "terminam" &&
           deadlineDate !== null &&
           !Number.isNaN(deadlineDate.getTime()) &&
@@ -332,8 +391,16 @@ export default function CompetitionsDashboard({
     });
 
     return [...items].sort((a, b) => {
-      const dateA = new Date(a.data).getTime() || 0;
-      const dateB = new Date(b.data).getTime() || 0;
+      const parsedDateA = parseCompetitionDate(
+        a.data_publicacao_iso ?? a.data,
+      );
+      const parsedDateB = parseCompetitionDate(
+        b.data_publicacao_iso ?? b.data,
+      );
+
+      const dateA = parsedDateA?.getTime() ?? 0;
+      const dateB = parsedDateB?.getTime() ?? 0;
+
       return sort === "antigos" ? dateA - dateB : dateB - dateA;
     });
   }, [
@@ -349,14 +416,9 @@ export default function CompetitionsDashboard({
     statFilter,
   ]);
 
-  const now = new Date();
-  const sevenDaysAgo = new Date(now);
-  sevenDaysAgo.setDate(now.getDate() - 7);
-
-  const newThisWeek = concursos.filter((item) => {
-    const date = new Date(item.data);
-    return !Number.isNaN(date.getTime()) && date >= sevenDaysAgo;
-  }).length;
+  const newThisWeek = concursos.filter((item) =>
+    isPublishedInLast7Days(item.data_publicacao_iso ?? item.data),
+  ).length;
 
   const active = concursos.filter((item) => item.estado === "aberto").length;
 
@@ -384,7 +446,9 @@ export default function CompetitionsDashboard({
   function applyStatFilter(
     filter: "todos" | "ativos" | "novos" | "terminam" | "entidades",
   ) {
-    setStatFilter((current) => (current === filter ? "todos" : filter));
+    const nextFilter = statFilter === filter ? "todos" : filter;
+
+    setStatFilter(nextFilter);
     setActiveTab("todos");
     setQuery("");
     setCategory("Todos");
@@ -392,11 +456,18 @@ export default function CompetitionsDashboard({
     setSelectedProcedures([]);
     setSelectedServices([]);
 
-    window.setTimeout(() => {
-      document
-        .getElementById("concursos")
-        ?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 80);
+    window.requestAnimationFrame(() => {
+      window.setTimeout(() => {
+        const resultsSection = document.getElementById("concursos");
+
+        if (resultsSection) {
+          resultsSection.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }
+      }, 100);
+    });
   }
 
   return (
@@ -493,6 +564,9 @@ export default function CompetitionsDashboard({
             <div className="hero-visual" />
           </div>
 
+        </div>
+
+        <div className="site-container stats-container">
           <div className="stats-panel">
             <button
               type="button"
@@ -550,6 +624,7 @@ export default function CompetitionsDashboard({
               </div>
             </button>
           </div>
+
         </div>
       </section>
 
