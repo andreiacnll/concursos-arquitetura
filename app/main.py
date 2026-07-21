@@ -348,23 +348,6 @@ def main():
         f"{total_final_base_dados}"
     )
 
-    quantidade_guardada = (
-        guardar_concursos_enviados(
-            concursos_novos
-        )
-    )
-
-    total_final_base_dados = contar_concursos()
-
-    print(
-        f"\nConcursos guardados: {quantidade_guardada}"
-    )
-
-    print(
-        "Total na base de dados: "
-        f"{total_inicial_base_dados} -> "
-        f"{total_final_base_dados}"
-    )
 
     print("\nA enviar email...")
 
