@@ -354,96 +354,75 @@ def _extrair_fatores(secao: str) -> list[tuple[str, str]]:
     return fatores
 
 
-def extrair_criterio(texto: str) -> dict[str, str | None]:
+def extrair_criterio(texto: str) -> dict:
     """
-    Extrai o critério de adjudicação do texto do anúncio.
+    Extrai critérios de adjudicação a partir do PDF.
+    Evita duplicação quando o PDF repete
+    critérios antes da secção Ponderação.
+    """
 
-    Não inventa percentagens em critérios multifator.
-    Para monofator, o único fator corresponde a 100%.
-    """
-    resultado: dict[str, str | None] = {
+    import re
+
+    resultado = {
         "criterio_tipo": None,
         "criterio_resumo": None,
         "criterio_detalhe": None,
     }
 
-    secao = _extrair_secao_criterio(texto)
+    texto_limpo = texto.replace("\r", "\n")
 
-    if not secao:
-        return resultado
-
-    pesquisa = _sem_acentos(secao).casefold()
-
-    multifator_nao = bool(
-        re.search(
-            r"multifator\s*:\s*nao\b",
-            pesquisa,
-        )
+    # Procurar preferencialmente a secção Ponderação
+    partes = re.split(
+        r"pondera[cç][aã]o\s*:?",
+        texto_limpo,
+        flags=re.IGNORECASE,
     )
 
-    multifator_sim = bool(
-        re.search(
-            r"multifator\s*:\s*sim\b",
-            pesquisa,
-        )
+    if len(partes) > 1:
+        bloco = partes[1]
+    else:
+        bloco = texto_limpo
+
+    padrao = re.compile(
+        r"([A-Za-zÀ-ÿ\s\-]+?)\s*[:\-]?\s*(\d{1,3})\s*%",
+        re.IGNORECASE,
     )
 
-    tem_monofator = "monofator" in pesquisa
-    fatores = _extrair_fatores(secao)
+    encontrados = []
 
-    if multifator_nao or tem_monofator:
-        resultado["criterio_tipo"] = "Monofator"
+    for nome, percentagem in padrao.findall(bloco):
 
-        nome = ""
+        nome = " ".join(nome.split()).strip()
 
-        correspondencia = re.search(
-            r"(?:nome|designacao)\s*:\s*([^\n]+)",
-            secao,
-            flags=re.IGNORECASE,
-        )
-
-        if correspondencia:
-            nome = _limpar_nome_fator(
-                correspondencia.group(1)
-            )
-
-        if not nome and fatores:
-            nome = fatores[0][0]
-
-        if not nome and re.search(
-            r"\bpreco\b",
-            pesquisa,
+        if (
+            "ponderação" in nome.lower()
+            or "ponderacao" in nome.lower()
+            or "outro nome" in nome.lower()
+            or len(nome) > 80
         ):
-            nome = "Preço"
+            continue
 
-        if nome:
-            resumo = f"{nome} 100%"
+        if not nome:
+            continue
 
-            resultado["criterio_resumo"] = resumo
-            resultado["criterio_detalhe"] = resumo
+        valor = f"{nome} {percentagem}%"
 
+        if valor not in encontrados:
+            encontrados.append(valor)
+
+    if not encontrados:
         return resultado
 
-    if multifator_sim or len(fatores) >= 2:
+    if len(encontrados) == 1:
+        resultado["criterio_tipo"] = "Monofator"
+    else:
         resultado["criterio_tipo"] = "Multifator"
 
-        if fatores:
-            linhas = [
-                f"{nome} {percentagem}"
-                for nome, percentagem in fatores
-            ]
+    resultado["criterio_resumo"] = " • ".join(encontrados)
 
-            resultado["criterio_resumo"] = " • ".join(linhas)
-            resultado["criterio_detalhe"] = "\n".join(linhas)
-
-        return resultado
-
-    # A secção existe, mas o formato não foi suficientemente
-    # claro para classificar com segurança.
-    resultado["criterio_detalhe"] = secao
+    resultado["criterio_detalhe"] = "\n".join(encontrados)
 
     return resultado
-
 
 def extrair_entregaveis(texto: str) -> str | None:
     """
