@@ -1,27 +1,23 @@
-<svg width="1200" height="700" viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg">
+<svg width="1200" height="700"
+viewBox="0 0 1200 700"
+xmlns="http://www.w3.org/2000/svg">
 
 <rect width="1200" height="700" fill="#D6D0C7"/>
 
-<g fill="none" stroke="#333333" stroke-width="4" opacity="0.35">
-<path d="M100 520 L100 250 L300 100 L500 250 L500 520"/>
-<path d="M100 400 H500"/>
-<path d="M300 100 V520"/>
-<rect x="720" y="180" width="260" height="220"/>
+
+<g fill="none" stroke="#222" stroke-width="3" opacity="0.45">
+
+<path d="M200 450 L400 160 L700 320 L900 140"/>
+<path d="M400 160 V520"/>
+<path d="M700 320 V520"/>
 </g>
 
-<text x="90" y="160"
+<text x="90" y="590"
 font-family="Arial, Helvetica, sans-serif"
-font-size="42"
-fill="#222222">
-Arquitetura
-</text>
-
-<text x="90" y="570"
-font-family="Arial, Helvetica, sans-serif"
-font-size="230"
+font-size="90"
 font-weight="700"
-fill="#222222"
-opacity="0.18">
+fill="#222"
+opacity="0.45">
 ARQ
 </text>
 
