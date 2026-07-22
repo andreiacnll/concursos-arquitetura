@@ -41,16 +41,15 @@ const categoryImages = {
 };
 
 function formatDate(value: string | null) {
-  if (!value) return "Sem prazo indicado";
+  if (!value) return "Sem data";
 
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
+  const partes = value.split("-");
 
-  return new Intl.DateTimeFormat("pt-PT", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(date);
+  if (partes.length === 3) {
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+  }
+
+  return value;
 }
 
 function getCategory(title: string) {
@@ -112,14 +111,13 @@ export default function CompetitionCard({
     <article className="competition-card">
       <div className="card-image">
 
-        <Image
+        <img
           src={image}
           alt={category}
-          fill
-          priority={index < 6}
-          sizes="(max-width:768px) 100vw, 33vw"
           style={{
-            objectFit: "cover",
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
           }}
         />
 
