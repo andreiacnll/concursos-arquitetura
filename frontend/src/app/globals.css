@@ -1639,3 +1639,13 @@ a {
 #concursos {
   scroll-margin-top: 90px;
 }
+
+.procedure-type {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.procedure-type span {
+  display: block;
+}

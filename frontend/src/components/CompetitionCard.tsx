@@ -200,7 +200,13 @@ export default function CompetitionCard({
         </div>
 
         <div className="card-footer">
-          <span>{concurso.tipo_procedimento || "Concurso público"}</span>
+          <div className="procedure-type">
+            {(concurso.tipo_procedimento || "Concurso público")
+              .split(",")
+              .map((item, i) => (
+                <span key={i}>{item.trim()}</span>
+              ))}
+          </div>
           <strong>{concurso.preco_base || "Valor não indicado"}</strong>
         </div>
 
