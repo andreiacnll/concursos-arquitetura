@@ -356,9 +356,8 @@ def _extrair_fatores(secao: str) -> list[tuple[str, str]]:
 
 def extrair_criterio(texto: str) -> dict:
     """
-    Extrai critérios de adjudicação a partir do PDF.
-    Evita duplicação quando o PDF repete
-    critérios antes da secção Ponderação.
+    Extrai critérios de adjudicação do DR.
+    Associa cada Nome à sua Ponderação.
     """
 
     import re
@@ -371,36 +370,24 @@ def extrair_criterio(texto: str) -> dict:
 
     texto_limpo = texto.replace("\r", "\n")
 
-    # Procurar preferencialmente a secção Ponderação
-    partes = re.split(
-        r"pondera[cç][aã]o\s*:?",
-        texto_limpo,
-        flags=re.IGNORECASE,
-    )
-
-    if len(partes) > 1:
-        bloco = partes[1]
-    else:
-        bloco = texto_limpo
-
-    padrao = re.compile(
-        r"([A-Za-zÀ-ÿ\s\-]+?)\s*[:\-]?\s*(\d{1,3})\s*%",
-        re.IGNORECASE,
-    )
-
     encontrados = []
 
-    for nome, percentagem in padrao.findall(bloco):
+    # Formato habitual do Diário da República:
+    #
+    # Nome: Qualidade
+    # Ponderação: 30%
+    #
+    # Nome: Preço
+    # Ponderação: 70%
+
+    padrao_nome = re.compile(
+        r"Nome:\s*(.*?)\s+Ponderação:\s*(\d{1,3})%",
+        re.IGNORECASE | re.DOTALL,
+    )
+
+    for nome, percentagem in padrao_nome.findall(texto_limpo):
 
         nome = " ".join(nome.split()).strip()
-
-        if (
-            "ponderação" in nome.lower()
-            or "ponderacao" in nome.lower()
-            or "outro nome" in nome.lower()
-            or len(nome) > 80
-        ):
-            continue
 
         if not nome:
             continue
@@ -410,16 +397,43 @@ def extrair_criterio(texto: str) -> dict:
         if valor not in encontrados:
             encontrados.append(valor)
 
+
+    # fallback para anúncios antigos
+    if not encontrados:
+
+        padrao = re.compile(
+            r"([A-Za-zÀ-ÿ\s\-\/]+?)\s*[:\-]\s*(\d{1,3})\s*%",
+            re.IGNORECASE,
+        )
+
+        for nome, percentagem in padrao.findall(texto_limpo):
+
+            nome = " ".join(nome.split()).strip()
+
+            if (
+                "ponderação" in nome.lower()
+                or "ponderacao" in nome.lower()
+                or len(nome) > 80
+            ):
+                continue
+
+            valor = f"{nome} {percentagem}%"
+
+            if valor not in encontrados:
+                encontrados.append(valor)
+
+
     if not encontrados:
         return resultado
 
-    if len(encontrados) == 1:
-        resultado["criterio_tipo"] = "Monofator"
-    else:
-        resultado["criterio_tipo"] = "Multifator"
+
+    resultado["criterio_tipo"] = (
+        "Monofator"
+        if len(encontrados) == 1
+        else "Multifator"
+    )
 
     resultado["criterio_resumo"] = " • ".join(encontrados)
-
     resultado["criterio_detalhe"] = "\n".join(encontrados)
 
     return resultado
