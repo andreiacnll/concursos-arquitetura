@@ -164,6 +164,9 @@ def atualizar_dados_concurso(
     preco_base=None,
     cpv=None,
     tipo_procedimento=None,
+    criterio_tipo=None,
+    criterio_resumo=None,
+    criterio_detalhe=None,
 ):
     """
     Atualiza os dados complementares de um concurso existente.
@@ -182,6 +185,15 @@ def atualizar_dados_concurso(
     cpv = _texto_ou_none(cpv)
     tipo_procedimento = _texto_ou_none(
         tipo_procedimento
+    )
+    criterio_tipo = _texto_ou_none(
+        criterio_tipo
+    )
+    criterio_resumo = _texto_ou_none(
+        criterio_resumo
+    )
+    criterio_detalhe = _texto_ou_none(
+        criterio_detalhe
     )
 
     conn = sqlite3.connect(DB_NAME)
@@ -206,6 +218,18 @@ def atualizar_dados_concurso(
             tipo_procedimento = COALESCE(
                 ?,
                 tipo_procedimento
+            ),
+            criterio_tipo = COALESCE(
+                ?,
+                criterio_tipo
+            ),
+            criterio_resumo = COALESCE(
+                ?,
+                criterio_resumo
+            ),
+            criterio_detalhe = COALESCE(
+                ?,
+                criterio_detalhe
             )
         WHERE link = ?
         """,
@@ -217,6 +241,9 @@ def atualizar_dados_concurso(
             preco_base,
             cpv,
             tipo_procedimento,
+            criterio_tipo,
+            criterio_resumo,
+            criterio_detalhe,
             link,
         ),
     )
