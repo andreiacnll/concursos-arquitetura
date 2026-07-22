@@ -12,45 +12,31 @@ import type { Concurso } from "./competition-types";
 
 const categoryImages = {
   "Saúde": [
-    "/categories/architecture-1.svg",
-    "/categories/architecture-1.svg",
-    "/categories/architecture-1.svg",
+    "/categories/saude.svg",
   ],
 
   "Habitação": [
-    "/categories/architecture-1.svg",
-    "/categories/architecture-1.svg",
-    "/categories/architecture-1.svg",
+    "/categories/habitacao.svg",
   ],
 
   "Escolas": [
-    "/categories/architecture-1.svg",
-    "/categories/architecture-1.svg",
-    "/categories/architecture-1.svg",
+    "/categories/escolas.svg",
   ],
 
   "Paisagismo": [
-    "/categories/architecture-1.svg",
-    "/categories/architecture-1.svg",
-    "/categories/architecture-1.svg",
+    "/categories/paisagismo.svg",
   ],
 
   "Espaço público": [
-    "/categories/architecture-1.svg",
-    "/categories/architecture-1.svg",
-    "/categories/architecture-1.svg",
+    "/categories/espaco-publico.svg",
   ],
 
   "Património": [
-    "/categories/architecture-1.svg",
-    "/categories/architecture-1.svg",
-    "/categories/architecture-1.svg",
+    "/categories/patrimonio.svg",
   ],
 
   "Arquitetura": [
-    "/categories/architecture-1.svg",
-    "/categories/architecture-1.svg",
-    "/categories/architecture-1.svg",
+    "/categories/arquitetura.svg",
   ],
 };
 
