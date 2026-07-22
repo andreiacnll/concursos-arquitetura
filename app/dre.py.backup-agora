@@ -1,0 +1,94 @@
+
+
+def extrair_criterio(texto: str) -> dict:
+    """
+    Extrai critérios de adjudicação a partir do texto do PDF.
+    """
+
+    import re
+
+    resultado = {
+        "criterio_tipo": None,
+        "criterio_resumo": None,
+        "criterio_detalhe": None,
+    }
+
+    texto_limpo = " ".join(texto.split())
+
+    # Preço 100%
+    if re.search(
+        r"pre[cç]o\s*(?:[:\-]|\s)\s*100\s*%",
+        texto_limpo,
+        re.IGNORECASE,
+    ):
+        return {
+            "criterio_tipo": "Monofator",
+            "criterio_resumo": "Preço 100%",
+            "criterio_detalhe": "Preço 100%",
+        }
+
+    inicio = re.search(
+        r"crit[eé]rio[s]?\s+de\s+adjudica[cç][aã]o",
+        texto,
+        re.IGNORECASE,
+    )
+
+    if not inicio:
+        return resultado
+
+    zona = texto[
+        inicio.start():
+        inicio.start() + 3000
+    ]
+
+    fatores = []
+
+    encontrados = re.findall(
+        r"([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\s]{2,60}?)\s*[:\-]?\s*(\d{1,3})\s*%",
+        zona,
+    )
+
+    for nome, valor in encontrados:
+        nome = nome.strip()
+
+        if nome.lower() in {
+            "ponderação",
+            "ponderacao",
+            "total",
+        }:
+            continue
+
+        if int(valor) <= 100:
+            fatores.append(
+                f"{nome} {valor}%"
+            )
+
+    if fatores:
+        resultado.update(
+            {
+                "criterio_tipo": "Multifator",
+                "criterio_resumo": " • ".join(fatores),
+                "criterio_detalhe": "\n".join(fatores),
+            }
+        )
+
+    return resultado
+
+
+import requests
+
+
+def testar_anuncio():
+
+    url = "https://diariodarepublica.pt/dr/screenservices/dr/Legislacao_Conteudos/Conteudo_Detalhe/DataActionGetAllConteudoDetalheData"
+
+    resposta = requests.post(
+        url,
+        json={}
+    )
+
+    print("Estado:", resposta.status_code)
+    print(resposta.text[:500])
+
+
+testar_anuncio()

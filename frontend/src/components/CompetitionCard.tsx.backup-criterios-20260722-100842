@@ -81,19 +81,58 @@ function getCategory(title: string) {
   return "Arquitetura";
 }
 
-function getFreshness(dateValue: string) {
-  const date = new Date(dateValue);
-  if (Number.isNaN(date.getTime())) return null;
+function parseCompetitionDate(value: string | null | undefined) {
+  if (!value) return null;
 
-  const now = new Date();
-  const diff = Math.floor(
-    (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
-  );
+  const isoMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
 
-  if (diff <= 0) return "Hoje";
-  if (diff === 1) return "Ontem";
-  if (diff <= 7) return `${diff} dias`;
-  return null;
+  if (isoMatch) {
+    const [, year, month, day] = isoMatch;
+    return new Date(Number(year), Number(month) - 1, Number(day));
+  }
+
+  const portugueseMatch = value.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+
+  if (portugueseMatch) {
+    const [, day, month, year] = portugueseMatch;
+    return new Date(Number(year), Number(month) - 1, Number(day));
+  }
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function getPublicationBadge(
+  dateValue: string | null | undefined,
+) {
+  const date = parseCompetitionDate(dateValue);
+  if (!date) return null;
+
+  const currentYear = new Date().getFullYear();
+
+  if (date.getFullYear() !== currentYear) {
+    return String(date.getFullYear());
+  }
+
+  return new Intl.DateTimeFormat("pt-PT", {
+    month: "short",
+  })
+    .format(date)
+    .replace(".", "")
+    .toUpperCase();
+}
+
+function getPublicationDateLabel(
+  dateValue: string | null | undefined,
+) {
+  const date = parseCompetitionDate(dateValue);
+  if (!date) return "Data de publicação não indicada";
+
+  return `Publicado em ${new Intl.DateTimeFormat("pt-PT", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(date)}`;
 }
 
 export default function CompetitionCard({
@@ -118,7 +157,10 @@ export default function CompetitionCard({
 
   const image = images[index % images.length];
 
-  const freshness = getFreshness(concurso.data);
+  const publicationDate =
+    concurso.data_publicacao_iso ?? concurso.data;
+
+  const publicationBadge = getPublicationBadge(publicationDate);
   const location =
     concurso.municipio || concurso.distrito || concurso.entidade || "Portugal";
 
@@ -137,9 +179,13 @@ export default function CompetitionCard({
           }}
         />
 
-        {freshness && (
-          <span className="freshness-badge">
-            {freshness}
+        {publicationBadge && (
+          <span
+            className="freshness-badge"
+            title={getPublicationDateLabel(publicationDate)}
+            aria-label={getPublicationDateLabel(publicationDate)}
+          >
+            {publicationBadge}
           </span>
         )}
 
@@ -195,42 +241,13 @@ export default function CompetitionCard({
           </span>
           <span>
             <CalendarDays size={15} />
-            Publicado {formatDate(concurso.data)}
-          </span>
-
-          <span>
-            ⏳ {formatDate(concurso.data_limite)}
+            {formatDate(concurso.data_limite)}
           </span>
         </div>
 
-        {concurso.criterio_tipo && (
-          <div className="award-criteria">
-            <span className="award-label">
-              Critério de adjudicação
-            </span>
-
-            <strong>
-              {concurso.criterio_tipo}
-            </strong>
-
-            <p>
-              {concurso.criterio_resumo}
-            </p>
-          </div>
-        )}
-
-        <div className="procedure-info">
-          <div className="procedure-type">
-            {(concurso.tipo_procedimento || "Concurso público")
-              .split(",")
-              .map((item, i) => (
-                <span key={i}>{item.trim()}</span>
-              ))}
-          </div>
-
-          <strong className="price">
-            {concurso.preco_base || "Valor não indicado"}
-          </strong>
+        <div className="card-footer">
+          <span>{concurso.tipo_procedimento || "Concurso público"}</span>
+          <strong>{concurso.preco_base || "Valor não indicado"}</strong>
         </div>
 
         <a

@@ -1,6 +1,5 @@
 from .ai import analisar_concurso
 from .coletor import procurar_concursos
-from .dre import enriquecer_concurso
 from .database import (
     atualizar_dados_concurso,
     concurso_existe,
@@ -137,9 +136,6 @@ def atualizar_concursos_existentes(concursos):
                     concurso
                 )
             ),
-            link_anuncio_dr=concurso.get(
-                "link_anuncio_dr"
-            ),
         )
 
         if atualizado:
@@ -158,21 +154,6 @@ def guardar_concursos_enviados(concursos):
     quantidade_guardada = 0
 
     for concurso in concursos:
-
-        if concurso.get("link_anuncio_dr"):
-            try:
-                concurso = enriquecer_concurso(
-                    concurso,
-                    concurso["link_anuncio_dr"],
-                )
-
-            except Exception as erro:
-                print(
-                    "Aviso: não foi possível extrair "
-                    "critérios do DR:"
-                )
-                print(erro)
-
         guardado = guardar_concurso(
             titulo=concurso["titulo"],
             entidade=concurso.get("entidade"),
@@ -367,6 +348,23 @@ def main():
         f"{total_final_base_dados}"
     )
 
+    quantidade_guardada = (
+        guardar_concursos_enviados(
+            concursos_novos
+        )
+    )
+
+    total_final_base_dados = contar_concursos()
+
+    print(
+        f"\nConcursos guardados: {quantidade_guardada}"
+    )
+
+    print(
+        "Total na base de dados: "
+        f"{total_inicial_base_dados} -> "
+        f"{total_final_base_dados}"
+    )
 
     print("\nA enviar email...")
 
