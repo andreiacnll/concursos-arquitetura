@@ -159,7 +159,7 @@ a {
 
 .hero-copy {
   padding-left: 4px;
-  padding-bottom: 24px;
+  padding-bottom: 70px;
 }
 
 .eyebrow,
@@ -276,8 +276,7 @@ a {
   align-self: stretch;
   display: flex;
   align-items: center;
-  padding-bottom: 24px;
-  pointer-events: none;
+  padding-bottom: 78px;
 }
 
 .hero-visual {
@@ -290,73 +289,30 @@ a {
   box-shadow: inset 0 0 0 1px rgba(24, 26, 29, 0.03);
 }
 
-
-
-.stats-container {
-  position: relative;
-  z-index: 10;
-  margin-top: -34px;
-  margin-bottom: 12px;
-}
-
 .stats-panel {
-  position: relative;
-  z-index: 10;
-  width: 100%;
+  position: absolute;
+  right: 34px;
+  bottom: 12px;
+  width: min(700px, 54%);
   min-height: 100px;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  align-items: stretch;
-  padding: 0;
-  overflow: hidden;
+  grid-template-columns: repeat(4, 1fr);
+  align-items: center;
+  padding: 20px 16px;
   border: 1px solid rgba(229, 229, 225, 0.9);
   border-radius: 13px;
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 255, 255, 0.94);
   box-shadow: var(--shadow);
   backdrop-filter: blur(16px);
-  pointer-events: auto;
 }
 
 .stat {
-  position: relative;
-  z-index: 21;
-  width: 100%;
-  min-width: 0;
-  min-height: 106px;
+  min-height: 58px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 13px;
-  padding: 20px 18px;
-  border: 0;
+  padding: 0 18px;
   border-left: 1px solid var(--line);
-  border-radius: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  pointer-events: auto;
-  transition:
-    background 160ms ease,
-    color 160ms ease;
-}
-
-.stat:hover {
-  background: rgba(96, 123, 67, 0.08);
-}
-
-.stat:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.stat.active {
-  background: rgba(96, 123, 67, 0.14);
-  color: var(--accent);
-}
-
-.stat.active span {
-  color: var(--accent);
 }
 
 .stat:first-child {
@@ -772,7 +728,7 @@ a {
   }
 
   .stats-panel {
-    width: 100%;
+    width: 65%;
   }
 
   .competition-grid {
@@ -802,14 +758,12 @@ a {
     padding-bottom: 0;
   }
 
-  .stats-container {
-    margin-top: 20px;
-    margin-bottom: 18px;
-  }
-
   .stats-panel {
     position: relative;
+    right: auto;
+    bottom: auto;
     width: 100%;
+    margin-top: -48px;
   }
 
   .listing-shell {
@@ -1634,75 +1588,3 @@ a {
   background: #30362c;
   color: var(--foreground);
 }
-
-
-#concursos {
-  scroll-margin-top: 90px;
-}
-
-.procedure-type {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.procedure-type span {
-  display: block;
-}
-
-.procedure-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  margin-top: 14px;
-}
-
-.procedure-type {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  font-size: 0.85rem;
-}
-
-.procedure-type span {
-  display: block;
-}
-
-.price {
-  white-space: nowrap;
-}
-
-
-
-.award-criteria {
-  border-top: 1px solid #ddd8cf;
-  border-bottom: 1px solid #ddd8cf;
-  padding: 14px 0;
-  margin: 14px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.award-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #77736b;
-}
-
-.award-criteria strong {
-  display: block;
-  font-size: 17px;
-  font-weight: 600;
-  line-height: 1.2;
-}
-
-.award-criteria p {
-  margin: 0;
-  font-size: 14px;
-  color: #333;
-  line-height: 1.4;
-}
-

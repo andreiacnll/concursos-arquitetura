@@ -1,0 +1,88 @@
+from __future__ import annotations
+
+from io import BytesIO
+
+import requests
+from pypdf import PdfReader
+
+
+TIMEOUT = 30
+
+
+def obter_pdf(url: str) -> bytes:
+    """
+    Descarrega um PDF do Diário da República.
+    """
+
+    resposta = requests.get(
+        url,
+        timeout=TIMEOUT,
+    )
+
+    resposta.raise_for_status()
+
+    return resposta.content
+
+
+def extrair_texto_pdf(pdf_bytes: bytes) -> str:
+    """
+    Extrai todo o texto de um PDF.
+    """
+
+    reader = PdfReader(
+        BytesIO(pdf_bytes)
+    )
+
+    paginas = []
+
+    for pagina in reader.pages:
+        paginas.append(
+            pagina.extract_text() or ""
+        )
+
+    return "\n".join(paginas)
+
+
+def extrair_criterio(texto: str) -> dict:
+    """
+    Placeholder.
+    Será implementado no próximo passo.
+    """
+
+    return {
+        "criterio_tipo": None,
+        "criterio_resumo": None,
+        "criterio_detalhe": None,
+    }
+
+
+def extrair_entregaveis(texto: str) -> str | None:
+    """
+    Placeholder.
+    """
+
+    return None
+
+
+def enriquecer_concurso(
+    concurso: dict,
+    pdf_url: str,
+) -> dict:
+    """
+    Enriquece um concurso com informação
+    proveniente do PDF do DR.
+    """
+
+    pdf = obter_pdf(pdf_url)
+
+    texto = extrair_texto_pdf(pdf)
+
+    concurso.update(
+        extrair_criterio(texto)
+    )
+
+    concurso["entregaveis"] = (
+        extrair_entregaveis(texto)
+    )
+
+    return concurso

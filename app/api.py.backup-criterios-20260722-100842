@@ -222,39 +222,6 @@ def carregar_concursos_checkpoint() -> list[dict[str, Any]]:
     ]
 
 
-
-def carregar_concursos_base_dados() -> list[dict[str, Any]]:
-    """
-    Lê os concursos diretamente da base de dados.
-    Inclui os campos enriquecidos dos procedimentos.
-    """
-    with closing(obter_conexao()) as conexao:
-        linhas = conexao.execute(
-            """
-            SELECT
-                id,
-                titulo,
-                entidade,
-                link,
-                data,
-                relevante,
-                data_limite,
-                preco_base,
-                cpv,
-                tipo_procedimento,
-                criterio_tipo,
-                criterio_resumo,
-                criterio_detalhe,
-                entregaveis
-            FROM concursos
-            WHERE relevante = 1
-            ORDER BY id DESC
-            """
-        ).fetchall()
-
-    return [dict(linha) for linha in linhas]
-
-
 def juntar_valores(valor: Any) -> str | None:
     """Transforma listas e outros valores num texto para a API."""
     if isinstance(valor, list):
@@ -315,10 +282,6 @@ def normalizar_concurso_json(
         "preco_base": item.get("preco_base"),
         "cpv": cpv,
         "tipo_procedimento": tipo_procedimento,
-        "criterio_tipo": item.get("criterio_tipo"),
-        "criterio_resumo": item.get("criterio_resumo"),
-        "criterio_detalhe": item.get("criterio_detalhe"),
-        "entregaveis": item.get("entregaveis"),
         "numero_anuncio": item.get("numero_anuncio"),
         "link_anuncio_dr": item.get("link_anuncio_dr"),
         "link_pecas": item.get("link_pecas"),
@@ -355,7 +318,7 @@ def executar_listagem(
     limite: int,
     pagina: int,
 ) -> dict[str, Any]:
-    dados = carregar_concursos_base_dados()
+    dados = carregar_concursos_checkpoint()
 
     concursos = [
         normalizar_concurso_json(item, indice)

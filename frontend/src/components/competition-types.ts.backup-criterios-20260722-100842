@@ -14,8 +14,4 @@ export type Concurso = {
   municipio?: string | null;
   categoria?: string | null;
   tipo_procedimento?: string | null;
-  criterio_tipo?: string | null;
-  criterio_resumo?: string | null;
-  criterio_detalhe?: string | null;
-  entregaveis?: string | null;
 };

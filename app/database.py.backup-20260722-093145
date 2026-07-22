@@ -10,7 +10,11 @@ COLUNAS_ADICIONAIS = {
     "preco_base": "TEXT",
     "cpv": "TEXT",
     "tipo_procedimento": "TEXT",
-        "link_anuncio_dr": "TEXT",
+
+    "criterio_tipo": "TEXT",
+    "criterio_resumo": "TEXT",
+    "criterio_detalhe": "TEXT",
+    "entregaveis": "TEXT",
 }
 
 
@@ -101,7 +105,6 @@ def guardar_concurso(
     preco_base=None,
     cpv=None,
     tipo_procedimento=None,
-    link_anuncio_dr=None,
 ):
     """
     Guarda um concurso na base de dados.
@@ -125,10 +128,9 @@ def guardar_concurso(
                 data_limite,
                 preco_base,
                 cpv,
-                tipo_procedimento,
-                link_anuncio_dr
+                tipo_procedimento
             )
-            VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?)
             """,
             (
                 titulo,
@@ -139,7 +141,6 @@ def guardar_concurso(
                 _texto_ou_none(preco_base),
                 _texto_ou_none(cpv),
                 _texto_ou_none(tipo_procedimento),
-                _texto_ou_none(link_anuncio_dr),
             ),
         )
 

@@ -159,7 +159,7 @@ a {
 
 .hero-copy {
   padding-left: 4px;
-  padding-bottom: 24px;
+  padding-bottom: 70px;
 }
 
 .eyebrow,
@@ -276,7 +276,7 @@ a {
   align-self: stretch;
   display: flex;
   align-items: center;
-  padding-bottom: 24px;
+  padding-bottom: 78px;
   pointer-events: none;
 }
 
@@ -290,19 +290,12 @@ a {
   box-shadow: inset 0 0 0 1px rgba(24, 26, 29, 0.03);
 }
 
-
-
-.stats-container {
-  position: relative;
-  z-index: 10;
-  margin-top: -34px;
-  margin-bottom: 12px;
-}
-
 .stats-panel {
-  position: relative;
-  z-index: 10;
-  width: 100%;
+  position: absolute;
+  z-index: 20;
+  right: 34px;
+  bottom: 12px;
+  width: min(700px, 54%);
   min-height: 100px;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -772,7 +765,7 @@ a {
   }
 
   .stats-panel {
-    width: 100%;
+    width: 65%;
   }
 
   .competition-grid {
@@ -802,14 +795,12 @@ a {
     padding-bottom: 0;
   }
 
-  .stats-container {
-    margin-top: 20px;
-    margin-bottom: 18px;
-  }
-
   .stats-panel {
     position: relative;
+    right: auto;
+    bottom: auto;
     width: 100%;
+    margin-top: -48px;
   }
 
   .listing-shell {
@@ -1639,70 +1630,3 @@ a {
 #concursos {
   scroll-margin-top: 90px;
 }
-
-.procedure-type {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.procedure-type span {
-  display: block;
-}
-
-.procedure-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  margin-top: 14px;
-}
-
-.procedure-type {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  font-size: 0.85rem;
-}
-
-.procedure-type span {
-  display: block;
-}
-
-.price {
-  white-space: nowrap;
-}
-
-
-
-.award-criteria {
-  border-top: 1px solid #ddd8cf;
-  border-bottom: 1px solid #ddd8cf;
-  padding: 14px 0;
-  margin: 14px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.award-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #77736b;
-}
-
-.award-criteria strong {
-  display: block;
-  font-size: 17px;
-  font-weight: 600;
-  line-height: 1.2;
-}
-
-.award-criteria p {
-  margin: 0;
-  font-size: 14px;
-  color: #333;
-  line-height: 1.4;
-}
-

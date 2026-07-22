@@ -1,0 +1,157 @@
+from __future__ import annotations
+
+from io import BytesIO
+
+import requests
+from pypdf import PdfReader
+
+
+TIMEOUT = 30
+
+
+def obter_pdf(url: str) -> bytes:
+    """
+    Descarrega um PDF do Diário da República.
+    """
+    resposta = requests.get(
+        url,
+        timeout=TIMEOUT,
+    )
+
+    resposta.raise_for_status()
+
+    return resposta.content
+
+
+def extrair_texto_pdf(pdf_bytes: bytes) -> str:
+    """
+    Extrai texto de todas as páginas do PDF.
+    """
+    reader = PdfReader(
+        BytesIO(pdf_bytes)
+    )
+
+    paginas = []
+
+    for pagina in reader.pages:
+        paginas.append(
+            pagina.extract_text() or ""
+        )
+
+    return "\n".join(paginas)
+
+
+def extrair_criterio(texto: str) -> dict:
+    """
+    Extrai critérios de adjudicação.
+    """
+
+    import re
+
+    resultado = {
+        "criterio_tipo": None,
+        "criterio_resumo": None,
+        "criterio_detalhe": None,
+    }
+
+    texto_limpo = " ".join(texto.split())
+
+    # Preço 100%
+    if re.search(
+        r"pre[cç]o\s*(?:[:\-]|\s)\s*100\s*%",
+        texto_limpo,
+        re.IGNORECASE,
+    ):
+        return {
+            "criterio_tipo": "Monofator",
+            "criterio_resumo": "Preço 100%",
+            "criterio_detalhe": "Preço 100%",
+        }
+
+    inicio = re.search(
+        r"crit[eé]rio[s]?\s+de\s+adjudica[cç][aã]o",
+        texto,
+        re.IGNORECASE,
+    )
+
+    if not inicio:
+        return resultado
+
+    zona = texto[
+        inicio.start():
+        inicio.start() + 3000
+    ]
+
+    fatores = []
+
+    encontrados = re.findall(
+        r"([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\s]{2,60}?)\s*[:\-]?\s*(\d{1,3})\s*%",
+        zona,
+    )
+
+    for nome, valor in encontrados:
+        nome = nome.strip()
+
+        if nome.lower() in {
+            "ponderação",
+            "ponderacao",
+            "total",
+        }:
+            continue
+
+        if int(valor) <= 100:
+            fatores.append(
+                f"{nome} {valor}%"
+            )
+
+    if fatores:
+        fatores_unicos = []
+
+        for fator in fatores:
+            nome_atual = fator.split()[0]
+
+            encontrado = False
+
+            for i, existente in enumerate(fatores_unicos):
+                nome_existente = existente.split()[0]
+
+                if nome_atual == nome_existente:
+                    encontrado = True
+
+                    # Mantém a descrição mais completa
+                    if len(fator) > len(existente):
+                        fatores_unicos[i] = fator
+
+                    break
+
+            if not encontrado:
+                fatores_unicos.append(fator)
+
+        resultado.update(
+            {
+                "criterio_tipo": "Multifator",
+                "criterio_resumo": " • ".join(fatores_unicos),
+                "criterio_detalhe": "\n".join(fatores_unicos),
+            }
+        )
+
+    return resultado
+
+
+def enriquecer_concurso(
+    concurso: dict,
+    pdf_url: str,
+) -> dict:
+    """
+    Enriquece concurso com dados do PDF DR.
+    """
+
+    pdf = obter_pdf(pdf_url)
+
+    texto = extrair_texto_pdf(pdf)
+
+    concurso.update(
+        extrair_criterio(texto)
+    )
+
+    return concurso
