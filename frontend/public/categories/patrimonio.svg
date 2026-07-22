@@ -1,11 +1,28 @@
 <svg width="1200" height="700" viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg">
-<rect width="1200" height="700" fill="#e8e5df"/>
-<rect x="70" y="70" width="1060" height="560" fill="none" stroke="#222" stroke-width="2"/>
-<text x="100" y="180" font-family="Arial, Helvetica, sans-serif" font-size="38" fill="#222">
+
+<rect width="1200" height="700" fill="#DDB7A5"/>
+
+<g fill="none" stroke="#333333" stroke-width="4" opacity="0.35">
+<path d="M100 520 L100 250 L300 100 L500 250 L500 520"/>
+<path d="M100 400 H500"/>
+<path d="M300 100 V520"/>
+<rect x="720" y="180" width="260" height="220"/>
+</g>
+
+<text x="90" y="160"
+font-family="Arial, Helvetica, sans-serif"
+font-size="42"
+fill="#222222">
 Património
 </text>
-<text x="100" y="520" font-family="Arial, Helvetica, sans-serif" font-size="180" fill="#222" opacity="0.12">
+
+<text x="90" y="570"
+font-family="Arial, Helvetica, sans-serif"
+font-size="230"
+font-weight="700"
+fill="#222222"
+opacity="0.18">
 PAT
 </text>
-<line x1="100" y1="230" x2="500" y2="230" stroke="#222" stroke-width="3"/>
+
 </svg>
