@@ -190,6 +190,9 @@ def guardar_concursos_enviados(concursos):
                     concurso
                 )
             ),
+            link_anuncio_dr=concurso.get(
+                "link_anuncio_dr"
+            ),
         )
 
         if guardado:
