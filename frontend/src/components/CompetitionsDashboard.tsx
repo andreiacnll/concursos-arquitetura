@@ -33,6 +33,26 @@ const moreCategories = [
   "Outros",
 ];
 
+function parseDataEntrega(valor?: string | null) {
+  if (!valor) return null;
+
+  const match = valor.match(
+    /^(\d{2})-(\d{2})-(\d{4})(?:\s+(\d{2}):(\d{2}))?/
+  );
+
+  if (!match) return null;
+
+  const [, dia, mes, ano, hora = "00", minuto = "00"] = match;
+
+  return new Date(
+    Number(ano),
+    Number(mes) - 1,
+    Number(dia),
+    Number(hora),
+    Number(minuto),
+  );
+}
+
 function categoryForTitle(title: string) {
   const text = title.toLowerCase();
 
@@ -357,9 +377,9 @@ export default function CompetitionsDashboard({
       );
       const matchesSelectedService = matchesService(item, selectedServices);
 
-      const deadlineDate = item.data_fim_calculada
-        ? new Date(item.data_fim_calculada)
-        : null;
+      const deadlineDate = parseDataEntrega(
+        item.data_entrega_propostas,
+      );
 
       const todayFilter = new Date();
       todayFilter.setHours(0, 0, 0, 0);
@@ -430,11 +450,12 @@ export default function CompetitionsDashboard({
   sevenDaysAhead.setHours(23, 59, 59, 999);
 
   const endingSoon = concursos.filter((item) => {
-    if (!item.data_fim_calculada) return false;
-
-    const deadline = new Date(item.data_fim_calculada);
+    const deadline = parseDataEntrega(
+      item.data_entrega_propostas,
+    );
 
     return (
+      deadline !== null &&
       !Number.isNaN(deadline.getTime()) &&
       deadline >= today &&
       deadline <= sevenDaysAhead

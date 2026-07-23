@@ -10,6 +10,52 @@ import {
 } from "lucide-react";
 import type { Concurso } from "./competition-types";
 
+function formatDataEntrega(valor?: string | null) {
+  if (!valor) return "Sem data";
+
+  const match = valor.match(
+    /^(\d{2})-(\d{2})-(\d{4})(?:\s+(\d{2}):(\d{2}))?/
+  );
+
+  if (!match) return valor;
+
+  const [, dia, mes, ano, hora, minuto] = match;
+
+  return `${dia}/${mes}/${ano}${
+    hora && minuto ? ` ${hora}:${minuto}` : ""
+  }`;
+}
+
+
+function diasRestantes(valor?: string | null) {
+  if (!valor) return null;
+
+  const match = valor.match(
+    /^(\d{2})-(\d{2})-(\d{4})(?:\s+(\d{2}):(\d{2}))?/
+  );
+
+  if (!match) return null;
+
+  const [, dia, mes, ano, hora = "23", minuto = "59"] = match;
+
+  const entrega = new Date(
+    Number(ano),
+    Number(mes) - 1,
+    Number(dia),
+    Number(hora),
+    Number(minuto),
+  );
+
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+
+  const diferenca = entrega.getTime() - hoje.getTime();
+
+  return Math.ceil(
+    diferenca / (1000 * 60 * 60 * 24)
+  );
+}
+
 const categoryImages = {
   "Saúde": [
     "/categories/saude.svg",
@@ -183,8 +229,20 @@ export default function CompetitionCard({
           </span>
 
           <span>
-            ⏳ {formatDate(concurso.data_limite)}
+            📅 Entrega {formatDataEntrega(
+              concurso.data_entrega_propostas
+            )}
           </span>
+
+          {diasRestantes(concurso.data_entrega_propostas) !== null && (
+            <span>
+              ⏳ {
+                diasRestantes(concurso.data_entrega_propostas)! > 0
+                  ? `Faltam ${diasRestantes(concurso.data_entrega_propostas)} dias`
+                  : "Prazo terminado"
+              }
+            </span>
+          )}
         </div>
 
         {concurso.criterio_tipo && (

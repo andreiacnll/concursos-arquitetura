@@ -43,8 +43,8 @@ URL_DETALHE = f"{BASE_URL}/Base4/pt/detalhe/"
 VERSAO_PORTAL = os.getenv("BASE_VERSAO_PORTAL", "126.0")
 TIMEOUT_SEGUNDOS = int(os.getenv("BASE_TIMEOUT_SEGUNDOS", "45"))
 TAMANHO_PAGINA = int(os.getenv("BASE_PAGE_SIZE", "25"))
-DIAS_PADRAO_PESQUISA = 7
-DIAS_MAXIMOS_PESQUISA = 7
+DIAS_PADRAO_PESQUISA = 1
+DIAS_MAXIMOS_PESQUISA = 90
 
 dias_pedidos = int(
     os.getenv(
@@ -66,8 +66,8 @@ DIAS_A_PESQUISAR = min(
 )
 MAXIMO_PAGINAS = int(os.getenv("BASE_MAX_PAGINAS", "100"))
 MAXIMO_DETALHES = int(os.getenv("BASE_MAX_DETALHES", "300"))
-INTERVALO_PEDIDOS = float(os.getenv("BASE_INTERVALO_PEDIDOS", "9.0"))
-INTERVALO_DETALHES = float(os.getenv("BASE_INTERVALO_DETALHES", "7.0"))
+INTERVALO_PEDIDOS = float(os.getenv("BASE_INTERVALO_PEDIDOS", "2.0"))
+INTERVALO_DETALHES = float(os.getenv("BASE_INTERVALO_DETALHES", "2.0"))
 MOSTRAR_DIAGNOSTICO = os.getenv(
     "BASE_MOSTRAR_DIAGNOSTICO",
     "1",
@@ -944,37 +944,6 @@ def enriquecer(
 
         if parece_relevante(completo):
             normalizado = normalizar_anuncio(completo)
-
-            try:
-                from app.dre import enriquecer_concurso
-
-                if normalizado.get("link_anuncio_dr"):
-                    normalizado = enriquecer_concurso(
-                        normalizado,
-                        normalizado["link_anuncio_dr"],
-                    )
-
-                    print(
-                        "DATA ENTREGA PROPOSTAS:",
-                        normalizado.get(
-                            "data_entrega_propostas"
-                        ),
-                    )
-
-            except Exception as erro:
-                print(
-                    "Aviso: não foi possível extrair "
-                    "data de entrega do PDF DR:",
-                    erro,
-                )
-
-            print(
-                "DEBUG NORMALIZADO DATA:",
-                normalizado.get(
-                    "data_entrega_propostas"
-                ),
-            )
-
             por_id[identificador] = normalizado
             novos += 1
 
