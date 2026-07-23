@@ -430,9 +430,9 @@ export default function CompetitionsDashboard({
   sevenDaysAhead.setHours(23, 59, 59, 999);
 
   const endingSoon = concursos.filter((item) => {
-    if (!item.data_limite) return false;
+    if (!item.data_fim_calculada) return false;
 
-    const deadline = new Date(item.data_limite);
+    const deadline = new Date(item.data_fim_calculada);
 
     return (
       !Number.isNaN(deadline.getTime()) &&
