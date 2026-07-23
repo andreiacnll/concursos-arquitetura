@@ -97,7 +97,7 @@ export default async function HistoricoPage() {
 
                   <span>
                     <CalendarDays size={15} />
-                    Prazo terminou em {formatDate(concurso.data_fim_calculada ?? null)}
+                    Prazo terminou em {formatDate(concurso.data_entrega_propostas ?? null)}
                   </span>
                 </div>
               </div>

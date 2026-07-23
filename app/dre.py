@@ -466,6 +466,10 @@ def enriquecer_concurso(
         extrair_entregaveis(texto)
     )
 
+    enriquecido["data_entrega_propostas"] = (
+        extrair_data_entrega_propostas(texto)
+    )
+
     return enriquecido
 
 
@@ -509,3 +513,35 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+def extrair_data_entrega_propostas(texto: str) -> str | None:
+    """
+    Extrai a data/hora limite de apresentação
+    de propostas a partir do texto do PDF DR.
+    """
+
+    import re
+
+    padroes = [
+        r"Prazo para apresentação das propostas\s*[:\-]?\s*(\d{2}-\d{2}-\d{4})(?:\s+(\d{2}:\d{2}))?",
+        r"Data limite para apresentação das propostas\s*[:\-]?\s*(\d{2}-\d{2}-\d{4})(?:\s+(\d{2}:\d{2}))?",
+    ]
+
+    for padrao in padroes:
+        resultado = re.search(
+            padrao,
+            texto,
+            re.IGNORECASE
+        )
+
+        if resultado:
+            data = resultado.group(1)
+            hora = resultado.group(2)
+
+            if hora:
+                return f"{data} {hora}"
+
+            return data
+
+    return None

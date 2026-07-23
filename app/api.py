@@ -239,13 +239,15 @@ def carregar_concursos_base_dados() -> list[dict[str, Any]]:
                 data,
                 relevante,
                 data_limite,
+                data_entrega_propostas,
                 preco_base,
                 cpv,
                 tipo_procedimento,
                 criterio_tipo,
                 criterio_resumo,
                 criterio_detalhe,
-                entregaveis
+                entregaveis,
+                link_anuncio_dr
             FROM concursos
             WHERE relevante = 1
             ORDER BY id DESC
@@ -312,6 +314,10 @@ def normalizar_concurso_json(
         "data": item.get("data"),
         "relevante": 1,
         "data_limite": item.get("data_limite"),
+        "data_entrega_propostas": item.get(
+            "data_entrega_propostas"
+        ),
+        "data_entrega_propostas": item.get("data_entrega_propostas"),
         "preco_base": item.get("preco_base"),
         "cpv": cpv,
         "tipo_procedimento": tipo_procedimento,

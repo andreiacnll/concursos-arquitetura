@@ -102,6 +102,7 @@ def guardar_concurso(
     cpv=None,
     tipo_procedimento=None,
     link_anuncio_dr=None,
+    data_entrega_propostas=None,
 ):
     """
     Guarda um concurso na base de dados.
@@ -126,9 +127,10 @@ def guardar_concurso(
                 preco_base,
                 cpv,
                 tipo_procedimento,
-                link_anuncio_dr
+                link_anuncio_dr,
+                data_entrega_propostas
             )
-            VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?)
             """,
             (
                 titulo,
@@ -140,6 +142,7 @@ def guardar_concurso(
                 _texto_ou_none(cpv),
                 _texto_ou_none(tipo_procedimento),
                 _texto_ou_none(link_anuncio_dr),
+                _texto_ou_none(data_entrega_propostas),
             ),
         )
 

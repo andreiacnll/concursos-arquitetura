@@ -140,6 +140,9 @@ def atualizar_concursos_existentes(concursos):
             link_anuncio_dr=concurso.get(
                 "link_anuncio_dr"
             ),
+            data_entrega_propostas=concurso.get(
+                "data_entrega_propostas"
+            ),
         )
 
         if atualizado:
@@ -164,6 +167,11 @@ def guardar_concursos_enviados(concursos):
                 concurso = enriquecer_concurso(
                     concurso,
                     concurso["link_anuncio_dr"],
+                )
+
+                print(
+                    "DEBUG DATA ENTREGA:",
+                    concurso.get("data_entrega_propostas")
                 )
 
             except Exception as erro:
