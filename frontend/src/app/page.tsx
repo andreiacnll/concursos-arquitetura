@@ -9,7 +9,7 @@ const API_URL =
 async function getConcursos(): Promise<Concurso[]> {
   try {
     const response = await fetch(
-      `${API_URL}/concursos?estado=todos&limite=100`,
+      `${API_URL}/concursos?estado=todos&apenas_relevantes=true&limite=100`,
       { cache: "no-store" },
     );
 
