@@ -357,8 +357,8 @@ export default function CompetitionsDashboard({
       );
       const matchesSelectedService = matchesService(item, selectedServices);
 
-      const deadlineDate = item.data_limite
-        ? new Date(item.data_limite)
+      const deadlineDate = item.data_fim_calculada
+        ? new Date(item.data_fim_calculada)
         : null;
 
       const todayFilter = new Date();
