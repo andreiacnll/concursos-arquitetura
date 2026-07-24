@@ -19,3 +19,20 @@ frontend/.env.local
 .venv/
 frontend/node_modules/
 frontend/.next/
+
+# Python
+__pycache__/
+*.pyc
+
+# Next
+frontend/node_modules/
+frontend/.next/
+
+# Documentos extraídos
+analise_documentos/*/pecas_procedimentais/extraido/
+
+# Bases de dados grandes
+*.db
+*.backup
+*.sqlite
+

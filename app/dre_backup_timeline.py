@@ -470,10 +470,6 @@ def enriquecer_concurso(
         extrair_data_entrega_propostas(texto)
     )
 
-    enriquecido["data_esclarecimentos"] = (
-        extrair_data_esclarecimentos(texto)
-    )
-
     return enriquecido
 
 
@@ -497,6 +493,26 @@ def testar_pdf(url: str) -> None:
     for chave, valor in resultado.items():
         print(f"{chave}: {valor or 'não identificado'}")
 
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Testa a extração do critério de adjudicação "
+            "num PDF do Diário da República."
+        )
+    )
+
+    parser.add_argument(
+        "url",
+        help="URL oficial do PDF do Diário da República.",
+    )
+
+    argumentos = parser.parse_args()
+    testar_pdf(argumentos.url)
+
+
+if __name__ == "__main__":
+    main()
 
 
 def extrair_data_entrega_propostas(texto: str) -> str | None:
@@ -529,52 +545,3 @@ def extrair_data_entrega_propostas(texto: str) -> str | None:
             return data
 
     return None
-
-
-
-
-
-def extrair_data_esclarecimentos(texto: str) -> str | None:
-    """
-    Extrai a data limite para pedidos de esclarecimento.
-    """
-
-    padroes = [
-        r"pedidos de esclarecimento.*?(\d{2}-\d{2}-\d{4})",
-        r"esclarecimentos.*?(\d{2}-\d{2}-\d{4})",
-        r"solicita[cç][aã]o de esclarecimentos.*?(\d{2}-\d{2}-\d{4})",
-    ]
-
-    for padrao in padroes:
-        resultado = re.search(
-            padrao,
-            texto,
-            re.IGNORECASE | re.DOTALL,
-        )
-
-        if resultado:
-            return resultado.group(1)
-
-    return None
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(
-        description=(
-            "Testa a extração do critério de adjudicação "
-            "num PDF do Diário da República."
-        )
-    )
-
-    parser.add_argument(
-        "url",
-        help="URL oficial do PDF do Diário da República.",
-    )
-
-    argumentos = parser.parse_args()
-    testar_pdf(argumentos.url)
-
-
-
-if __name__ == "__main__":
-    main()

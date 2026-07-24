@@ -63,6 +63,36 @@ def inicio() -> dict[str, str]:
     }
 
 
+
+@app.get("/concursos/{concurso_id}/timeline")
+def obter_timeline_concurso(
+    concurso_id: int,
+) -> list[dict[str, Any]]:
+
+    with closing(obter_conexao()) as conexao:
+
+        eventos = conexao.execute(
+            """
+            SELECT
+                tipo,
+                titulo,
+                data,
+                origem
+            FROM timeline_eventos
+            WHERE concurso_id = ?
+            ORDER BY data
+            """,
+            (concurso_id,),
+        ).fetchall()
+
+
+    return [
+        dict(evento)
+        for evento in eventos
+    ]
+
+
+
 @app.get("/health")
 def healthcheck() -> dict[str, str]:
     try:
@@ -190,6 +220,7 @@ def calcular_estado(data_fim: date | None) -> str:
 
 def carregar_concursos_checkpoint() -> list[dict[str, Any]]:
     """Lê os concursos completos acumulados pelo coletor."""
+
     if not CHECKPOINT_PATH.exists():
         raise HTTPException(
             status_code=503,
@@ -201,459 +232,81 @@ def carregar_concursos_checkpoint() -> list[dict[str, Any]]:
 
     try:
         dados = json.loads(
-            CHECKPOINT_PATH.read_text(encoding="utf-8")
+            CHECKPOINT_PATH.read_text(
+                encoding="utf-8"
+            )
         )
-    except (OSError, json.JSONDecodeError) as erro:
+
+    except Exception as erro:
         raise HTTPException(
-            status_code=503,
-            detail=f"Não foi possível ler os concursos: {erro}",
+            status_code=500,
+            detail=f"Erro a ler checkpoint: {erro}",
         ) from erro
 
-    if not isinstance(dados, list):
-        raise HTTPException(
-            status_code=503,
-            detail="O ficheiro de concursos não contém uma lista válida.",
-        )
-
-    return [
-        item
-        for item in dados
-        if isinstance(item, dict)
-    ]
+    return dados
 
 
+# =====================================================
+# ANÁLISE AUTOMÁTICA DE CONCURSOS
+# =====================================================
 
-def carregar_concursos_base_dados() -> list[dict[str, Any]]:
-    """
-    Lê os concursos diretamente da base de dados.
-    Inclui os campos enriquecidos dos procedimentos.
-    """
-    with closing(obter_conexao()) as conexao:
-        linhas = conexao.execute(
-            """
-            SELECT
-                id,
-                titulo,
-                entidade,
-                link,
-                data,
-                relevante,
-                data_limite,
-                data_entrega_propostas,
-                preco_base,
-                cpv,
-                tipo_procedimento,
-                criterio_tipo,
-                criterio_resumo,
-                criterio_detalhe,
-                entregaveis,
-                link_anuncio_dr
-            FROM concursos
-            WHERE relevante = 1
-            ORDER BY id DESC
-            """
-        ).fetchall()
-
-    return [dict(linha) for linha in linhas]
+ANALISE_DIR = BASE_DIR / "analise_documentos"
 
 
-def juntar_valores(valor: Any) -> str | None:
-    """Transforma listas e outros valores num texto para a API."""
-    if isinstance(valor, list):
-        valores = [
-            str(item).strip()
-            for item in valor
-            if item is not None and str(item).strip()
-        ]
-        return ", ".join(valores) or None
-
-    if valor is None:
-        return None
-
-    texto = str(valor).strip()
-    return texto or None
-
-
-def normalizar_concurso_json(
-    item: dict[str, Any],
-    indice: int,
+@app.get("/analise/{id_concurso}")
+def obter_analise(
+    id_concurso: str,
 ) -> dict[str, Any]:
-    data_publicacao = converter_data(item.get("data"))
 
-    data_fim = calcular_data_fim(
-        data_publicacao,
-        item.get("data_limite"),
-    )
+    pasta = ANALISE_DIR / id_concurso
 
-    cpv = juntar_valores(
-        item.get("cpvs")
-        or item.get("cpv")
-    )
-
-    tipo_procedimento = juntar_valores(
-        item.get("tipos_contrato")
-        or item.get("tipo_procedimento")
-    )
-
-    identificador = (
-        item.get("id_portal_base")
-        or item.get("id_procedimento")
-        or item.get("numero_anuncio")
-        or indice
-    )
-
-    return {
-        "id": str(identificador),
-        "titulo": item.get("titulo") or "Concurso sem título",
-        "entidade": item.get("entidade") or "Entidade não indicada",
-        "link": (
-            item.get("link")
-            or item.get("link_anuncio_dr")
-            or ""
-        ),
-        "data": item.get("data"),
-        "relevante": 1,
-        "data_limite": item.get("data_limite"),
-        "data_entrega_propostas": item.get(
-            "data_entrega_propostas"
-        ),
-        "data_entrega_propostas": item.get("data_entrega_propostas"),
-        "preco_base": item.get("preco_base"),
-        "cpv": cpv,
-        "tipo_procedimento": tipo_procedimento,
-        "criterio_tipo": item.get("criterio_tipo"),
-        "criterio_resumo": item.get("criterio_resumo"),
-        "criterio_detalhe": item.get("criterio_detalhe"),
-        "entregaveis": item.get("entregaveis"),
-        "numero_anuncio": item.get("numero_anuncio"),
-        "link_anuncio_dr": item.get("link_anuncio_dr"),
-        "link_pecas": item.get("link_pecas"),
-        "id_portal_base": item.get("id_portal_base"),
-        "id_procedimento": item.get("id_procedimento"),
-        "texto": item.get("texto"),
-        "data_publicacao_iso": (
-            data_publicacao.isoformat()
-            if data_publicacao
-            else None
-        ),
-        "data_fim_calculada": (
-            data_fim.isoformat()
-            if data_fim
-            else None
-        ),
-        "estado": calcular_estado(data_fim),
-    }
+    ficha = pasta / "ficha.json"
+    analise_ai = pasta / "analise_ai.json"
 
 
-def executar_listagem(
-    *,
-    periodo: Literal["atual", "historico"],
-    pesquisa: str | None,
-    entidade: str | None,
-    tipo_procedimento: str | None,
-    apenas_relevantes: bool,
-    estado: Literal[
-        "todos",
-        "aberto",
-        "encerrado",
-        "sem_prazo",
-    ],
-    limite: int,
-    pagina: int,
-) -> dict[str, Any]:
-    dados = carregar_concursos_base_dados()
+    if not ficha.exists():
 
-    concursos = [
-        normalizar_concurso_json(item, indice)
-        for indice, item in enumerate(dados, start=1)
-    ]
-
-    if periodo == "atual":
-        concursos = [
-            concurso
-            for concurso in concursos
-            if concurso["estado"] != "encerrado"
-        ]
-    else:
-        concursos = [
-            concurso
-            for concurso in concursos
-            if concurso["estado"] == "encerrado"
-        ]
-
-    if apenas_relevantes:
-        concursos = [
-            concurso
-            for concurso in concursos
-            if concurso["relevante"] == 1
-        ]
-
-    if estado != "todos":
-        concursos = [
-            concurso
-            for concurso in concursos
-            if concurso["estado"] == estado
-        ]
-
-    if pesquisa:
-        termo = pesquisa.strip().casefold()
-
-        concursos = [
-            concurso
-            for concurso in concursos
-            if (
-                termo in str(
-                    concurso.get("titulo") or ""
-                ).casefold()
-                or termo in str(
-                    concurso.get("entidade") or ""
-                ).casefold()
-                or termo in str(
-                    concurso.get("cpv") or ""
-                ).casefold()
-            )
-        ]
-
-    if entidade:
-        termo_entidade = entidade.strip().casefold()
-
-        concursos = [
-            concurso
-            for concurso in concursos
-            if termo_entidade
-            in str(
-                concurso.get("entidade") or ""
-            ).casefold()
-        ]
-
-    if tipo_procedimento:
-        termo_tipo = tipo_procedimento.strip().casefold()
-
-        concursos = [
-            concurso
-            for concurso in concursos
-            if termo_tipo
-            in str(
-                concurso.get("tipo_procedimento") or ""
-            ).casefold()
-        ]
-
-    concursos.sort(
-        key=lambda concurso: (
-            concurso.get("data_publicacao_iso") or "",
-            str(concurso.get("id") or ""),
-        ),
-        reverse=True,
-    )
-
-    total = len(concursos)
-    inicio_pagina = (pagina - 1) * limite
-    fim_pagina = inicio_pagina + limite
-
-    return {
-        "pagina": pagina,
-        "limite": limite,
-        "total": total,
-        "periodo": periodo,
-        "estado": estado,
-        "resultados": concursos[inicio_pagina:fim_pagina],
-    }
-
-
-@app.get("/concursos")
-def listar_concursos(
-    pesquisa: str | None = Query(
-        default=None,
-        description="Pesquisa no título, entidade ou CPV.",
-    ),
-    entidade: str | None = Query(
-        default=None,
-        description="Filtrar por entidade.",
-    ),
-    tipo_procedimento: str | None = Query(
-        default=None,
-        description="Filtrar por tipo de procedimento.",
-    ),
-    apenas_relevantes: bool = Query(
-        default=False,
-        description="Mostrar apenas concursos relevantes.",
-    ),
-    estado: Literal[
-        "todos",
-        "aberto",
-        "encerrado",
-        "sem_prazo",
-    ] = Query(
-        default="todos",
-        description="Filtrar pelo estado do concurso.",
-    ),
-    limite: int = Query(
-        default=20,
-        ge=1,
-        le=100,
-    ),
-    pagina: int = Query(
-        default=1,
-        ge=1,
-    ),
-) -> dict[str, Any]:
-    return executar_listagem(
-        periodo="atual",
-        pesquisa=pesquisa,
-        entidade=entidade,
-        tipo_procedimento=tipo_procedimento,
-        apenas_relevantes=apenas_relevantes,
-        estado=estado,
-        limite=limite,
-        pagina=pagina,
-    )
-
-
-@app.get("/historico")
-def listar_historico(
-    pesquisa: str | None = Query(
-        default=None,
-        description="Pesquisa no título, entidade ou CPV.",
-    ),
-    entidade: str | None = Query(
-        default=None,
-        description="Filtrar por entidade.",
-    ),
-    tipo_procedimento: str | None = Query(
-        default=None,
-        description="Filtrar por tipo de procedimento.",
-    ),
-    apenas_relevantes: bool = Query(
-        default=False,
-        description="Mostrar apenas concursos relevantes.",
-    ),
-    estado: Literal[
-        "todos",
-        "aberto",
-        "encerrado",
-        "sem_prazo",
-    ] = Query(
-        default="todos",
-        description="Filtrar pelo estado do concurso.",
-    ),
-    limite: int = Query(
-        default=20,
-        ge=1,
-        le=100,
-    ),
-    pagina: int = Query(
-        default=1,
-        ge=1,
-    ),
-) -> dict[str, Any]:
-    return executar_listagem(
-        periodo="historico",
-        pesquisa=pesquisa,
-        entidade=entidade,
-        tipo_procedimento=tipo_procedimento,
-        apenas_relevantes=apenas_relevantes,
-        estado=estado,
-        limite=limite,
-        pagina=pagina,
-    )
-
-
-@app.get("/concursos/{concurso_id}")
-def obter_concurso(
-    concurso_id: int,
-) -> dict[str, Any]:
-    with closing(obter_conexao()) as conexao:
-        linha = conexao.execute(
-            """
-            SELECT
-                id,
-                titulo,
-                entidade,
-                link,
-                data,
-                relevante,
-                data_limite,
-                preco_base,
-                cpv,
-                tipo_procedimento
-            FROM concursos
-            WHERE id = ?
-            """,
-            (concurso_id,),
-        ).fetchone()
-
-    if linha is None:
         raise HTTPException(
             status_code=404,
-            detail="Concurso não encontrado.",
+            detail=(
+                "Ficha não encontrada "
+                f"para o concurso {id_concurso}"
+            ),
         )
 
-    return linha_para_dicionario(linha)
+
+    try:
+
+        dados = json.loads(
+            ficha.read_text(
+                encoding="utf-8"
+            )
+        )
 
 
-@app.get("/estatisticas")
-def obter_estatisticas() -> dict[str, Any]:
-    with closing(obter_conexao()) as conexao:
-        total = conexao.execute(
-            """
-            SELECT COUNT(*)
-            FROM concursos
-            """
-        ).fetchone()[0]
+        if analise_ai.exists():
 
-        relevantes = conexao.execute(
-            """
-            SELECT COUNT(*)
-            FROM concursos
-            """
-        ).fetchone()[0]
+            dados_ai = json.loads(
+                analise_ai.read_text(
+                    encoding="utf-8"
+                )
+            )
 
-        com_preco = conexao.execute(
-            """
-            SELECT COUNT(*)
-            FROM concursos
-            WHERE
-                preco_base IS NOT NULL
-                AND TRIM(preco_base) != ''
-            """
-        ).fetchone()[0]
+            dados.update(
+                dados_ai
+            )
 
-        com_prazo = conexao.execute(
-            """
-            SELECT COUNT(*)
-            FROM concursos
-            WHERE
-                data_limite IS NOT NULL
-                AND TRIM(data_limite) != ''
-            """
-        ).fetchone()[0]
 
-        entidades = conexao.execute(
-            """
-            SELECT
-                entidade,
-                COUNT(*) AS total
-            FROM concursos
-            WHERE
-                entidade IS NOT NULL
-                AND TRIM(entidade) != ''
-            GROUP BY entidade
-            ORDER BY total DESC
-            LIMIT 10
-            """
-        ).fetchall()
+    except Exception as erro:
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro a ler análise: {erro}",
+        ) from erro
+
 
     return {
-        "total_concursos": total,
-        "concursos_relevantes": relevantes,
-        "concursos_com_preco": com_preco,
-        "concursos_com_prazo": com_prazo,
-        "principais_entidades": [
-            {
-                "entidade": linha["entidade"],
-                "total": linha["total"],
-            }
-            for linha in entidades
-        ],
-   
-     }
+        "id_concurso": id_concurso,
+        "analise": dados,
+    }
+

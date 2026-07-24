@@ -21,7 +21,7 @@ export default function HeroAnalise({
 
 
       <h1>
-        {identificacao.titulo}
+        {identificacao?.titulo || identificacao?.identificacao?.titulo || 'Concurso público'}
       </h1>
 
 

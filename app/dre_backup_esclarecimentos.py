@@ -470,10 +470,6 @@ def enriquecer_concurso(
         extrair_data_entrega_propostas(texto)
     )
 
-    enriquecido["data_esclarecimentos"] = (
-        extrair_data_esclarecimentos(texto)
-    )
-
     return enriquecido
 
 
@@ -531,31 +527,6 @@ def extrair_data_entrega_propostas(texto: str) -> str | None:
     return None
 
 
-
-
-
-def extrair_data_esclarecimentos(texto: str) -> str | None:
-    """
-    Extrai a data limite para pedidos de esclarecimento.
-    """
-
-    padroes = [
-        r"pedidos de esclarecimento.*?(\d{2}-\d{2}-\d{4})",
-        r"esclarecimentos.*?(\d{2}-\d{2}-\d{4})",
-        r"solicita[cç][aã]o de esclarecimentos.*?(\d{2}-\d{2}-\d{4})",
-    ]
-
-    for padrao in padroes:
-        resultado = re.search(
-            padrao,
-            texto,
-            re.IGNORECASE | re.DOTALL,
-        )
-
-        if resultado:
-            return resultado.group(1)
-
-    return None
 
 
 def main() -> None:

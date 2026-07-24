@@ -2,6 +2,7 @@ from .ai import analisar_concurso
 from .coletor import procurar_concursos
 from .dre import enriquecer_concurso
 from .database import (
+    gerar_timeline,
     atualizar_dados_concurso,
     concurso_existe,
     contar_concursos,
@@ -143,6 +144,9 @@ def atualizar_concursos_existentes(concursos):
             data_entrega_propostas=concurso.get(
                 "data_entrega_propostas"
             ),
+            data_esclarecimentos=concurso.get(
+                "data_esclarecimentos"
+            ),
         )
 
         if atualizado:
@@ -174,6 +178,11 @@ def guardar_concursos_enviados(concursos):
                     concurso.get("data_entrega_propostas")
                 )
 
+                print(
+                    "DEBUG DATA ESCLARECIMENTOS:",
+                    concurso.get("data_esclarecimentos")
+                )
+
             except Exception as erro:
                 print(
                     "Aviso: não foi possível extrair "
@@ -201,9 +210,19 @@ def guardar_concursos_enviados(concursos):
             link_anuncio_dr=concurso.get(
                 "link_anuncio_dr"
             ),
+            data_esclarecimentos=concurso.get(
+                "data_esclarecimentos"
+            ),
         )
 
         if guardado:
+
+            concurso["id"] = guardado
+
+            gerar_timeline(
+                concurso
+            )
+
             quantidade_guardada += 1
 
     return quantidade_guardada

@@ -38,7 +38,7 @@ export default function DecisionDashboard({
         <div className="score-circle">
 
           <strong>
-            {decisao.score}
+            {decisao?.score?.valor || decisao?.score || 0}
           </strong>
 
           <small>

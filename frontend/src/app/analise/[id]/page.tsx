@@ -8,6 +8,8 @@ import MetricsBar from "@/components/analise/dashboard/MetricsBar";
 import DecisionDashboard from "@/components/analise/dashboard/DecisionDashboard";
 import Timeline from "@/components/analise/dashboard/Timeline";
 import AnalysisPanels from "@/components/analise/dashboard/AnalysisPanels";
+import UpdatesBox from "@/components/analise/dashboard/UpdatesBox";
+import ProjectInfoPanel from "@/components/analise/dashboard/ProjectInfoPanel";
 import ProjectSummary from "@/components/analise/dashboard/ProjectSummary";
 import EligibilityCard from "@/components/analise/dashboard/EligibilityCard";
 import RiskCard from "@/components/analise/dashboard/RiskCard";
@@ -71,7 +73,7 @@ export default async function AnalisePage({
 
 
         <HeroAnalise
-          identificacao={ficha.identificacao}
+          identificacao={ficha.identificacao || ficha}
         />
 
 
@@ -81,18 +83,49 @@ export default async function AnalisePage({
         />
 
 
+
+
+
+        
+        
+        <div className="analysis-layout-reference">
+
+
+          <div className="analysis-left">
+
+
         <DecisionDashboard
           decisao={ficha.decisao}
+          criterio_resumo={ficha.criterio_resumo}
         />
 
 
-        <Timeline concursoId={id} />
+            <Timeline concursoId={id} />
 
 
-        <AnalysisPanels />
+            <AnalysisPanels
+              estrategia={ficha.estrategia}
+              analise={ficha}
+              equipa={ficha.equipa}
+              decisao={ficha}
+              criterio_resumo={ficha.criterio_resumo}
+            />
 
 
-        <ProjectSummary />
+          </div>
+
+
+          <aside className="analysis-right">
+
+            <ProjectInfoPanel />
+
+          </aside>
+
+
+        </div>
+
+
+<UpdatesBox />
 
 
       </main>

@@ -7,6 +7,7 @@ DB_NAME = "concursos.db"
 
 COLUNAS_ADICIONAIS = {
     "data_limite": "TEXT",
+    "data_esclarecimentos": "TEXT",
     "preco_base": "TEXT",
     "cpv": "TEXT",
     "tipo_procedimento": "TEXT",
@@ -71,6 +72,24 @@ def criar_base_dados():
         """
     )
 
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS timeline_eventos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            concurso_id INTEGER NOT NULL,
+            tipo TEXT NOT NULL,
+            titulo TEXT NOT NULL,
+            data TEXT,
+            estado TEXT,
+            origem TEXT,
+
+            FOREIGN KEY(concurso_id)
+            REFERENCES concursos(id)
+        )
+        """
+    )
+
+
     _adicionar_colunas_em_falta(cursor)
 
     conn.commit()
@@ -98,6 +117,7 @@ def guardar_concurso(
     link,
     data,
     data_limite=None,
+    data_esclarecimentos=None,
     preco_base=None,
     cpv=None,
     tipo_procedimento=None,
@@ -108,7 +128,7 @@ def guardar_concurso(
     Guarda um concurso na base de dados.
 
     Devolve:
-        True  -> concurso novo guardado
+        ID do concurso -> concurso novo guardado
         False -> concurso já existia
     """
     conn = sqlite3.connect(DB_NAME)
@@ -124,6 +144,7 @@ def guardar_concurso(
                 data,
                 relevante,
                 data_limite,
+                data_esclarecimentos,
                 preco_base,
                 cpv,
                 tipo_procedimento,
@@ -138,6 +159,7 @@ def guardar_concurso(
                 link,
                 _texto_ou_none(data),
                 _texto_ou_none(data_limite),
+                _texto_ou_none(data_esclarecimentos),
                 _texto_ou_none(preco_base),
                 _texto_ou_none(cpv),
                 _texto_ou_none(tipo_procedimento),
@@ -147,7 +169,7 @@ def guardar_concurso(
         )
 
         conn.commit()
-        guardado = True
+        guardado = cursor.lastrowid
 
     except sqlite3.IntegrityError:
         guardado = False
@@ -164,12 +186,15 @@ def atualizar_dados_concurso(
     entidade=None,
     data=None,
     data_limite=None,
+    data_esclarecimentos=None,
     preco_base=None,
     cpv=None,
     tipo_procedimento=None,
     criterio_tipo=None,
     criterio_resumo=None,
     criterio_detalhe=None,
+    link_anuncio_dr=None,
+    data_entrega_propostas=None,
 ):
     """
     Atualiza os dados complementares de um concurso existente.
@@ -184,6 +209,9 @@ def atualizar_dados_concurso(
     entidade = _texto_ou_none(entidade)
     data = _texto_ou_none(data)
     data_limite = _texto_ou_none(data_limite)
+    data_esclarecimentos = _texto_ou_none(
+        data_esclarecimentos
+    )
     preco_base = _texto_ou_none(preco_base)
     cpv = _texto_ou_none(cpv)
     tipo_procedimento = _texto_ou_none(
@@ -213,6 +241,10 @@ def atualizar_dados_concurso(
                 ?,
                 data_limite
             ),
+            data_esclarecimentos = COALESCE(
+                ?,
+                data_esclarecimentos
+            ),
             preco_base = COALESCE(
                 ?,
                 preco_base
@@ -241,6 +273,7 @@ def atualizar_dados_concurso(
             entidade,
             data,
             data_limite,
+            data_esclarecimentos,
             preco_base,
             cpv,
             tipo_procedimento,
@@ -379,6 +412,7 @@ def listar_concursos_periodo(
             link,
             data,
             data_limite,
+            data_esclarecimentos,
             preco_base,
             cpv,
             tipo_procedimento
@@ -399,6 +433,7 @@ def listar_concursos_periodo(
             link,
             data_texto,
             data_limite,
+            data_esclarecimentos,
             preco_base,
             cpv,
             tipo_procedimento,
@@ -448,3 +483,229 @@ def listar_concursos_periodo(
         )
 
     return concursos
+
+def guardar_analise(
+    concurso_id,
+    nivel,
+    resumo,
+    dados_json,
+):
+    """
+    Guarda ou atualiza a análise automática
+    de um concurso.
+    """
+
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        INSERT INTO analises
+        (
+            concurso_id,
+            nivel,
+            resumo,
+            dados_json
+        )
+        VALUES (?, ?, ?, ?)
+
+        ON CONFLICT(concurso_id)
+        DO UPDATE SET
+            nivel = excluded.nivel,
+            resumo = excluded.resumo,
+            dados_json = excluded.dados_json
+        """,
+        (
+            concurso_id,
+            nivel,
+            resumo,
+            dados_json,
+        )
+    )
+
+    conn.commit()
+    conn.close()
+
+
+def obter_analise(concurso_id):
+    """
+    Obtém a análise guardada.
+    """
+
+    conn = sqlite3.connect(DB_NAME)
+    conn.row_factory = sqlite3.Row
+
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM analises
+        WHERE concurso_id = ?
+        """,
+        (
+            concurso_id,
+        )
+    )
+
+    resultado = cursor.fetchone()
+
+    conn.close()
+
+    if resultado:
+        return dict(resultado)
+
+    return None
+
+
+def guardar_evento_timeline(
+    concurso_id,
+    tipo,
+    titulo,
+    data=None,
+    estado=None,
+    origem=None,
+):
+    """
+    Guarda um evento na timeline de um concurso.
+    """
+
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        INSERT INTO timeline_eventos
+        (
+            concurso_id,
+            tipo,
+            titulo,
+            data,
+            estado,
+            origem
+        )
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (
+            concurso_id,
+            tipo,
+            titulo,
+            data,
+            estado,
+            origem,
+        ),
+    )
+
+    conn.commit()
+    conn.close()
+
+
+
+def obter_timeline(concurso_id):
+    """
+    Devolve os eventos de timeline de um concurso.
+    """
+
+    conn = sqlite3.connect(DB_NAME)
+    conn.row_factory = sqlite3.Row
+
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM timeline_eventos
+        WHERE concurso_id = ?
+        ORDER BY data
+        """,
+        (
+            concurso_id,
+        ),
+    )
+
+    eventos = [
+        dict(linha)
+        for linha in cursor.fetchall()
+    ]
+
+    conn.close()
+
+    return eventos
+
+
+def gerar_timeline(concurso):
+    """
+    Gera automaticamente os eventos timeline
+    a partir dos dados do concurso.
+    """
+
+    concurso_id = concurso.get("id")
+
+    if not concurso_id:
+        return
+
+
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+
+    # evitar duplicados
+    cursor.execute(
+        """
+        DELETE FROM timeline_eventos
+        WHERE concurso_id = ?
+        """,
+        (concurso_id,)
+    )
+
+
+    eventos = []
+
+
+    if concurso.get("data"):
+
+        eventos.append(
+            (
+                concurso_id,
+                "publicacao",
+                "Publicado",
+                concurso.get("data"),
+                "DR",
+            )
+        )
+
+
+    if concurso.get("data_entrega_propostas"):
+
+        eventos.append(
+            (
+                concurso_id,
+                "entrega",
+                "Entrega de propostas",
+                concurso.get("data_entrega_propostas"),
+                "DR",
+            )
+        )
+
+
+    for evento in eventos:
+
+        cursor.execute(
+            """
+            INSERT INTO timeline_eventos
+            (
+                concurso_id,
+                tipo,
+                titulo,
+                data,
+                origem
+            )
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            evento
+        )
+
+
+    conn.commit()
+    conn.close()
+

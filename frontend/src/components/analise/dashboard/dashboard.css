@@ -484,12 +484,7 @@
 
 
 
-.analysis-panels {
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:24px;
-  margin-top:30px;
-}
+
 
 
 .analysis-card,
@@ -837,6 +832,1092 @@
 
   margin-top:25px;
 
+}
+
+
+
+
+.criterion-layout {
+  display:flex;
+  align-items:center;
+  gap:30px;
+}
+
+
+.criterion-circle {
+
+  width:130px;
+  height:130px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+}
+
+
+.criterion-inner {
+
+  background:white;
+  width:95px;
+  height:95px;
+  border-radius:50%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+
+}
+
+
+.criterion-inner strong {
+  font-size:28px;
+}
+
+
+.criterion-inner span {
+  font-size:13px;
+}
+
+
+
+.criterion-values div {
+
+  display:flex;
+  flex-direction:column;
+  margin-bottom:12px;
+
+}
+
+
+.criterion-values strong {
+  font-size:20px;
+}
+
+
+
+.complexity-title {
+
+  display:block;
+  margin:20px 0 15px;
+  font-size:18px;
+
+}
+
+
+
+.complexity-dots {
+
+  display:flex;
+  gap:8px;
+  margin-bottom:20px;
+
+}
+
+
+.complexity-dots span {
+
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:#ddd;
+
+}
+
+
+.complexity-dots .active {
+
+  background:#b4232c;
+
+}
+
+
+
+.team-number {
+
+  font-size:32px;
+  font-weight:600;
+
+}
+
+
+.team-number span {
+
+  display:block;
+  font-size:14px;
+  font-weight:400;
+
+}
+
+
+.team-list p {
+
+  margin:8px 0;
+
+}
+
+
+
+.analysis-lower{
+margin-top:30px;
+}
+
+
+.accordion-section{
+
+background:white;
+border:1px solid #e8e8e2;
+border-radius:18px;
+margin-bottom:12px;
+overflow:hidden;
+
+}
+
+
+.accordion-section button{
+
+width:100%;
+padding:22px 26px;
+display:flex;
+justify-content:space-between;
+border:0;
+background:white;
+font-size:16px;
+cursor:pointer;
+
+}
+
+
+.accordion-content{
+
+padding:0 26px 22px;
+color:#666;
+
+}
+
+
+.criterion-circle{
+
+width:130px;
+height:130px;
+border-radius:50%;
+background:conic-gradient(
+#6d9360 0 60%,
+#eadfc5 60% 100%
+);
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+}
+
+
+.criterion-circle div{
+
+background:white;
+width:95px;
+height:95px;
+border-radius:50%;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+
+}
+
+
+.updates-box{
+
+margin-top:30px;
+background:white;
+border:1px solid #e8e8e2;
+border-radius:22px;
+padding:30px;
+
+}
+
+
+.updates-box button{
+
+background:#6d9360;
+color:white;
+border:0;
+border-radius:20px;
+padding:12px 24px;
+
+}
+
+
+
+
+/* ===== AJUSTE LAYOUT ANALISE MOCKUP ===== */
+
+
+
+
+
+.analysis-card {
+
+background:white;
+border:1px solid #e8e8e2;
+border-radius:24px;
+padding:30px;
+min-height:300px;
+
+}
+
+
+.analysis-card h3 {
+
+font-size:18px;
+margin-bottom:25px;
+
+}
+
+
+
+.analysis-lower {
+
+margin-top:35px;
+width:100%;
+
+}
+
+
+.accordion-section {
+
+border-radius:18px;
+background:white;
+border:1px solid #e8e8e2;
+margin-bottom:14px;
+
+}
+
+
+.accordion-section button {
+
+height:70px;
+padding:0 30px;
+font-size:16px;
+font-weight:500;
+
+}
+
+
+
+.updates-box {
+
+margin-top:35px;
+border-radius:24px;
+
+}
+
+
+
+.team-number {
+
+font-size:46px;
+font-weight:600;
+line-height:1;
+
+}
+
+
+.team-number span {
+
+font-size:14px;
+color:#777;
+
+}
+
+
+
+.complexity-dots span {
+
+width:16px;
+height:16px;
+
+}
+
+
+
+.criterion-circle {
+
+margin:auto;
+
+}
+
+
+
+@media(max-width:1000px){
+
+
+
+}
+
+
+
+
+
+
+
+.project-info-panel{
+
+background:white;
+border:1px solid #e8e8e2;
+border-radius:24px;
+padding:30px;
+height:fit-content;
+
+}
+
+
+
+.project-info-panel h3{
+
+font-size:20px;
+margin-top:0;
+
+}
+
+
+
+.project-info-panel p{
+
+color:#666;
+line-height:1.6;
+
+}
+
+
+
+.info-block{
+
+border-top:1px solid #eeeeea;
+padding-top:18px;
+margin-top:18px;
+
+}
+
+
+
+.info-block span{
+
+display:block;
+font-size:12px;
+color:#888;
+margin-bottom:8px;
+
+}
+
+
+
+.info-block strong{
+
+font-size:15px;
+
+}
+
+
+
+@media(max-width:1000px){
+
+
+
+}
+
+
+
+/* ============================= */
+/* AJUSTES MOCKUP ANALISE FINAL */
+/* ============================= */
+
+
+/* composição inferior */
+
+
+
+
+/* cartões superiores */
+
+
+
+
+.analysis-card {
+
+  background:white;
+  border:1px solid #e8e8e2;
+  border-radius:24px;
+  padding:32px;
+  min-height:260px;
+
+}
+
+
+.analysis-card h3 {
+
+  font-size:18px;
+  font-weight:600;
+  margin-bottom:25px;
+
+}
+
+
+.analysis-card p {
+
+  color:#666;
+  font-size:14px;
+  line-height:1.6;
+
+}
+
+
+
+/* critério */
+
+.criterion-circle {
+
+  width:130px;
+  height:130px;
+  margin:10px auto 20px;
+
+}
+
+
+.criterion-values {
+
+  display:flex;
+  justify-content:center;
+  gap:40px;
+  margin-top:20px;
+
+}
+
+
+.criterion-values strong {
+
+  font-size:20px;
+
+}
+
+
+.criterion-values span {
+
+  display:block;
+  font-size:12px;
+  color:#888;
+
+}
+
+
+
+/* complexidade */
+
+.complexity-dots {
+
+  display:flex;
+  gap:8px;
+  margin:20px 0;
+
+}
+
+
+.complexity-dots span {
+
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:#ededed;
+
+}
+
+
+.complexity-dots span.active {
+
+  background:#719768;
+
+}
+
+
+
+/* equipa */
+
+
+.team-number {
+
+  font-size:52px;
+  font-weight:700;
+  line-height:1;
+
+}
+
+
+.team-number span {
+
+  display:block;
+  font-size:13px;
+  color:#999;
+  font-weight:400;
+
+}
+
+
+.analysis-card ul {
+
+  padding-left:0;
+  list-style:none;
+
+}
+
+
+.analysis-card li {
+
+  margin:8px 0;
+  font-size:14px;
+
+}
+
+
+
+/* painel direito */
+
+
+.project-info-panel {
+
+  background:white;
+  border:1px solid #e8e8e2;
+  border-radius:24px;
+  padding:30px;
+
+}
+
+
+.project-info-panel h3 {
+
+  font-size:20px;
+  margin-bottom:20px;
+
+}
+
+
+
+.info-block {
+
+  border-top:1px solid #eeeeea;
+  padding:18px 0;
+
+}
+
+
+.info-block span {
+
+  display:block;
+  font-size:12px;
+  color:#999;
+  margin-bottom:8px;
+
+}
+
+
+/* accordions */
+
+
+.analysis-lower {
+
+  margin-top:30px;
+
+}
+
+
+.accordion-section {
+
+  border-radius:18px;
+  margin-bottom:12px;
+  border:1px solid #e8e8e2;
+  background:white;
+
+}
+
+
+.accordion-section button {
+
+  height:72px;
+  padding:0 28px;
+
+}
+
+
+
+/* alertas */
+
+.updates-box {
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  background:white;
+  border:1px solid #e8e8e2;
+  border-radius:24px;
+
+  padding:28px 36px;
+  margin-top:35px;
+
+}
+
+
+.updates-box h3 {
+
+  margin:0 0 8px;
+
+}
+
+
+.updates-box p {
+
+  margin:0;
+  color:#777;
+
+}
+
+
+.updates-box button {
+
+  background:#111;
+  color:white;
+  border-radius:20px;
+  padding:14px 30px;
+  border:0;
+
+}
+
+
+
+@media(max-width:1100px){
+
+
+
+
+
+
+}
+
+
+
+
+/* CORREÇÃO ESTRUTURA ANALISE */
+
+
+
+
+
+
+
+
+
+
+.analysis-content {
+
+    width:100%;
+
+}
+
+
+
+
+
+.analysis-lower {
+
+    margin-top:25px;
+
+}
+
+
+
+@media(max-width:1200px){
+
+
+
+
+
+
+}
+
+
+
+/* AJUSTE FINAL LAYOUT ANALISE */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.analysis-card {
+
+background:#fff;
+border:1px solid #eeeeee;
+border-radius:24px;
+padding:32px;
+
+}
+
+
+
+.analysis-card h3 {
+
+font-size:18px;
+margin-bottom:24px;
+
+}
+
+
+
+.analysis-lower {
+
+margin-top:24px;
+
+}
+
+
+
+.analysis-lower > * {
+
+background:white;
+border:1px solid #eeeeee;
+border-radius:16px;
+margin-bottom:12px;
+
+}
+
+
+
+.analysis-card p {
+
+color:#667085;
+line-height:1.6;
+
+}
+
+
+
+.team-number {
+
+font-size:52px;
+font-weight:600;
+
+}
+
+
+
+.team-number span {
+
+display:block;
+font-size:13px;
+font-weight:400;
+color:#999;
+
+}
+
+
+
+@media(max-width:1200px){
+
+
+
+
+
+
+}
+
+
+
+/* Layout lateral análise */
+
+
+
+
+
+
+
+
+
+
+@media(max-width:1200px){
+
+    
+
+
+    
+
+}
+
+
+
+/* CORREÇÃO POSIÇÃO PAINEL LATERAL */
+
+
+
+
+
+
+
+
+
+
+.project-info-panel {
+    width:100%;
+}
+
+
+@media(max-width:1200px){
+
+
+
+
+
+
+}
+
+
+
+/* layout final estilo referência */
+
+
+
+
+
+
+
+
+
+
+/* garante que os cartões ocupam a esquerda */
+
+
+
+
+.analysis-lower {
+    width:100%;
+}
+
+
+@media(max-width:1100px){
+
+
+
+
+
+}
+
+
+
+/* layout final estilo referência */
+
+
+
+
+
+
+
+
+
+
+/* garante que os cartões ocupam a esquerda */
+
+
+
+
+.analysis-lower {
+    width:100%;
+}
+
+
+@media(max-width:1100px){
+
+
+
+
+
+}
+
+
+
+
+
+/* Layout análise - referência */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ANALYSIS PANELS - FINAL */
+
+.analysis-panels {
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0,1fr));
+    gap:24px;
+    width:100%;
+}
+
+
+.analysis-card {
+    background:white;
+    border-radius:24px;
+    padding:32px;
+}
+
+
+.analysis-lower {
+    margin-top:24px;
+}
+
+
+@media(max-width:1000px){
+
+    .analysis-panels {
+        grid-template-columns:1fr;
+    }
+
+}
+
+
+
+/* ==========================
+   LAYOUT ANALISE FINAL
+   ========================== */
+
+
+.analysis-layout-reference {
+
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 330px;
+    gap:28px;
+    align-items:start;
+
+}
+
+
+.analysis-left {
+
+    grid-column:1;
+
+}
+
+
+.analysis-right {
+
+    grid-column:2;
+    grid-row:1;
+    position:sticky;
+    top:24px;
+
+}
+
+
+.analysis-panels {
+
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:24px;
+
+}
+
+
+.analysis-lower {
+
+    margin-top:24px;
+
+}
+
+
+
+@media(max-width:1100px){
+
+    .analysis-layout-reference {
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .analysis-left,
+    .analysis-right {
+
+        grid-column:auto;
+        grid-row:auto;
+        position:static;
+
+    }
+
+}
+
+
+
+.analysis-layout-reference {
+    grid-template-areas:
+        "left right";
+}
+
+
+.analysis-layout-reference .analysis-left {
+    grid-area:left;
+}
+
+
+.analysis-layout-reference .analysis-right {
+    grid-area:right;
+}
+
+
+
+
+/* coluna direita acompanha toda a análise */
+
+.analysis-layout-reference {
+    align-items:stretch;
+}
+
+
+.analysis-right {
+    height:auto;
+}
+
+
+.analysis-right > * {
+    height:100%;
+}
+
+
+
+
+/* distribuição interna decisão */
+
+.decision-dashboard {
+    display:grid;
+    grid-template-columns:
+        180px
+        minmax(260px,1fr)
+        220px
+        220px;
+    gap:24px;
 }
 
 

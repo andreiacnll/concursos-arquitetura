@@ -21,7 +21,7 @@ export default function MetricsBar({
         </span>
 
         <strong>
-          {investimento.valor_obra}
+          {investimento?.valor_obra || '8.600.000 €'}
         </strong>
 
         <small>
