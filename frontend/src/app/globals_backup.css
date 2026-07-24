@@ -1737,7 +1737,7 @@ a {
 
 .analysis-card strong {
   display:block;
-  margin-top:10px;
+  margin-top:12px;
   font-size:1.8rem;
 }
 
@@ -1815,7 +1815,7 @@ a {
 
 .analysis-card strong {
   display:block;
-  margin-top:10px;
+  margin-top:12px;
   font-size:1.8rem;
 }
 
@@ -1916,7 +1916,7 @@ a {
 
 .metric span {
   display:block;
-  margin-top:10px;
+  margin-top:12px;
   opacity:.6;
 }
 
@@ -2679,13 +2679,39 @@ a {
 }
 
 
+.score-circle {
+
+  width:150px;
+
+  height:150px;
+
+  border-radius:50%;
+
+  border:12px solid #6c8f5c;
+
+  display:flex;
+
+  flex-direction:column;
+
+  align-items:center;
+
+  justify-content:center;
+
+}
 
 
+.score-circle strong {
+
+  font-size:48px;
+
+}
 
 
+.score-circle span {
 
+  color:#777;
 
-
+}
 
 
 .decision-info h2 {
@@ -2806,43 +2832,134 @@ a {
 /* métricas */
 
 
+.metrics-bar {
+
+  background:white;
+
+  border:1px solid #e8e8e3;
+
+  border-radius:20px;
+
+  display:grid;
+
+  grid-template-columns:repeat(5,1fr);
+
+  padding:25px;
+
+  gap:20px;
+
+  margin:30px 0;
+
+}
 
 
+.metrics-bar div {
+
+  min-height:70px;
+
+  border-right:1px solid #eee;
+
+  padding:10px;
+
+  font-weight:600;
+
+}
 
 
+.metrics-bar div:last-child {
 
+  border-right:none;
 
-
+}
 
 
 
 /* blocos gerais */
 
 
+.decision-dashboard,
+.timeline-dashboard,
+.analysis-panels,
+.project-summary {
+
+  background:white;
+
+  border:1px solid #e8e8e3;
+
+  border-radius:22px;
+
+  padding:30px;
+
+  margin:30px 0;
+
+}
+
+
+.decision-dashboard h2 {
+
+  margin-top:0;
+
+  font-size:22px;
+
+}
+
+
+.decision-dashboard strong {
+
+  font-size:60px;
+
+}
 
 
 
 
 
+.metrics-bar span {
+
+  display:block;
+
+  font-size:13px;
+
+  color:#666;
+
+  margin-bottom:12px;
+
+}
+
+
+.metrics-bar strong {
+
+  display:block;
+
+  font-size:22px;
+
+  letter-spacing:-0.03em;
+
+}
+
+
+.metrics-bar small {
+
+  display:block;
+
+  margin-top:8px;
+
+  color:#777;
+
+  font-size:12px;
+
+}
 
 
 
 
+.metric-item {
 
+  padding:0 20px;
 
+  border-right:1px solid #eeeeea;
 
-
-
-
-
-
-
-
-
-
-
-
-
+}
 
 
 .metric-item:last-child {
@@ -2852,20 +2969,72 @@ a {
 }
 
 
+.metric-item span {
+
+  display:block;
+
+  font-size:12px;
+
+  color:#666;
+
+  margin-bottom:14px;
+
+}
+
+
+.metric-item strong {
+
+  display:block;
+
+  font-size:22px;
+
+  font-weight:600;
+
+  letter-spacing:-0.03em;
+
+}
+
+
+.metric-item small {
+
+  display:block;
+
+  color:#777;
+
+  font-size:12px;
+
+  margin-top:8px;
+
+}
 
 
 
+.criteria-line {
+
+  height:5px;
+
+  background:#eadfc9;
+
+  border-radius:10px;
+
+  margin-top:12px;
+
+  overflow:hidden;
+
+  width:120px;
+
+}
 
 
+.criteria-line div {
 
+  height:100%;
 
+  width:70%;
 
+  background:#6b8f5b;
 
-
-
-
-
-
+}
 
 
 
@@ -2881,258 +3050,126 @@ a {
 
 
 
+.metrics-bar {
 
+  padding:20px;
 
+}
 
 
+.metric-item {
 
+  min-height:90px;
 
+}
 
 
 
 
+.criteria-line {
 
+  height:6px;
 
+  width:140px;
 
+}
 
 
+.criteria-line div {
 
+  height:6px;
 
+}
 
 
 
 
 
+.decision-dashboard {
 
+  padding:32px 36px;
 
+}
 
 
+.decision-title {
 
+  margin-bottom:30px;
 
+}
 
 
+.decision-title h2 {
 
+  font-size:22px;
 
+  font-weight:600;
 
+}
 
 
+.decision-content {
 
+  display:grid;
 
+  grid-template-columns:220px 1fr 1fr;
 
+  gap:45px;
 
+}
 
 
+.decision-score {
 
+  border-right:1px solid #eeeeea;
 
+  padding-right:35px;
 
+  text-align:center;
 
+}
 
-/* DECISION DASHBOARD */
 
+.score-circle {
 
+  width:120px;
 
+  height:120px;
 
+  border-radius:50%;
 
+  border:8px solid #6d9360;
 
+  display:flex;
 
+  flex-direction:column;
 
+  align-items:center;
 
+  justify-content:center;
 
+  margin:20px auto;
 
+}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* FORCE CRITERIO ADJUDICACAO */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* FINAL CRITERIO ADJUDICACAO */
-
-
-
-
-
-
-
-
-
-
-
-/* ajuste final barra criterio */
-
-
-.hero-analise h1 {
+.score-circle strong {
 
   font-size:42px;
-  max-width:720px;
+
+}
+
+
+.score-circle small {
+
+  font-size:12px;
+
+}
+
+
+.decision-content li {
+
+  margin-bottom:14px;
 
 }
 

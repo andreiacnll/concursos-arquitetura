@@ -66,6 +66,7 @@ export default function Navbar() {
         <nav className="desktop-nav" aria-label="Navegação principal">
           <Link href="/#concursos">Concursos</Link>
           <Link href="/historico">Histórico</Link>
+          <Link href="/analises">Análises</Link>
           <Link href="/#sobre">Sobre</Link>
           <Link href="/#como-funciona">Como funciona</Link>
           <Link href="/#newsletter">Newsletter</Link>
