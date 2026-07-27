@@ -1,9 +1,5 @@
 type Props = {
-  identificacao: {
-    titulo: string;
-    local: string;
-    tipo: string[];
-  };
+  identificacao?: any;
 };
 
 
@@ -32,8 +28,8 @@ export default function HeroAnalise({
 
       <div className="tags">
 
-        {identificacao.tipo.map(
-          tipo => (
+        {identificacao.tipo?.map(
+          (tipo: string) => (
             <span key={tipo}>
               {tipo}
             </span>

@@ -2,6 +2,8 @@ import CompetitionsDashboard from "@/components/CompetitionsDashboard";
 import Navbar from "@/components/Navbar";
 import type { Concurso } from "@/components/competition-types";
 
+export const dynamic = "force-dynamic";
+
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ??
   "https://concursos-arquitetura.onrender.com";

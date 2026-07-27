@@ -1,4 +1,19 @@
-export default function AnalysisPanels() {
+type Props = {
+  estrategia?: any;
+  analise?: any;
+  equipa?: any;
+  decisao?: any;
+  criterio_resumo?: string;
+};
+
+
+export default function AnalysisPanels({
+  estrategia,
+  analise,
+  equipa,
+  decisao,
+  criterio_resumo,
+}: Props) {
   return (
     <section className="analysis-panels">
 

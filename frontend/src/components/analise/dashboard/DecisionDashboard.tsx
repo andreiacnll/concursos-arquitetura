@@ -3,11 +3,13 @@ import RiskCard from "./RiskCard";
 
 type Props = {
   decisao: any;
+  criterio_resumo?: string;
 };
 
 
 export default function DecisionDashboard({
   decisao,
+  criterio_resumo,
 }: Props) {
 
   return (
