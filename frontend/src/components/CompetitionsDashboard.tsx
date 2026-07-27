@@ -476,25 +476,28 @@ export default function CompetitionsDashboard({
       item.data_fim_calculada,
     );
 
-    if (item.data_fim_calculada) {
-      console.log(
-        "DEBUG PRAZO",
-        item.titulo,
-        item.data_fim_calculada,
-        deadline,
-        {
-          hoje: today,
-          limite: sevenDaysAhead,
-        }
-      );
+    if (!deadline || Number.isNaN(deadline.getTime())) {
+      return false;
     }
 
-    return (
-      deadline !== null &&
-      !Number.isNaN(deadline.getTime()) &&
-      deadline >= today &&
-      deadline <= sevenDaysAhead
+    const deadlineDay = new Date(
+      deadline.getFullYear(),
+      deadline.getMonth(),
+      deadline.getDate(),
     );
+
+    const todayDay = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    );
+
+    const diffDays = Math.ceil(
+      (deadlineDay.getTime() - todayDay.getTime()) /
+      (1000 * 60 * 60 * 24)
+    );
+
+    return diffDays >= 0 && diffDays <= 7;
   }).length;
 
   const entityCount = uniqueCount(concursos.map((item) => item.entidade));
