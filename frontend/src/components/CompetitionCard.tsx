@@ -30,21 +30,39 @@ function formatDataEntrega(valor?: string | null) {
 function diasRestantes(valor?: string | null) {
   if (!valor) return null;
 
-  const match = valor.match(
-    /^(\d{2})-(\d{2})-(\d{4})(?:\s+(\d{2}):(\d{2}))?/
-  );
+  let entrega: Date;
 
-  if (!match) return null;
+  // formato API: YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}/.test(valor)) {
+    const [ano, mes, dia] = valor.split("-").map(Number);
 
-  const [, dia, mes, ano, hora = "23", minuto = "59"] = match;
+    entrega = new Date(
+      ano,
+      mes - 1,
+      dia,
+      23,
+      59,
+    );
+  }
 
-  const entrega = new Date(
-    Number(ano),
-    Number(mes) - 1,
-    Number(dia),
-    Number(hora),
-    Number(minuto),
-  );
+  // formato antigo: DD-MM-YYYY
+  else {
+    const match = valor.match(
+      /^(\d{2})-(\d{2})-(\d{4})(?:\s+(\d{2}):(\d{2}))?/
+    );
+
+    if (!match) return null;
+
+    const [, dia, mes, ano, hora = "23", minuto = "59"] = match;
+
+    entrega = new Date(
+      Number(ano),
+      Number(mes) - 1,
+      Number(dia),
+      Number(hora),
+      Number(minuto),
+    );
+  }
 
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
@@ -230,15 +248,15 @@ export default function CompetitionCard({
 
           <span>
             📅 Entrega {formatDataEntrega(
-              concurso.data_entrega_propostas
+              concurso.data_fim_calculada
             )}
           </span>
 
-          {diasRestantes(concurso.data_entrega_propostas) !== null && (
+          {diasRestantes(concurso.data_fim_calculada) !== null && (
             <span>
               ⏳ {
-                diasRestantes(concurso.data_entrega_propostas)! > 0
-                  ? `Faltam ${diasRestantes(concurso.data_entrega_propostas)} dias`
+                diasRestantes(concurso.data_fim_calculada)! > 0
+                  ? `Faltam ${diasRestantes(concurso.data_fim_calculada)} dias`
                   : "Prazo terminado"
               }
             </span>

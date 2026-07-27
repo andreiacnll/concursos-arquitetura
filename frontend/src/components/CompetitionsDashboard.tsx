@@ -36,21 +36,43 @@ const moreCategories = [
 function parseDataEntrega(valor?: string | null) {
   if (!valor) return null;
 
-  const match = valor.match(
-    /^(\d{2})-(\d{2})-(\d{4})(?:\s+(\d{2}):(\d{2}))?/
-  );
+  const cleanValue = String(valor).trim();
 
-  if (!match) return null;
+  // API: YYYY-MM-DD
+  const iso = cleanValue.match(/^(\d{4})-(\d{2})-(\d{2})/);
 
-  const [, dia, mes, ano, hora = "00", minuto = "00"] = match;
+  if (iso) {
+    const [, ano, mes, dia] = iso;
 
-  return new Date(
-    Number(ano),
-    Number(mes) - 1,
-    Number(dia),
-    Number(hora),
-    Number(minuto),
-  );
+    return new Date(
+      Number(ano),
+      Number(mes) - 1,
+      Number(dia),
+      12,
+      0,
+      0,
+      0,
+    );
+  }
+
+  // Portugal: DD-MM-YYYY / DD/MM/YYYY / DD.MM.YYYY
+  const pt = cleanValue.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/);
+
+  if (pt) {
+    const [, dia, mes, ano] = pt;
+
+    return new Date(
+      Number(ano),
+      Number(mes) - 1,
+      Number(dia),
+      12,
+      0,
+      0,
+      0,
+    );
+  }
+
+  return null;
 }
 
 function categoryForTitle(title: string) {
@@ -378,7 +400,7 @@ export default function CompetitionsDashboard({
       const matchesSelectedService = matchesService(item, selectedServices);
 
       const deadlineDate = parseDataEntrega(
-        item.data_entrega_propostas,
+        item.data_fim_calculada,
       );
 
       const todayFilter = new Date();
@@ -451,8 +473,21 @@ export default function CompetitionsDashboard({
 
   const endingSoon = concursos.filter((item) => {
     const deadline = parseDataEntrega(
-      item.data_entrega_propostas,
+      item.data_fim_calculada,
     );
+
+    if (item.data_fim_calculada) {
+      console.log(
+        "DEBUG PRAZO",
+        item.titulo,
+        item.data_fim_calculada,
+        deadline,
+        {
+          hoje: today,
+          limite: sevenDaysAhead,
+        }
+      );
+    }
 
     return (
       deadline !== null &&
