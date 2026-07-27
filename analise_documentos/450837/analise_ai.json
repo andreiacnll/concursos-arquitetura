@@ -1,0 +1,74 @@
+{
+  "score": {
+    "valor": 86,
+    "titulo": "Muito interessante"
+  },
+  "criterio": {
+    "qualidade": 60,
+    "preco": 40
+  },
+  "elegibilidade": {
+    "nivel": "Compatível",
+    "descricao": "A maioria dos ateliers consegue participar, desde que cumpra os requisitos mínimos."
+  },
+  "risco": {
+    "nivel": "Médio",
+    "fatores": [
+      "Elevado número de requisitos técnicos",
+      "Experiência específica da equipa valorizada"
+    ]
+  },
+  "complexidade": {
+    "nivel": "Muito alta",
+    "bolas": 5,
+    "motivos": [
+      "Edifício existente",
+      "Alteração funcional profunda",
+      "Integração de várias especialidades",
+      "Intervenção interior e exterior"
+    ]
+  },
+  "equipa": {
+    "total": 21,
+    "principais": [
+      "Coordenador de Projeto",
+      "Autor do Projeto de Arquitetura",
+      "Autor do Projeto de Estabilidade",
+      "Autor do Projeto de Instalações Elétricas",
+      "Autor do Projeto de AVAC"
+    ],
+    "todos": [
+      "Coordenador de Projeto",
+      "Autor do Projeto de Arquitetura",
+      "Autor do Projeto de Estabilidade",
+      "Autor do Projeto de Instalações Elétricas",
+      "Autor do Projeto de AVAC",
+      "Autor do Projeto de Acústica",
+      "Autor do Projeto de SCIE",
+      "Experiência Profissional do COORDENADOR DE PROJETO",
+      "Experiência Profissional do Autor de Projeto de ARQUITETURA",
+      "Experiência Profissional do Autor de Projeto de ESTABILIDADE",
+      "Experiência Profissional do Autor de Projeto de INSTALAÇÕES ELÉTRICAS",
+      "Experiência Profissional do Autor de Projeto de AVAC",
+      "Experiência Profissional do Autor de Projeto de ACÚSTICA",
+      "Experiência Profissional do Autor de Projeto de SCIE",
+      "SUBFATOR 2.1 - Experiência Profissional do COORDENAÇÃO DE PROJETO",
+      "SUBFATOR 2.2 - Experiência Profissional do Autor de Projeto de ARQUITETURA",
+      "SUBFATOR 2.3 - Experiência Profissional do Autor de Projeto de ESTABILIDADE",
+      "SUBFATOR 2.4 - Experiência Profissional do Autor de Projeto de INSTALAÇÕES ELÉTRICAS",
+      "SUBFATOR 2.5 - Experiência Profissional do Autor de Projeto de AVAC",
+      "SUBFATOR 2.6 - Experiência Profissional do Autor de Projeto de ACÚSTICA",
+      "SUBFATOR 2.7 - Experiência Profissional do Autor de Projeto de SCIE"
+    ]
+  },
+  "pontos_fortes": [
+    "Valor de investimento elevado",
+    "Critério privilegia qualidade técnica",
+    "Equipamento público com elevada visibilidade"
+  ],
+  "alertas": [
+    "Experiência em projetos semelhantes",
+    "Elevado número de especialidades"
+  ],
+  "opiniao_ai": "O concurso apresenta interesse elevado para equipas com experiência em equipamentos públicos. O principal fator de atenção é a exigência curricular e a coordenação multidisciplinar."
+}

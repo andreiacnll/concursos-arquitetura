@@ -1,0 +1,170 @@
+{
+  "identificacao": {
+    "titulo": "RESTRUTURAÇÃO, REVITALIZAÇÃO E MODERNIZAÇÃO DO MERCADO MUNICIPAL DE CASTELO BRANCO",
+    "local": "Castelo Branco",
+    "tipo": [
+      "Reabilitação",
+      "Revitalização",
+      "Modernização"
+    ]
+  },
+  "programa": {
+    "usos": [
+      "Mercado Municipal",
+      "Comércio",
+      "Restauração",
+      "Residências temporárias"
+    ],
+    "areas": {
+      "total": "6990 m²",
+      "piso_-1": "2210 m²",
+      "piso_0": "2650 m²",
+      "piso_1": "2130 m²"
+    }
+  },
+  "investimento": {
+    "valor_obra": "8.600.000 €",
+    "prazo_projeto": "180 dias"
+  },
+  "analise": {
+    "complexidade": "Muito alta",
+    "nivel": 5,
+    "motivos": [
+      "Edifício existente",
+      "Alteração funcional profunda",
+      "Integração de várias especialidades",
+      "Intervenção interior e exterior"
+    ]
+  },
+  "documentos": {
+    "programa_preliminar": true,
+    "levantamento": true,
+    "pecas_desenhadas": true,
+    "mapa_quantidades": true,
+    "cartografia": true
+  },
+  "equipa": [
+    {
+      "titulo": "Subfator 2.1 - Coordenador de Projeto (20%)",
+      "descricao": ""
+    },
+    {
+      "titulo": "Subfator 2.2 - Autor do Projeto de Arquitetura (20%)",
+      "descricao": ""
+    },
+    {
+      "titulo": "Subfator 2.3 - Autor do Projeto de Estabilidade (15%)",
+      "descricao": ""
+    },
+    {
+      "titulo": "Subfator 2.4 - Autor do Projeto de Instalações Elétricas (15%)",
+      "descricao": ""
+    },
+    {
+      "titulo": "Subfator 2.5 - Autor do Projeto de AVAC (10%)",
+      "descricao": ""
+    },
+    {
+      "titulo": "Subfator 2.6 - Autor do Projeto de Acústica (10%)",
+      "descricao": ""
+    },
+    {
+      "titulo": "Subfator 2.7 - Autor do Projeto de SCIE (10%)",
+      "descricao": "3.2.2. Nos Subfatores acima mencionados, serão analisados os documentos exigidos no ANEXO X - Avaliação da Valia Técnica da Equipa de Projecto,  presente nos anexos do Programa de Procedimento. 3.2.3. A experiência em projetos similares, será avaliada de acordo com a informação preenchida no formulário do ANEXO X,  sob compromisso de honra. Deste modo, os técnicos (de coordenação de projeto, projeto de arquitetura e das  diversas especialidades mencionadas nos subfactores) serão obrigados a preencher e assinar a declaração respetiva. 3.2.4. Para cada subfator da  Valia Técnica da Equipa de Projeto (VT) a avaliar, só pode ser indicado um técnico da equipa a afetar à execução do projeto que será o Autor, co-autor, ou o Responsável (no caso do Coordenador de Projeto). 3.2.5. Cada um dos subfactores é pontuado numa escala de 0 a 10, com as seguintes premissas:"
+    },
+    {
+      "titulo": "Subfator 2.1 – Experiência Profissional do COORDENADOR DE PROJETO",
+      "descricao": "EM PROJETOS SIMILARES Descritores Pontuação A. Técnico, engenheiro ou arquiteto legalmente habilitado nos termos da Lei n.º 31/2009, de 3 de julho, na sua redação atual , que tenha assumido a coordenação de 1 Projeto de Reabilitação ou Construção de um Mercado Municipal Coberto e de 1 Projeto de  edifício de  componente residencial/coletiva/acolhimento temporário. 10 B. Técnico, engenheiro ou arquiteto legalmente habilitado nos termos da Lei n.º 31/2009, de 3 de julho, na sua redação atual , que tenha assumido a coordenação de  1 Projeto de Reabilitação ou Construção de um Mercado Municipal Coberto. 5 C. Não se enquadra em nenhum dos descritores anteriores. 0 RESTRUTURAÇÃO, REVITALIZAÇÃO E MODERNIZAÇÃO DO MERCADO MUNICIPAL DE CASTELO BRANCO Página 5 | 9"
+    },
+    {
+      "titulo": "Subfator 2.2 – Experiência Profissional do Autor de Projeto de ARQUITETURA",
+      "descricao": "EM PROJETOS SIMILARES Descritores Pontuação A. Arquiteto, autor ou co -autor, de 1 Projeto de Reabilitação ou Construção de um Mercado Municipal Coberto e de 1 Projeto de edifício de componente residencial/coletiva/acolhimento temporário. 10 B. Arquiteto, autor ou co-autor, de 1 Projeto de Reabilitação ou Construção de um Mercado Municipal Coberto. 5 C. Não se enquadra em nenhum dos descritores anteriores. 0"
+    },
+    {
+      "titulo": "Subfator 2.3 – Experiência Profissional do Autor de Projeto de ESTABILIDADE",
+      "descricao": "EM PROJETOS SIMILARES Descritores Pontuação A. Engenheiro Civil, autor ou co -autor, de 1 Projeto de estabilidade de Estruturas de reabilitação e/ou reforço, alteração ou compatibilização estrutural de um Mercado Municipal Coberto , cumulativamente com as seguintes características mínimas: • Vão de nave ≥ 20 m, entre apoios e pilares; • Pé-direito livre ≥ 10 m. 10 B. Engenheiro Civil, autor ou co -autor, de 1 Projeto de estabilidade de Estruturas de reabilitação e/ou reforço, alteração ou compatibilização estrutural de um Mercado Municipal Coberto ou edifício público/comercial, cumulativamente com as seguintes características mínimas: • Vão de nave ≥ 15 m, entre apoios e pilares; • Pé-direito livre ≥ 8 m. 5 C. Não se enquadra em nenhum dos descritores anteriores. 0"
+    },
+    {
+      "titulo": "Subfator 2.4 – Experiência Profissional do Autor de Projeto de INSTALAÇÕES ELÉTRICAS",
+      "descricao": "EM PROJETOS SIMILARES Descritores Pontuação A. Engenheiro Eletrotécnico, autor ou co -autor, de 1 Projeto de reabilitação/adaptação de infraestruturas técnicas existentes  de um Mercado Municipal Coberto, cumulativamente com as seguintes características mínimas: • Pé-direito livre ≥ 10 m; • Instalações de Autoconsumo numa potência de 100 KVA; • Instalação elétrica com potência ≥ 630KVA. 10 B. Engenheiro Eletrotécnico, autor ou co -autor, de 1 Projeto de reabilitação/adaptação de infraestruturas técnicas existentes  de um Mercado Municipal Coberto  ou de edifício público/ comercial+serviços, 5 RESTRUTURAÇÃO, REVITALIZAÇÃO E MODERNIZAÇÃO DO MERCADO MUNICIPAL DE CASTELO BRANCO Página 6 | 9 cumulativamente com as seguintes características mínimas: • Pé-direito livre ≥ 8 m. • Instalação elétrica com potência ≥ 400 KVA C. Não se enquadra em nenhum dos descritores anteriores. 0"
+    },
+    {
+      "titulo": "Subfator 2.5 – Experiência Profissional do Autor de Projeto de AVAC",
+      "descricao": "EM PROJETOS SIMILARES Descritores Pontuação A. Engenheiro Mecânico, autor ou co -autor, de 1 Projeto de AVAC/Ventilação de um Mercado Municipal Coberto,  cumulativamente com as seguintes características mínimas: • Vão de nave ≥ 20 m; • Pé-direito livre ≥ 10 m. 10 B. Engenheiro Mecânico, autor ou co -autor, de 1 Projeto de AVAC /Ventilação de um Mercado Municipal Cobert o ou de edifício público/comercial+serviços, cumulativamente com as seguintes características mínimas: • Vão de nave ≥ 15 m, entre apoios e pilares; • Pé-direito livre ≥ 8 m. 5 C. Não se enquadra em nenhum dos descritores anteriores. 0"
+    },
+    {
+      "titulo": "Subfator 2.6 – Experiência Profissional do Autor de Projeto de ACÚSTICA",
+      "descricao": "EM PROJETOS SIMILARES Descritores Pontuação A. Engenheiro qualifica do que possua  especialização em engenharia acústica acreditada pela Ordem Profissional para executar projetos acústicos de categoria I II, autor ou co -autor, de 1 Projeto de acústica de um Mercado Municipal Coberto, cumulativamente com as seguintes características mínimas: • Vão de nave ≥ 20 m, entre apoios e pilares; • Pé-direito livre ≥ 10 m. 10 B. Engenheiro qualificado  que possua  especialização em engenharia acústica acreditada pela Ordem Profissional para executar projetos ac ústicos de categoria III , autor ou co -autor, de 1 Projeto  de acústica  de um Mercado Municipal Coberto  ou de edifício público/comercial+serviços , cumulativamente com as seguintes características mínimas: • Vão de nave ≥ 15 m, entre apoios e pilares; • Pé-direito livre ≥ 8 m. 5 C. Não se enquadra em nenhum dos descritores anteriores. 0 RESTRUTURAÇÃO, REVITALIZAÇÃO E MODERNIZAÇÃO DO MERCADO MUNICIPAL DE CASTELO BRANCO Página 7 | 9"
+    },
+    {
+      "titulo": "Subfator 2.7 – Experiência Profissional do Autor de Projeto de SCIE",
+      "descricao": "EM PROJETOS SIMILARES Descritores Pontuação A. Técnico legalmente habilitado, com certificação específica e registo na ANEPC , para executar projeto de SCIE  de 3.ª Categoria de Risco ou superior, autor ou co-autor, de 1 Projeto de SCIE de um Mercado Municipal Coberto Multifuncional. 10 B. Técnico legalmente habilitado, com certificação específica e registo na ANEPC , para executar projeto de SCIE de 3.ª Categoria de Risco ou superior, autor ou co-autor, de 1 Projeto de SCIE de um Mercado Municipal Coberto Multifuncional ou de edifício público/comercial+serviços. 5 C. Não se enquadra em nenhum dos descritores anteriores. 0 3.2.6. Estes subfatores serão avaliados de acordo com a expressão numérica seguinte: VT= 20% x (2.1) + 20% x (2.2) + 15% x (2.3) + 15% X (2.4) + 10% X (2.5) + 10% X (2.6) + 10% X (2.7) A VT final resulta da média ponderada desses subfatores e também fica numa escala de 0 a 10. 3.2.7. O modo de atestar/comprovar a experiência em projetos similares será aferida pela entrega OBRIGATÓRIA dos seguintes documentos necessários para avaliação de cada subfactor e projeto mencionado no ANEXO X: a. Cópia do contrato da adjudicação, de aquisição do referente ao projeto mencionado; b. Termo de responsabilidade  do técnico (em avaliação) , com a designação do projeto supracitado; c. Documento (memória descritiva , peça desenhada , etc. ) com evidência s de todas as características descritas na avaliação do anexo X. d. Declaração/certificação da Ordem com inscrição válida  e da certificação especifica quando aplicável; 3.2.8. A falta ou insuficiência de elementos de prova de algum dos elementos dos descritores, constantes no ANEXO X , inviabiliza a possibilidade de aferir a veracidade dos atos declarados, impossibilitando a atribuição de pontuação no descritor correspondente. RESTRUTURAÇÃO, REVITALIZAÇÃO E MODERNIZAÇÃO DO MERCADO MUNICIPAL DE CASTELO BRANCO Página 8 | 9 3.2.9. No caso de um mesmo  técnico se enquadrar em mais do que um descritor, do mesmo subfac"
+    },
+    {
+      "titulo": "SUBFATOR 2.1 - Experiência Profissional do COORDENAÇÃO DE PROJETO",
+      "descricao": "EM PROJETOS SIMILARES Nome Completo Licenciatura / Mestrado Integrado ANEXO X FATOR 2 - VALIA TÉCNICA DA EQUIPA DE PROJETO (VT)"
+    },
+    {
+      "titulo": "SUBFATOR 2.2 - Experiência Profissional do Autor de Projeto de ARQUITETURA",
+      "descricao": "EM PROJETOS SIMILARES Nome Completo ou Membro da Ordem Profissional / Certificação Profissional N.º PREENCHER APENAS UM DOS CAMPOS A OU B OU C Arquiteto, autor ou co-autor, de 1 Projeto de Reabilitação ou Construção de um Mercado Municipal Coberto e de 1 Projeto de edifício de componente residencial/coletiva/acolhimento temporário. Designação do Projeto A Arquiteto, autor ou co-autor, de 1 Projeto de Reabilitação ou Construção de um Mercado Municipal Coberto e de 1 Projeto de edifício de componente residencial/coletiva/acolhimento temporário. B Designação do Projeto NOTA: Na falta de um dos elementos acima mencionados, ou na falta de evidência dos descritores em avaliação será dada a pontuação de 0 (zero). ou C      Não se enquadra em nenhum dos descritores anteriores preencher com cruz (X) Para efeitos de avaliação do subfator é OBRIGATÓRIO a entrega dos seguintes documentos: a) Declaração/ Certificação da ordem profissional. preencher com cruz (X) b) Cópia do contrato da adjudicação de AQUISIÇÃO DE SERVIÇO do projeto designado; c) Termo de responsabilidade respetivo, com a designação do projeto supracitado; d) Documento (memória descritiva, peça desenhada, etc.) com evidência de todas as caracteristicas minimas descritas; Licenciatura / Mestrado Integrado ANEXO X FATOR 2 - VALIA TÉCNICA DA EQUIPA DE PROJETO (VT)"
+    },
+    {
+      "titulo": "SUBFATOR 2.3 - Experiência Profissional do Autor de Projeto de ESTABILIDADE",
+      "descricao": "EM PROJETOS SIMILARES Nome Completo ou Membro da Ordem Profissional / Certificação Profissional N.º PREENCHER APENAS UM DOS CAMPOS A OU B OU C Engenheiro Civil, autor ou co-autor, de 1 Projeto de estabilidade de Estruturas de reabilitação e/ou reforço, alteração ou compatibilização estrutural de um Mercado Municipal Coberto, cumulativamente com as seguintes características mínimas: • Vão de nave ≥ 20 m, entre apoios e pilares; • Pé-direito livre ≥ 10m A Designação do Projeto Engenheiro Civil, autor ou co-autor, de 1 Projeto de estabilidade de Estruturas de reabilitação e/ou reforço, alteração ou compatibilização estrutural de um Mercado Municipal Coberto ou edifício público/comercial, cumulativamente com as seguintes características mínimas: Descritores • Vão de nave ≥ 15 m, entre apoios e pilares; preencher com cruz (X)• Pé-direito livre ≥ 8 m B Designação do Projeto NOTA: Na falta de um dos elementos acima mencionados, ou na falta de evidência dos descritores em avaliação será dada a pontuação de 0 (zero). ou C      Não se enquadra em nenhum dos descritores anteriores preencher com cruz (X) Para efeitos de avaliação do subfator é OBRIGATÓRIO a entrega dos seguintes documentos: a) Declaração/ Certificação da ordem profissional. preencher com cruz (X) b) Cópia do contrato da adjudicação de AQUISIÇÃO DE SERVIÇO do projeto designado; c) Termo de responsabilidade respetivo, com a designação do projeto supracitado; d) Documento (memória descritiva, peça desenhada, etc.) com evidência de todas as caracteristicas minimas descritas; Licenciatura / Mestrado Integrado ANEXO X FATOR 2 - VALIA TÉCNICA DA EQUIPA DE PROJETO (VT)"
+    },
+    {
+      "titulo": "SUBFATOR 2.4 - Experiência Profissional do Autor de Projeto de INSTALAÇÕES ELÉTRICAS",
+      "descricao": "EM PROJETOS SIMILARES Nome Completo ou Membro da Ordem Profissional / Certificação Profissional N.º PREENCHER APENAS UM DOS CAMPOS A OU B OU C Engenheiro Eletrotécnico, autor ou co-autor, de 1 Projeto de reabilitação/adaptação de infraestruturas técnicas existentes de um Mercado Municipal Coberto, cumulativamente com as seguintes características mínimas: Descritores • Pé-direito livre ≥ 10 m; preencher com cruz (X) • Instalações de Autoconsumo numa potência de 100 KVA; • Instalação elétrica com potência ≥ 630KVA. A Designação do Projeto preencher com cruz (X)• Instalação elétrica com potência ≥ 400 KVA. B Designação do Projeto Engenheiro Eletrotécnico, autor ou co-autor, de 1 Projeto de reabilitação/adaptação de infraestruturas técnicas existentes de um Mercado Municipal Coberto ou de edifício público/comercial+serviços, cumulativamente com as seguintes características mínimas: Descritores • Pé-direito livre ≥ 8 m; NOTA: Na falta de um dos elementos acima mencionados, ou na falta de evidência dos descritores em avaliação será dada a pontuação de 0 (zero). ou C      Não se enquadra em nenhum dos descritores anteriores preencher com cruz (X) Para efeitos de avaliação do subfator é OBRIGATÓRIO a entrega dos seguintes documentos: a) Declaração/ Certificação da ordem profissional. preencher com cruz (X) b) Cópia do contrato da adjudicação de AQUISIÇÃO DE SERVIÇO do projeto designado; c) Termo de responsabilidade respetivo, com a designação do projeto supracitado; d) Documento (memória descritiva, peça desenhada, etc.) com evidência de todas as caracteristicas minimas descritas; Licenciatura / Mestrado Integrado ANEXO X FATOR 2 - VALIA TÉCNICA DA EQUIPA DE PROJETO (VT)"
+    },
+    {
+      "titulo": "SUBFATOR 2.5 - Experiência Profissional do Autor de Projeto de AVAC",
+      "descricao": "EM PROJETOS SIMILARES Nome Completo ou Membro da Ordem Profissional / Certificação Profissional N.º PREENCHER APENAS UM DOS CAMPOS A OU B OU C Engenheiro Mecânico, autor ou co-autor, de 1 Projeto de AVAC/Ventilação de um Mercado Municipal Coberto, cumulativamente com as seguintes características mínimas: Descritores • Vão de nave ≥ 20 m, entre apoios e pilares; preencher com cruz (X)• Pé-direito livre ≥ 10m A Designação do Projeto Engenheiro Mecânico, autor ou co-autor, de 1 Projeto de AVAC/Ventilação de um Mercado Municipal Coberto ou de edifício público/comercial+serviços, cumulativamente com as seguintes características mínimas: Descritores • Vão de nave ≥ 15 m, entre apoios e pilares; preencher com cruz (X)• Pé-direito livre ≥ 8m B Designação do Projeto NOTA: Na falta de um dos elementos acima mencionados, ou na falta de evidência dos descritores em avaliação será dada a pontuação de 0 (zero). ou C      Não se enquadra em nenhum dos descritores anteriores preencher com cruz (X) Para efeitos de avaliação do subfator é OBRIGATÓRIO a entrega dos seguintes documentos: a) Declaração/ Certificação da ordem profissional. preencher com cruz (X) b) Cópia do contrato da adjudicação de AQUISIÇÃO DE SERVIÇO do projeto designado; c) Termo de responsabilidade respetivo, com a designação do projeto supracitado; d) Documento (memória descritiva, peça desenhada, etc.) com evidência de todas as caracteristicas minimas descritas; Licenciatura / Mestrado Integrado ANEXO X FATOR 2 - VALIA TÉCNICA DA EQUIPA DE PROJETO (VT)"
+    },
+    {
+      "titulo": "SUBFATOR 2.6 - Experiência Profissional do Autor de Projeto de ACÚSTICA",
+      "descricao": "EM PROJETOS SIMILARES Nome Completo ou Membro da Ordem Profissional / Certificação Profissional N.º PREENCHER APENAS UM DOS CAMPOS A OU B OU C Engenheiro qualificado que possua especialização em engenharia acústica acreditada pela Ordem Profissional para executar projetos acústicos de categoria III, autor ou co-autor, de 1 Projeto de acústica de um Mercado Municipal Coberto, cumulativamente com as seguintes características mínimas: Descritores • Vão de nave ≥ 20 m, entre apoios e pilares; preencher com cruz (X)• Pé-direito livre ≥ 10m Designação do Projeto A Engenheiro qualificado que possua especialização em engenharia acústica acreditada pela Ordem Profissional para executar projetos acústicos de categoria III, autor ou co-autor, de 1 Projeto de acústica de um Mercado Municipal  Coberto ou de edifício público/comercial+serviços, cumulativamente com as seguintes características mínimas: Descritores • Vão de nave ≥ 20 m, entre apoios e pilares; preencher com cruz (X)• Pé-direito livre ≥ 10m Designação do Projeto B NOTA: Na falta de um dos elementos acima mencionados, ou na falta de evidência dos descritores em avaliação será dada a pontuação de 0 (zero). ou C     Não se enquadra em nenhum dos descritores anteriores preencher com cruz (X) Para efeitos de avaliação do subfator é OBRIGATÓRIO a entrega dos seguintes documentos: a) Declaração/ Certificação da ordem profissional. preencher com cruz (X) b) Cópia do contrato da adjudicação de AQUISIÇÃO DE SERVIÇO do projeto designado; c) Termo de responsabilidade respetivo, com a designação do projeto supracitado; d) Documento (memória descritiva, peça desenhada, etc.) com evidência de todas as caracteristicas minimas descritas; Licenciatura / Mestrado Integrado ANEXO X FATOR 2 - VALIA TÉCNICA DA EQUIPA DE PROJETO (VT)"
+    },
+    {
+      "titulo": "SUBFATOR 2.7 - Experiência Profissional do Autor de Projeto de SCIE",
+      "descricao": "EM PROJETOS SIMILARES Nome Completo Membro da Ordem Profissional / Certificação Profissional N.º PREENCHER APENAS UM DOS CAMPOS A OU B OU C A Técnico legalmente habilitado, com certificação específica e registo na ANEPC, para executar projeto de SCIE de 3.ª Categoria de Risco ou superior, autor ou co-autor, de 1 Projeto de SCIE de um Mercado Municipal Coberto Multifuncional. Designação do Projeto ou C     Não se enquadra em nenhum dos descritores anteriores preencher com cruz (X) ou B Técnico legalmente habilitado, com certificação específica e registo na ANEPC, para executar projeto de SCIE de 3.ª Categoria de Risco ou superior, autor ou co-autor, de 1 Projeto de SCIE de um Mercado Municipal Coberto Multifuncional ou de edifício público/comercial+serviços. Designação do Projeto NOTA: Na falta de um dos elementos acima mencionados, ou na falta de evidência dos descritores em avaliação será dada a pontuação de 0 (zero). Para efeitos de avaliação do subfator é OBRIGATÓRIO a entrega dos seguintes documentos: a) Declaração/ Certificação da ordem profissional. preencher com cruz (X) b) Cópia do contrato da adjudicação de AQUISIÇÃO DE SERVIÇO do projeto designado; c) Termo de responsabilidade respetivo, com a designação do projeto supracitado; d) Documento (memória descritiva, peça desenhada, etc.) com evidência de todas as caracteristicas minimas descritas; DIVISÃO DE OBRAS, EQUIPAMENTOS E INFRAESTRUTURAS QUALIFICAÇÃO DOS TÉCNICOS ANEXO V ELABORAÇÃO DE ESTUDOS E PROJECTOS: RESTRUTURAÇÃO, REVITALIZAÇÃO E MODERNIZAÇÃO  DO MERCADO MUNICIPAL DE CASTELO BRANCO MAIO | 2026 ANEXO V QUALIFICAÇÃO DOS TÉCNICOS (n.º 1 do art.º 7º da Lei n.º 31/2009, de 3 de Julho, alterada e republicada pela Lei n.º 40/2015, de 1 de junho) Nome (Identificação completa) Especificação das funções que assumem Especificação dos projetos que elaboram Identificação dos elementos de seguro (nos termos do n.º 2 do art.º 29º da Lei n.º 40/2015, de 1 de junho, as disposições relativas ao seguro de responsabi"
+    }
+  ],
+  "estrategia": {
+    "nivel": "Média",
+    "resumo": "A avaliação privilegia a componente técnica da proposta (60%), face ao preço (40%).",
+    "pontos_decisivos": [
+      "Experiência específica da equipa técnica",
+      "Projetos similares",
+      "Capacidade multidisciplinar"
+    ],
+    "perfil_recomendado": "Ateliers com experiência em equipamentos públicos complexos e equipas multidisciplinares."
+  },
+  "decisao": {
+    "score": 86,
+    "classificacao": "Muito interessante",
+    "elegibilidade": {
+      "estado": "Requer experiência",
+      "motivos": [
+        "Experiência específica da equipa técnica",
+        "Experiência em projetos similares"
+      ]
+    },
+    "oportunidades": [
+      "Critério privilegia qualidade técnica",
+      "Valor de investimento elevado",
+      "Equipamento público com elevada visibilidade"
+    ],
+    "riscos": [
+      "Equipa multidisciplinar extensa",
+      "Necessidade de comprovação curricular",
+      "Experiência específica valorizada"
+    ]
+  },
+  "temas": [
+    "Reabilitação urbana",
+    "Sustentabilidade",
+    "Eficiência energética",
+    "Espaço público",
+    "Equipamento municipal"
+  ]
+}

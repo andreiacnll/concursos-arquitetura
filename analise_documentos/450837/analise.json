@@ -1,0 +1,145 @@
+{
+  "concurso_id": "450837",
+  "preparacao": {
+    "score": 100,
+    "nivel": "muito_alta"
+  },
+  "resumo": {
+    "total_documentos": 26,
+    "programa_procedimento": true,
+    "caderno_encargos": true,
+    "programa_preliminar": true,
+    "levantamento": true,
+    "pecas_desenhadas": true,
+    "cartografia": true,
+    "mapa_quantidades": true,
+    "elementos_prediais": true,
+    "condicoes_tecnicas": true
+  },
+  "documentos": [
+    {
+      "nome": "pecas_procedimentais/extraido/Peças_Procedimentais/PROGRAMA_PRELIMINAR_E_ANEXOS/Anexo_7_Elem_Prediais.pdf",
+      "tipos": [
+        "elementos_prediais"
+      ]
+    },
+    {
+      "nome": "pecas_procedimentais/extraido/Peças_Procedimentais/PROGRAMA_PRELIMINAR_E_ANEXOS/Anexo_5_Peças_Desenhadas_Espc_Antg.pdf",
+      "tipos": [
+        "pecas_desenhadas"
+      ]
+    },
+    {
+      "nome": "pecas_procedimentais/extraido/Peças_Procedimentais/PROGRAMA_PRELIMINAR_E_ANEXOS/Anexo_8_Mod_Mapa de Quantidades.xls",
+      "tipos": [
+        "mapa_quantidades"
+      ]
+    },
+    {
+      "nome": "pecas_procedimentais/extraido/Peças_Procedimentais/PROGRAMA_PRELIMINAR_E_ANEXOS/Anexo_8_Mod_Mapa de Quantidades.pdf",
+      "tipos": [
+        "mapa_quantidades"
+      ]
+    },
+    {
+      "nome": "pecas_procedimentais/extraido/Peças_Procedimentais/PROGRAMA_PRELIMINAR_E_ANEXOS/Anexo_4_Levt_Topog_Arq.pdf",
+      "tipos": [
+        "levantamento"
+      ]
+    },
+    {
+      "nome": "pecas_procedimentais/extraido/Peças_Procedimentais/PROGRAMA_PRELIMINAR_E_ANEXOS/Anexo_3_Elem_Cartograficos.pdf",
+      "tipos": [
+        "cartografia"
+      ]
+    },
+    {
+      "nome": "pecas_procedimentais/extraido/Peças_Procedimentais/PROGRAMA_PRELIMINAR_E_ANEXOS/_PROGRAMA_PRELIMINAR.pdf",
+      "tipos": [
+        "programa_preliminar"
+      ]
+    },
+    {
+      "nome": "pecas_procedimentais/extraido/Peças_Procedimentais/PROGRAMA_PRELIMINAR_E_ANEXOS/Anexo_2_SIMAB.pdf",
+      "tipos": []
+    },
+    {
+      "nome": "pecas_procedimentais/extraido/Peças_Procedimentais/PROGRAMA_PRELIMINAR_E_ANEXOS/Anexo_1_CONDICOES_TECNICAS_.pdf",
+      "tipos": [
+        "condicoes_tecnicas"
+      ]
+    },
+    {
+      "nome": "pecas_procedimentais/extraido/Peças_Procedimentais/ANEXOS/Anexo_IX_criterios adjudicacao.pdf",
+      "tipos": []
+    },
+    {
+      "nome": "pecas_procedimentais/extraido/Peças_Procedimentais/ANEXOS/Anexo_III_Modelo_Proposta.docx",
+      "tipos": []
+    },
+    {
+      "nome": "pecas_procedimentais/extraido/Peças_Procedimentais/ANEXOS/Anexo_II_Declaracao_Nao_Impedimentos.docx",
+      "tipos": []
+    },
+    {
+      "nome": "pecas_procedimentais/extraido/Peças_Procedimentais/ANEXOS/ANEXO_VII_Termo_Responsabilidade_Coordenador.docx",
+      "tipos": []
+    },
+    {
+      "nome": "pecas_procedimentais/extraido/Peças_Procedimentais/ANEXOS/~$EXO_VIII_Termo_Responsabilidade_Autores.docx",
+      "tipos": []
+    },
+    {
+      "nome": "pecas_procedimentais/extraido/Peças_Procedimentais/ANEXOS/ANEXO_VI_Classificacao_Obras.docx",
+      "tipos": []
+    },
+    {
+      "nome": "pecas_procedimentais/extraido/Peças_Procedimentais/ANEXOS/Anexo_IV_Declaracao_Nao_Impedimentos_CPA.docx",
+      "tipos": []
+    },
+    {
+      "nome": "pecas_procedimentais/extraido/Peças_Procedimentais/ANEXOS/Anexo_X_valia_tecnica_equipa_projeto.pdf",
+      "tipos": []
+    },
+    {
+      "nome": "pecas_procedimentais/extraido/Peças_Procedimentais/ANEXOS/ANEXO_VIII_Termo_Responsabilidade_Autores.docx",
+      "tipos": []
+    },
+    {
+      "nome": "pecas_procedimentais/extraido/Peças_Procedimentais/ANEXOS/Anexo_V_qualificacao_tecnicos.pdf",
+      "tipos": []
+    },
+    {
+      "nome": "pecas_procedimentais/extraido/Peças_Procedimentais/ANEXOS/Documentos_Informativos/Faturacao_Eletronica.pdf",
+      "tipos": []
+    },
+    {
+      "nome": "pecas_procedimentais/extraido/Peças_Procedimentais/ANEXOS/Documentos_Informativos/Como_Assinar_Documentos_Electronicamente.pdf",
+      "tipos": []
+    },
+    {
+      "nome": "extraido/Dados do Procedimento/Minuta do anúncio.pdf",
+      "tipos": []
+    },
+    {
+      "nome": "extraido/Dados do Procedimento/Lista.pdf",
+      "tipos": []
+    },
+    {
+      "nome": "extraido/Carta Convite ou Anúncio DR/419966613.pdf",
+      "tipos": []
+    },
+    {
+      "nome": "extraido/Processo Concurso/2_Caderno_120.pdf",
+      "tipos": [
+        "caderno_encargos"
+      ]
+    },
+    {
+      "nome": "extraido/Processo Concurso/1_Programa_procedimento_120.pdf",
+      "tipos": [
+        "programa_procedimento"
+      ]
+    }
+  ]
+}
