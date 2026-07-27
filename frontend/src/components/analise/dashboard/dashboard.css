@@ -527,3 +527,1087 @@ grid-template-columns:1fr;
 
 }
 
+
+
+.hero-analise {
+  padding:24px 0 28px;
+}
+
+
+.back-button {
+
+  border:none;
+  background:none;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:13px;
+  cursor:pointer;
+  margin-bottom:28px;
+
+}
+
+
+
+.hero-analise .eyebrow {
+
+  font-size:11px;
+  letter-spacing:.08em;
+  color:#777;
+  margin-bottom:12px;
+
+}
+
+
+
+.hero-analise h1 {
+
+  font-size:42px;
+  line-height:1.05;
+  font-weight:500;
+  max-width:850px;
+  margin:0 0 18px;
+
+}
+
+
+
+.hero-location {
+
+  font-size:14px;
+  margin-bottom:18px;
+
+}
+
+
+
+.hero-meta {
+
+  display:flex;
+  align-items:center;
+  gap:24px;
+  margin-top:26px;
+  padding-top:20px;
+  border-top:1px solid #ecebe5;
+
+}
+
+
+
+.hero-meta div {
+
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:13px;
+
+}
+
+
+
+.base-button {
+
+  margin-left:auto;
+  background:#111;
+  color:white;
+  padding:12px 18px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  text-decoration:none;
+  font-size:13px;
+
+}
+
+
+
+.decision-grid {
+
+display:grid;
+grid-template-columns:1fr 1.3fr 1.2fr 1.2fr;
+gap:25px;
+
+}
+
+
+
+.score-wrapper {
+
+position:relative;
+width:110px;
+height:110px;
+margin:20px auto;
+
+}
+
+
+.score-wrapper svg {
+
+position:absolute;
+
+}
+
+
+.score-number {
+
+position:absolute;
+inset:0;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+
+}
+
+
+.score-number strong {
+
+font-size:32px;
+
+}
+
+
+.score-number small {
+
+font-size:12px;
+
+}
+
+
+
+.score-column {
+
+text-align:center;
+
+}
+
+
+
+.decision-column span {
+
+font-size:12px;
+color:#666;
+
+}
+
+
+
+.decision-column ul {
+
+padding:0;
+list-style:none;
+
+}
+
+
+.decision-column li {
+
+display:flex;
+gap:8px;
+margin:10px 0;
+font-size:13px;
+
+}
+
+
+
+.risk-gauge {
+
+margin:25px 0;
+
+}
+
+
+.gauge-bar {
+
+height:12px;
+border-radius:20px;
+background:
+linear-gradient(
+90deg,
+#6d9360 var(--value),
+#eee var(--value)
+);
+
+}
+
+
+
+
+
+/* mapa do projeto */
+
+.project-map {
+  width:100%;
+  height:180px;
+  border-radius:14px;
+  overflow:hidden;
+  margin-top:20px;
+}
+
+
+.project-map .mapboxgl-map {
+  width:100%;
+  height:100%;
+}
+
+
+
+.project-map-placeholder {
+
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ justify-content:center;
+
+ height:140px;
+
+ margin-top:18px;
+
+ border-radius:14px;
+
+ background:#f4f4ef;
+
+ color:#222;
+
+ text-decoration:none;
+
+ font-size:14px;
+
+ gap:8px;
+
+}
+
+
+.project-map-placeholder div {
+
+ font-size:28px;
+
+}
+
+
+
+/* SIDEBAR ANALISE - estilo mockup */
+
+
+
+
+/* ============================= */
+/* SIDEBAR ANALISE - MOCKUP */
+/* ============================= */
+
+
+.project-info-panel {
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+
+/* grupo de informação */
+
+.info-card {
+
+  background:white;
+  border:1px solid #e8e8e2;
+  border-radius:0;
+  padding:0;
+
+  overflow:hidden;
+
+}
+
+
+/* arredondar primeiro e ultimo */
+.info-card:first-child {
+  border-radius:18px 18px 0 0;
+}
+
+
+.info-card:last-of-type {
+  border-radius:0 0 18px 18px;
+}
+
+
+
+/* botão */
+
+.info-card-button {
+
+  width:100%;
+
+  display:flex;
+  align-items:center;
+
+  padding:18px 20px;
+
+  background:white;
+
+  border:0;
+
+  cursor:pointer;
+
+  text-align:left;
+
+}
+
+
+/* ícone */
+
+.info-card-icon {
+
+  width:38px;
+  height:38px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  margin-right:14px;
+
+  border-radius:10px;
+
+  background:#f5f5ef;
+
+  font-size:16px;
+
+}
+
+
+/* texto */
+
+.info-card-content {
+
+  flex:1;
+
+}
+
+
+.info-card h4 {
+
+  margin:0 0 5px;
+
+  font-size:14px;
+
+  font-weight:600;
+
+  color:#111;
+
+}
+
+
+.info-card p {
+
+  margin:0;
+
+  font-size:12px;
+
+  line-height:1.35;
+
+  color:#777;
+
+}
+
+
+/* contador */
+
+
+.info-card-count {
+
+  display:flex;
+
+  align-items:center;
+
+  gap:12px;
+
+}
+
+
+.info-card-count span {
+
+  background:#f5f5ef;
+
+  border-radius:20px;
+
+  padding:5px 10px;
+
+  font-size:11px;
+
+  white-space:nowrap;
+
+}
+
+
+.info-card-count b {
+
+  font-size:20px;
+
+  font-weight:400;
+
+  color:#111;
+
+}
+
+
+/* conteúdo aberto */
+
+.info-card-details {
+
+  padding:0 20px 18px 72px;
+
+  border-top:1px solid #eeeeea;
+
+  font-size:13px;
+
+  line-height:1.7;
+
+}
+
+
+/* histórico */
+
+.entity-history {
+
+  background:white;
+
+  border:1px solid #e8e8e2;
+
+  border-radius:18px;
+
+  padding:20px;
+
+}
+
+
+
+
+/* refinamento sidebar direita */
+
+.project-info-panel {
+  gap:0;
+}
+
+
+/* junta os blocos */
+
+.info-card {
+  border-radius:0;
+  border-bottom:1px solid #e8e8e2;
+}
+
+
+.info-card:first-child {
+  border-radius:18px 18px 0 0;
+}
+
+
+.info-card:last-of-type {
+  border-radius:0 0 18px 18px;
+  border-bottom:none;
+}
+
+
+/* compactar */
+
+.info-card-button {
+
+  padding:16px 18px;
+
+  min-height:88px;
+
+}
+
+
+.info-card-content {
+
+  min-width:0;
+
+}
+
+
+.info-card h4 {
+
+  font-size:14px;
+  line-height:1.2;
+
+}
+
+
+.info-card p {
+
+  max-width:190px;
+
+  line-height:1.25;
+
+}
+
+
+.info-card-count {
+
+  flex-shrink:0;
+
+}
+
+
+/* evitar títulos partidos */
+
+.info-card h4 {
+
+  white-space:normal;
+
+}
+
+
+
+
+/* corrigir espaçamento entre grupos da sidebar */
+
+
+.project-info-panel {
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+
+/* apenas os quatro cards ficam unidos */
+
+.project-info-panel .info-card {
+  margin:0;
+}
+
+
+/* criar agrupamento visual entre cards */
+.project-info-panel .info-card + .info-card {
+  border-top:0;
+}
+
+
+/* histórico e sobre projeto respiram */
+
+.entity-history,
+.project-summary {
+  margin-top:0;
+}
+
+
+
+
+
+/* grupo lateral igual ao mockup */
+
+.sidebar-cards {
+
+  border:1px solid #e8e8e2;
+  border-radius:18px;
+  overflow:hidden;
+
+}
+
+
+.sidebar-cards .info-card {
+
+  border:0;
+  border-bottom:1px solid #e8e8e2;
+  border-radius:0;
+
+}
+
+
+.sidebar-cards .info-card:last-child {
+
+  border-bottom:none;
+
+}
+
+
+
+
+/* ===== AJUSTES FINAIS DASHBOARD ===== */
+
+
+.project-info-panel {
+  gap:0;
+  overflow:hidden;
+}
+
+
+.info-card {
+  border-radius:0;
+  border-left:0;
+  border-right:0;
+  margin:0;
+}
+
+
+.info-card:first-child {
+  border-radius:18px 18px 0 0;
+}
+
+
+.info-card:last-of-type {
+  border-radius:0 0 18px 18px;
+}
+
+
+.info-card-button {
+  padding:22px;
+}
+
+
+.project-summary {
+  padding:22px;
+}
+
+
+.map-button {
+  display:block;
+  margin-top:16px;
+  text-align:center;
+  text-decoration:none;
+}
+
+
+
+
+.updates-box {
+
+  margin-top:40px;
+  background:#f8f8f3;
+  border:1px solid #e8e8e2;
+  border-radius:18px;
+
+  padding:22px 28px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+}
+
+
+.updates-content {
+
+  display:flex;
+  align-items:center;
+  gap:18px;
+
+}
+
+
+.updates-icon {
+
+  width:42px;
+  height:42px;
+
+  border-radius:50%;
+  background:white;
+  border:1px solid #ddd;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+}
+
+
+.updates-box h3 {
+
+  margin:0 0 6px;
+  font-size:15px;
+
+}
+
+
+.updates-box p {
+
+  margin:0;
+  color:#666;
+  font-size:13px;
+
+}
+
+
+.updates-actions {
+
+  display:flex;
+  gap:12px;
+
+}
+
+
+.favorite-button,
+.alert-button {
+
+  height:42px;
+  padding:0 22px;
+
+  border-radius:10px;
+
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  cursor:pointer;
+
+}
+
+
+.favorite-button {
+
+  background:white;
+  border:1px solid #ddd;
+
+}
+
+
+.alert-button {
+
+  background:#111;
+  color:white;
+  border:1px solid #111;
+
+}
+
+
+
+.updates-box {
+
+  margin-top:40px;
+  background:#f8f8f3;
+  border:1px solid #e8e8e2;
+  border-radius:18px;
+
+  padding:22px 28px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+}
+
+
+.updates-content {
+
+  display:flex;
+  align-items:center;
+  gap:18px;
+
+}
+
+
+.updates-icon {
+
+  width:42px;
+  height:42px;
+
+  border-radius:50%;
+  background:white;
+  border:1px solid #ddd;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+}
+
+
+.updates-box h3 {
+
+  margin:0 0 6px;
+  font-size:15px;
+
+}
+
+
+.updates-box p {
+
+  margin:0;
+  color:#666;
+  font-size:13px;
+
+}
+
+
+.updates-actions {
+
+  display:flex;
+  gap:12px;
+
+}
+
+
+.favorite-button,
+.alert-button {
+
+  height:42px;
+  padding:0 22px;
+
+  border-radius:10px;
+
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  cursor:pointer;
+
+}
+
+
+.favorite-button {
+
+  background:white;
+  border:1px solid #ddd;
+
+}
+
+
+.alert-button {
+
+  background:#111;
+  color:white;
+  border:1px solid #111;
+
+}
+
+
+
+.updates-box {
+
+margin-top:40px;
+background:#f7f7f2;
+border:1px solid #e6e6df;
+border-radius:18px;
+
+padding:20px 26px;
+
+display:flex;
+align-items:center;
+justify-content:space-between;
+
+gap:20px;
+
+}
+
+
+
+.updates-title {
+
+display:flex;
+align-items:center;
+gap:10px;
+
+}
+
+
+.updates-title h3 {
+
+margin:0;
+font-size:15px;
+font-weight:600;
+
+}
+
+
+
+.updates-text p {
+
+margin:6px 0 0;
+
+font-size:13px;
+color:#666;
+
+}
+
+
+
+.updates-actions {
+
+display:flex;
+gap:12px;
+
+}
+
+
+
+.favorite-button,
+.alert-button {
+
+height:42px;
+padding:0 22px;
+
+border-radius:10px;
+
+display:flex;
+align-items:center;
+gap:8px;
+
+cursor:pointer;
+
+font-size:14px;
+
+}
+
+
+
+.favorite-button {
+
+background:white;
+border:1px solid #ddd;
+
+}
+
+
+
+.favorite-button.active {
+
+background:#f0f4ea;
+
+}
+
+
+
+.alert-button {
+
+background:#111;
+color:white;
+border:1px solid #111;
+
+}
+
+
+
+@media(max-width:900px){
+
+.updates-box{
+
+flex-direction:column;
+align-items:stretch;
+
+}
+
+.updates-actions{
+
+width:100%;
+
+}
+
+.favorite-button,
+.alert-button{
+
+flex:1;
+justify-content:center;
+
+}
+
+}
+
+
+
+/* ================================
+   Ajustes finais layout análise
+================================ */
+
+
+/* aproxima histórico e projeto na sidebar */
+
+.project-info-panel {
+  gap: 8px;
+}
+
+
+.entity-history {
+  margin-bottom: 0;
+}
+
+
+.project-summary {
+  margin-top: 0;
+}
+
+
+
+/* espaço antes da barra de alertas */
+
+.updates-box {
+  margin-top: 28px;
+  margin-bottom: 20px;
+}
+
+
+/* evita que a barra pareça colada aos cards */
+
+.analysis-left {
+  display:flex;
+  flex-direction:column;
+  gap:28px;
+}
+
+
+/* a timeline já tem margem própria */
+.timeline-dashboard {
+  margin-bottom:0;
+}
+
+
+/* cartões inferiores */
+
+.analysis-panels {
+  margin-top:0;
+}
+
+
+
+
+/* refinamento barra atualizações */
+
+.updates-box {
+  margin-top:45px;
+  margin-bottom:10px;
+  background:#f6f7f1;
+  border-radius:20px;
+  padding:24px 30px;
+}
+
+
+/* aproxima blocos da sidebar */
+
+.entity-history {
+  margin-bottom:6px;
+}
+
+
+.project-summary {
+  margin-top:0;
+}
+
+
+
+/* botão principal alertas */
+
+.updates-box button:last-child {
+  background:#111;
+  color:white;
+  border:none;
+}
+
+
+
+
+.portal-layout {
+
+display:flex;
+min-height:100vh;
+
+}
+
+
+.portal-content {
+
+flex:1;
+padding:40px;
+
+}
+
+

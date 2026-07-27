@@ -657,8 +657,12 @@ def obter_concurso(
                 tipo_procedimento
             FROM concursos
             WHERE id = ?
+               OR link LIKE ?
             """,
-            (concurso_id,),
+            (
+                concurso_id,
+                f"%id={concurso_id}%",
+            ),
         ).fetchone()
 
     if linha is None:

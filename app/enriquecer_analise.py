@@ -1,4 +1,5 @@
 import json
+from geocoding import obter_coordenadas
 from pathlib import Path
 
 

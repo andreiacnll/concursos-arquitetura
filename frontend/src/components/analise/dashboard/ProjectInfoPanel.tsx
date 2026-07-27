@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { FileText, Users, Scale, AlertTriangle, History } from "lucide-react";
 import ProjectMap from "../mapa/ProjectMap";
 
 
@@ -22,17 +23,22 @@ export default function ProjectInfoPanel({
   };
 
 
-  const entregaveis =
-    ficha?.entregaveis?.principais ?? [];
+  const entregaveis = ficha?.entregaveis?.principais ?? [];
+  const especialidades = ficha?.especialidades?.lista ?? [];
+  const requisitos = ficha?.requisitos?.obrigatorios ?? [];
+  const riscos = ficha?.requisitos?.riscos_participacao ?? [];
 
-  const especialidades =
-    ficha?.especialidades?.lista ?? [];
 
-  const requisitos =
-    ficha?.requisitos?.obrigatorios ?? [];
+  const latitude = ficha?.localizacao?.latitude;
+  const longitude = ficha?.localizacao?.longitude;
 
-  const riscos =
-    ficha?.requisitos?.riscos_participacao ?? [];
+
+  const mapaUrl =
+    latitude && longitude
+      ? `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+          ficha?.localizacao?.cidade || "Portugal"
+        )}`;
 
 
 
@@ -41,51 +47,11 @@ export default function ProjectInfoPanel({
     <aside className="project-info-panel">
 
 
-      <section className="project-summary">
-
-        <h3>
-          Sobre o projeto
-        </h3>
-
-
-        <p>
-          {ficha?.identificacao?.titulo}
-        </p>
-
-
-        <strong>
-          📍 {ficha?.localizacao?.morada}
-        </strong>
-
-
-        <span>
-          {ficha?.localizacao?.cidade}
-        </span>
-
-
-        {ficha?.localizacao?.latitude && (
-
-          <ProjectMap
-            latitude={ficha.localizacao.latitude}
-            longitude={ficha.localizacao.longitude}
-          />
-
-        )}
-
-
-        <button className="map-button">
-          Ver localização ↗
-        </button>
-
-
-      </section>
-
-
-
+      <div className="sidebar-cards">
 
       <ExpandableCard
         id="entregaveis"
-        icon="📄"
+        icon={<FileText size={18}/>} 
         title="Entregáveis principais"
         description="Lista completa dos documentos e elementos a apresentar."
         count={`${entregaveis.length} entregáveis`}
@@ -95,10 +61,9 @@ export default function ProjectInfoPanel({
       />
 
 
-
       <ExpandableCard
         id="especialidades"
-        icon="👥"
+        icon={<Users size={18}/>} 
         title="Especialidades e consultores"
         description="Todas as especialidades previstas no programa preliminar."
         count={`${especialidades.length} especialidades`}
@@ -108,10 +73,9 @@ export default function ProjectInfoPanel({
       />
 
 
-
       <ExpandableCard
         id="requisitos"
-        icon="⚖"
+        icon={<Scale size={18}/>} 
         title="Requisitos de habilitação"
         description="Condições obrigatórias para participação."
         count={`${requisitos.length} requisitos`}
@@ -121,10 +85,9 @@ export default function ProjectInfoPanel({
       />
 
 
-
       <ExpandableCard
         id="riscos"
-        icon="⚠"
+        icon={<AlertTriangle size={18}/>} 
         title="Riscos e oportunidades"
         description="Principais fatores identificados."
         count={`${riscos.length} alertas`}
@@ -135,17 +98,65 @@ export default function ProjectInfoPanel({
 
 
 
+      </div>
+
 
       <section className="entity-history">
 
-        <h3>
-          Histórico da entidade
-        </h3>
-
+        <h3><History size={18}/> Histórico da entidade</h3>
 
         <p>
           Informação disponível brevemente
         </p>
+
+      </section>
+
+
+
+
+      <section className="project-summary">
+
+
+        <h3>
+          Sobre o projeto
+        </h3>
+
+
+        <p>
+          {ficha?.descricao ||
+          "Requalificação, revitalização e modernização do projeto. Intervenção em edifício existente com integração urbana, funcional e técnica."}
+        </p>
+
+
+        {latitude && longitude && (
+
+          <ProjectMap
+            latitude={latitude}
+            longitude={longitude}
+          />
+
+        )}
+
+
+        <span className="project-location">
+
+          📍 {ficha?.localizacao?.cidade || "Localização disponível"}
+
+        </span>
+
+
+        <a
+          className="map-button"
+          href={mapaUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Ver localização ↗
+        </a>
+
+
+
+
 
 
       </section>
@@ -224,7 +235,6 @@ function ExpandableCard({
 
 
       </button>
-
 
 
       {isOpen && (

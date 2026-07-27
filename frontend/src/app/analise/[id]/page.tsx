@@ -7,8 +7,8 @@ import HeroAnalise from "@/components/analise/dashboard/HeroAnalise";
 import MetricsBar from "@/components/analise/dashboard/MetricsBar";
 import DecisionDashboard from "@/components/analise/dashboard/DecisionDashboard";
 import Timeline from "@/components/analise/dashboard/Timeline";
-import AnalysisPanels from "@/components/analise/dashboard/AnalysisPanels";
 import UpdatesBox from "@/components/analise/dashboard/UpdatesBox";
+import AnalysisPanels from "@/components/analise/dashboard/AnalysisPanels";
 import ProjectInfoPanel from "@/components/analise/dashboard/ProjectInfoPanel";
 import ProjectSummary from "@/components/analise/dashboard/ProjectSummary";
 import EligibilityCard from "@/components/analise/dashboard/EligibilityCard";
@@ -66,6 +66,19 @@ export default async function AnalisePage({
   const ficha = dados.analise;
 
 
+  const concursoResposta = await fetch(
+    `${API_URL}/concursos/${id}`,
+    {
+      cache: "no-store",
+    }
+  );
+
+
+  const concurso = concursoResposta.ok
+    ? await concursoResposta.json()
+    : null;
+
+
   return (
     <AnaliseLayout>
 
@@ -74,6 +87,7 @@ export default async function AnalisePage({
 
         <HeroAnalise
           identificacao={ficha.identificacao || ficha}
+          concurso={concurso}
         />
 
 
@@ -110,6 +124,9 @@ export default async function AnalisePage({
             />
 
 
+            <UpdatesBox />
+
+
           </div>
 
 
@@ -123,7 +140,7 @@ export default async function AnalisePage({
         </div>
 
 
-<UpdatesBox />
+
 
 
       </main>

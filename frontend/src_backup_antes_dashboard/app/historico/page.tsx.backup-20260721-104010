@@ -1,0 +1,132 @@
+import Link from "next/link";
+import { ArrowLeft, Archive, CalendarDays, ExternalLink } from "lucide-react";
+import type { Concurso } from "@/components/competition-types";
+
+async function getHistorico(): Promise<Concurso[]> {
+  try {
+    const response = await fetch(
+      "http://127.0.0.1:8000/concursos?estado=encerrado&limite=100",
+      { cache: "no-store" },
+    );
+
+    if (!response.ok) {
+      throw new Error(`A API respondeu com o estado ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data.resultados)) return data.resultados;
+
+    return [];
+  } catch (error) {
+    console.error("Erro ao carregar histórico:", error);
+    return [];
+  }
+}
+
+function formatDate(value: string | null) {
+  if (!value) return "Sem data";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("pt-PT", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+}
+
+export default async function HistoricoPage() {
+  const concursos = await getHistorico();
+
+  return (
+    <main className="history-page">
+      <header className="history-header">
+        <div className="site-container history-navbar">
+          <Link href="/" className="history-back">
+            <ArrowLeft size={18} />
+            Voltar aos concursos
+          </Link>
+
+          <Link href="/" className="history-brand">
+            ARQCONCURSOS
+          </Link>
+        </div>
+      </header>
+
+      <section className="site-container history-hero">
+        <div>
+          <p className="eyebrow">Arquivo</p>
+          <h1>Histórico de concursos</h1>
+          <p>
+            Consulta concursos públicos de arquitetura cujo prazo já terminou.
+          </p>
+        </div>
+
+        <div className="history-counter">
+          <Archive size={24} />
+          <div>
+            <strong>{concursos.length}</strong>
+            <span>concursos encerrados</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="site-container history-list">
+        {concursos.length > 0 ? (
+          concursos.map((concurso) => (
+            <article key={concurso.id} className="history-item">
+              <div className="history-item-main">
+                <p className="history-entity">{concurso.entidade}</p>
+                <h2>{concurso.titulo}</h2>
+
+                <div className="history-meta">
+                  <span>
+                    <CalendarDays size={15} />
+                    Publicado em {formatDate(concurso.data)}
+                  </span>
+
+                  <span>
+                    <CalendarDays size={15} />
+                    Prazo: {formatDate(concurso.data_limite)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="history-item-side">
+                <span className="history-status">Encerrado</span>
+
+                {concurso.preco_base && (
+                  <strong className="history-value">{concurso.preco_base}</strong>
+                )}
+
+                <a
+                  href={concurso.link}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="history-link"
+                >
+                  Ver anúncio
+                  <ExternalLink size={15} />
+                </a>
+              </div>
+            </article>
+          ))
+        ) : (
+          <div className="history-empty">
+            <Archive size={32} />
+            <h2>Ainda não existem concursos no histórico</h2>
+            <p>
+              Quando existirem concursos encerrados, irão aparecer nesta página.
+            </p>
+          </div>
+        )}
+      </section>
+    </main>
+  );
+}

@@ -1,0 +1,22 @@
+export type Concurso = {
+  data_fim_calculada?: string;
+  data_entrega_propostas?: string;
+  data_publicacao_iso?: string;
+  id: number;
+  titulo: string;
+  entidade: string;
+  link: string;
+  data: string;
+  relevante: number;
+  data_limite: string | null;
+  preco_base: string | null;
+  estado: "aberto" | "encerrado" | "sem_prazo";
+  distrito?: string | null;
+  municipio?: string | null;
+  categoria?: string | null;
+  tipo_procedimento?: string | null;
+  criterio_tipo?: string | null;
+  criterio_resumo?: string | null;
+  criterio_detalhe?: string | null;
+  entregaveis?: string | null;
+};

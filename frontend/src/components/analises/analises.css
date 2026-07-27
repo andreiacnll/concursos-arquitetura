@@ -1,0 +1,247 @@
+
+.analises-page {
+  width:100%;
+  max-width:1400px;
+  margin:0 auto;
+  padding:32px 40px;
+}
+
+
+/* HEADER */
+
+.analises-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:28px;
+}
+
+
+.analises-header h1 {
+  font-size:36px;
+  margin:0;
+  font-weight:600;
+}
+
+
+.analises-header p {
+  margin-top:8px;
+  color:#666;
+}
+
+
+.analises-header span {
+  font-size:12px;
+  background:#edf2e8;
+  padding:5px 10px;
+  border-radius:20px;
+}
+
+
+
+/* BOTAO */
+
+.analises-header button {
+  background:white;
+  border:1px solid #ddd;
+  padding:12px 20px;
+  border-radius:12px;
+}
+
+
+
+/* METRICAS */
+
+.analises-stats {
+
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:18px;
+margin-bottom:28px;
+
+}
+
+
+.analises-stats div {
+
+background:white;
+border:1px solid #e7e7e0;
+border-radius:16px;
+padding:20px;
+
+}
+
+
+.analises-stats strong {
+
+font-size:30px;
+
+}
+
+
+
+/* CAIXAS */
+
+.analises-card {
+
+background:white;
+border:1px solid #e7e7e0;
+border-radius:18px;
+padding:24px;
+margin-bottom:24px;
+
+}
+
+
+.analises-card h2 {
+
+font-size:18px;
+margin-bottom:16px;
+
+}
+
+
+
+/* LINHAS */
+
+.analise-item {
+
+display:grid;
+grid-template-columns:2.2fr 1fr auto;
+align-items:center;
+gap:25px;
+
+padding:18px 0;
+border-bottom:1px solid #eee;
+
+}
+
+
+.analise-item:last-child {
+
+border-bottom:none;
+
+}
+
+
+
+.analise-item h3 {
+
+font-size:16px;
+margin:0 0 6px;
+
+}
+
+
+.analise-item p {
+
+margin:0;
+color:#777;
+font-size:14px;
+
+}
+
+
+
+/* PROGRESS */
+
+.progress {
+
+display:flex;
+align-items:center;
+gap:12px;
+
+}
+
+
+.progress div {
+
+height:7px;
+background:#718d59;
+border-radius:10px;
+width:70%;
+
+}
+
+
+.progress p {
+
+font-size:14px;
+color:#333;
+
+}
+
+
+/* LINKS */
+
+.analise-item a {
+
+border:1px solid #ddd;
+padding:10px 18px;
+border-radius:12px;
+text-decoration:none;
+color:#111;
+white-space:nowrap;
+
+}
+
+
+
+@media(max-width:1000px){
+
+.analises-stats{
+grid-template-columns:1fr 1fr;
+}
+
+.analise-item{
+grid-template-columns:1fr;
+}
+
+}
+
+
+
+.analises-stats div{
+display:flex;
+flex-direction:column;
+gap:8px;
+}
+
+
+.analises-stats svg{
+color:#718d59;
+margin-bottom:8px;
+}
+
+
+.analise-title{
+display:flex;
+align-items:center;
+gap:12px;
+}
+
+
+.analise-title svg{
+color:#718d59;
+flex-shrink:0;
+}
+
+
+
+
+.score-box{
+
+background:#f4f6ef;
+padding:14px 20px;
+border-radius:14px;
+
+}
+
+
+.score-box strong{
+
+font-size:13px;
+
+}
+
+

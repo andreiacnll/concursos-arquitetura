@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
 import {
   Building2,
   Clock3,
@@ -11,9 +14,52 @@ import {
 } from "lucide-react";
 
 
-export default function Sidebar() {
+const items = [
+  {
+    nome:"Concursos",
+    href:"/",
+    icon:Building2,
+  },
+  {
+    nome:"Histórico",
+    href:"/historico",
+    icon:Clock3,
+  },
+  {
+    nome:"Favoritos",
+    href:"/favoritos",
+    icon:Heart,
+  },
+  {
+    nome:"Análises",
+    href:"/analise",
+    icon:ChartNoAxesColumn,
+  },
+  {
+    nome:"Entidades",
+    href:"/entidades",
+    icon:Landmark,
+  },
+  {
+    nome:"Alertas",
+    href:"/alertas",
+    icon:Bell,
+  },
+  {
+    nome:"Perfil",
+    href:"/perfil",
+    icon:UserRound,
+  },
+];
+
+
+export default function Sidebar(){
+
+  const pathname = usePathname();
+
 
   return (
+
     <aside className="sidebar">
 
 
@@ -34,51 +80,42 @@ export default function Sidebar() {
       <nav className="sidebar-menu">
 
 
-        <a>
-          <Building2 size={18}/>
-          <span>Concursos</span>
-        </a>
+        {items.map((item)=>{
+
+          const Icon = item.icon;
 
 
-        <a>
-          <Clock3 size={18}/>
-          <span>Histórico</span>
-        </a>
+          const ativo =
+            pathname === item.href ||
+            pathname.startsWith(item.href + "/");
 
 
-        <a>
-          <Heart size={18}/>
-          <span>Favoritos</span>
-        </a>
+          return (
 
+            <Link
+              key={item.nome}
+              href={item.href}
+              className={ativo ? "active" : ""}
+            >
 
-        <a className="active">
-          <ChartNoAxesColumn size={18}/>
-          <span>Análises</span>
-        </a>
+              <Icon size={18}/>
 
+              <span>
+                {item.nome}
+              </span>
 
-        <a>
-          <Landmark size={18}/>
-          <span>Entidades</span>
-        </a>
+            </Link>
 
+          );
 
-        <a>
-          <Bell size={18}/>
-          <span>Alertas</span>
-        </a>
-
-
-        <a>
-          <UserRound size={18}/>
-          <span>Perfil</span>
-        </a>
+        })}
 
 
       </nav>
 
 
     </aside>
+
   );
+
 }

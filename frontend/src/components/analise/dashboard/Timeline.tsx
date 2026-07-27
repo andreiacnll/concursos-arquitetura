@@ -115,7 +115,7 @@ export default function Timeline({
 
                     {concluido
                       ? "✓"
-                      : index + 1
+                      : ""
                     }
 
                   </div>
@@ -127,9 +127,8 @@ export default function Timeline({
                       {fase}
                     </strong>
 
-
                     <span>
-                      {evento?.data ?? ""}
+                      {evento?.data ?? "Por definir"}
                     </span>
 
                   </div>
