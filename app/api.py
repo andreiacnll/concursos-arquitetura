@@ -454,6 +454,62 @@ def executar_listagem(
     }
 
 
+
+
+# =====================================================
+# ANÁLISE AUTOMÁTICA DE CONCURSOS
+# =====================================================
+
+ANALISE_DIR = BASE_DIR / "analise_documentos"
+
+
+@app.get("/analise/{id_concurso}")
+def obter_analise(
+    id_concurso: str,
+) -> dict[str, Any]:
+
+    pasta = ANALISE_DIR / id_concurso
+
+    ficha = pasta / "ficha.json"
+    analise_ai = pasta / "analise_ai.json"
+
+    if not ficha.exists():
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                "Ficha não encontrada "
+                f"para o concurso {id_concurso}"
+            ),
+        )
+
+    try:
+        dados = json.loads(
+            ficha.read_text(
+                encoding="utf-8"
+            )
+        )
+
+        if analise_ai.exists():
+            dados_ai = json.loads(
+                analise_ai.read_text(
+                    encoding="utf-8"
+                )
+            )
+
+            dados.update(dados_ai)
+
+    except Exception as erro:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro a ler análise: {erro}",
+        ) from erro
+
+    return {
+        "id_concurso": id_concurso,
+        "analise": dados,
+    }
+
+
 @app.get("/concursos")
 def listar_concursos(
     pesquisa: str | None = Query(
