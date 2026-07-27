@@ -63,6 +63,35 @@ def inicio() -> dict[str, str]:
     }
 
 
+
+
+@app.get("/concursos/{concurso_id}/timeline")
+def obter_timeline_concurso(
+    concurso_id: int,
+) -> list[dict[str, Any]]:
+
+    with closing(obter_conexao()) as conexao:
+
+        eventos = conexao.execute(
+            """
+            SELECT
+                tipo,
+                titulo,
+                data,
+                origem
+            FROM timeline_eventos
+            WHERE concurso_id = ?
+            ORDER BY data
+            """,
+            (concurso_id,),
+        ).fetchall()
+
+    return [
+        dict(evento)
+        for evento in eventos
+    ]
+
+
 @app.get("/health")
 def healthcheck() -> dict[str, str]:
     try:
