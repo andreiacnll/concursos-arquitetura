@@ -43,3 +43,10 @@ analise_documentos/*/pecas_procedimentais/
 analise_documentos/*/extraido/
 analise_documentos/*/pecas_download/
 analise_documentos/*/pecas_download
+
+# backups locais
+*.backup*
+*_backup*
+*.old.*
+*.before*
+src_backup_*
