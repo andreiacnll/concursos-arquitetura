@@ -1,381 +1,46 @@
 
+/* ===========================
+   PORTAL CONCURSOS
+   ANALISE DASHBOARD
+   =========================== */
+
+
+* {
+  box-sizing:border-box;
+}
+
+
+/* largura geral */
+
+.site-container {
+
+  width:100%;
+  max-width:1500px;
+
+  margin:0 auto;
+
+  padding:0 40px;
+
+}
+
+
+
+
+/* topo */
+
 .metrics-bar {
+
   display:grid;
+
   grid-template-columns:repeat(5,1fr);
-  background:white;
-  border:1px solid #e8e8e2;
-  border-radius:22px;
-  overflow:hidden;
-}
-
-
-.metric-item {
-  padding:32px 26px;
-  border-right:1px solid #eeeeea;
-}
-
-.metric-item:last-child {
-  border-right:none;
-}
-
-
-.metric-item span {
-  display:block;
-  font-size:12px;
-  color:#555;
-  margin-bottom:14px;
-}
-
-
-.metric-item strong {
-  display:block;
-  font-size:22px;
-  font-weight:600;
-}
-
-
-.metric-item small {
-  display:block;
-  margin-top:10px;
-  color:#777;
-}
-
-
-.criteria-line {
-  display:flex;
-  width:90px;
-  height:3px;
-  margin-top:12px;
-  border-radius:20px;
-  overflow:hidden;
-  background:#eadfc5;
-}
-
-
-.criteria-quality {
-  width:70%;
-  background:#6d9360;
-}
-
-
-.criteria-price {
-  width:30%;
-  background:#eadfc5;
-}
-
-
-
-
-.decision-dashboard {
 
   background:white;
+
   border:1px solid #e8e8e2;
-  border-radius:22px;
-  padding:32px;
 
-}
+  border-radius:18px;
 
-
-.decision-title h2 {
-
-  font-size:22px;
-  margin:0;
-
-}
-
-
-.decision-subtitle {
-
-  color:#777;
-  margin-top:8px;
-
-}
-
-
-.decision-content {
-
-  display:grid;
-  grid-template-columns:180px 1fr 1fr;
-  gap:40px;
-  margin-top:35px;
-
-}
-
-
-.score-circle {
-
-  width:90px;
-  height:90px;
-  border:8px solid #6d9360;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-
-}
-
-
-.score-circle strong {
-
-  font-size:32px;
-
-}
-
-
-.score-circle small {
-
-  font-size:12px;
-
-}
-
-
-.eligibility-card,
-.risk-card {
-
-  background:#fafaf7;
-  border-radius:16px;
-  padding:25px;
-
-}
-
-
-
-.decision-content {
-
-  display:grid;
-  grid-template-columns:180px 1fr 1fr;
-  gap:50px;
-  align-items:start;
-  margin-top:35px;
-
-}
-
-
-.decision-score {
-
-  border-right:1px solid #eeeeea;
-  padding-right:30px;
-
-}
-
-
-.score-circle {
-
-  width:90px;
-  height:90px;
-  border:8px solid #6d9360;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  margin-top:15px;
-
-}
-
-
-.score-circle strong {
-
-  font-size:32px;
-  line-height:1;
-
-}
-
-
-.score-circle small {
-
-  font-size:12px;
-
-}
-
-
-.eligibility-card,
-.risk-card {
-
-  background:#fafaf7;
-  border-radius:16px;
-  padding:25px;
-  min-height:170px;
-
-}
-
-
-.decision-content h4 {
-
-  margin-top:0;
-
-}
-
-
-
-
-.decision-content {
-
-  display:grid;
-  grid-template-columns:180px 1fr 220px 220px;
-  gap:32px;
-  align-items:start;
-  margin-top:35px;
-
-}
-
-
-.decision-score {
-
-  border-right:1px solid #eeeeea;
-  padding-right:30px;
-
-}
-
-
-.score-circle {
-
-  width:100px;
-  height:100px;
-  border:8px solid #6d9360;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  margin-top:18px;
-
-}
-
-
-.score-circle strong {
-
-  font-size:34px;
-
-}
-
-
-.eligibility-card,
-.risk-card {
-
-  background:#fafaf7;
-  border-radius:16px;
-  padding:22px;
-  min-height:160px;
-
-}
-
-
-.decision-content h4 {
-
-  margin-top:0;
-
-}
-
-
-
-.eligibility-card,
-.risk-card {
-
-  min-height:120px;
-
-}
-
-
-
-.score-circle {
-
-  width:110px;
-  height:110px;
-
-}
-
-
-.score-circle strong {
-
-  font-size:38px;
-
-}
-
-
-
-.decision-content {
-
-  gap:45px;
-
-}
-
-
-
-
-.decision-content {
-
-  grid-template-columns:160px 1fr 220px 220px;
-  gap:28px;
-
-}
-
-
-.decision-dashboard {
-
-  padding:28px 32px;
-
-}
-
-
-
-
-/* ajustes finais decision dashboard */
-
-.decision-dashboard {
-
-  border-top:none;
-
-}
-
-
-.decision-score {
-
-  min-width:150px;
-
-}
-
-
-.decision-score h3 {
-
-  white-space:nowrap;
-  font-size:15px;
-  margin-top:18px;
-
-}
-
-
-
-
-/* ajustes finais decision dashboard */
-
-.decision-dashboard {
-
-  border-top:none;
-
-}
-
-
-.decision-score {
-
-  min-width:150px;
-
-}
-
-
-.decision-score h3 {
-
-  white-space:nowrap;
-  font-size:15px;
-  margin-top:18px;
-
-}
-
-
-
-
-.metrics-bar {
+  overflow:hidden;
 
   margin-bottom:24px;
 
@@ -383,1541 +48,482 @@
 
 
 
+.metric-item {
+
+ padding:24px;
+
+ border-right:1px solid #eee;
+
+}
+
+
+
+.metric-item:last-child {
+
+ border:none;
+
+}
+
+
+
+.metric-item span {
+
+ font-size:11px;
+
+ color:#777;
+
+}
+
+
+.metric-item strong {
+
+ display:block;
+
+ margin-top:10px;
+
+ font-size:22px;
+
+}
+
+
+
+/* layout principal */
+
+
+.analysis-layout-reference {
+
+ display:grid;
+
+ grid-template-columns:minmax(0,1fr) 360px;
+
+ gap:24px;
+
+ align-items:start;
+
+}
+
+
+
+.analysis-left {
+
+ display:flex;
+
+ flex-direction:column;
+
+ gap:18px;
+
+}
+
+
+
+.analysis-right {
+
+ width:360px;
+
+}
+
+
+
+/* decisão */
+
+
+.decision-dashboard {
+
+ background:white;
+
+ border:1px solid #e8e8e2;
+
+ border-radius:22px;
+
+ padding:28px;
+
+}
+
+
 
 .decision-content {
 
-  display:grid;
-  grid-template-columns:180px 1fr 220px 220px;
-  gap:35px;
-  align-items:start;
+ display:grid;
 
-}
+ grid-template-columns:
 
+ 180px
+ 1fr
+ 220px
+ 220px;
 
-.eligibility-card,
-.risk-card {
-
-  background:#fafaf7;
-  border-radius:16px;
-  padding:24px;
-
-  min-height:150px;
-
-}
-
-
-.eligibility-card strong,
-.risk-card strong {
-
-  display:inline-block;
-  margin:12px 0;
-  font-size:14px;
-
-}
-
-
-.eligibility-card p,
-.risk-card p {
-
-  font-size:14px;
-  line-height:1.5;
-  margin:0;
+ gap:24px;
 
 }
 
 
 
 
-/* ajustes finais decision dashboard */
-
-.decision-content {
-  grid-template-columns: 180px 1fr 240px 240px;
-  gap:35px;
-}
+/* timeline */
 
 
-.score-circle {
-  width:100px;
-  height:100px;
-}
+.timeline {
 
+ background:white;
 
-.score-circle strong {
-  font-size:36px;
-}
+ border-radius:22px;
 
+ border:1px solid #e8e8e2;
 
-.criteria-line {
-  width:80px;
-  height:5px;
+ padding:28px;
+
 }
 
 
 
+/* cards inferiores */
 
-/* refinamento decision */
 
-.decision-content {
-  align-items:start;
+.analysis-panels {
+
+ display:grid;
+
+ grid-template-columns:repeat(3,1fr);
+
+ gap:18px;
+
 }
 
-
-.decision-score {
-  padding-top:8px;
-}
-
-
-.eligibility-card,
-.risk-card {
-  min-height:150px;
-}
-
-
-
-
-/* esconder navegação antiga temporariamente */
-
-.decision-dashboard + div > a {
-  display:none;
-}
-
-
-
-
-
-
-
-.analysis-card,
-.project-summary {
-  background:white;
-  border:1px solid #e8e8e2;
-  border-radius:22px;
-  padding:28px;
-}
-
-
-.analysis-card h3,
-.project-summary h2 {
-  margin:0 0 16px;
-  font-size:18px;
-}
-
-
-.analysis-card p,
-.project-summary p {
-  color:#555;
-  line-height:1.6;
-}
-
-
-.analysis-card strong {
-  display:block;
-  margin-top:20px;
-}
-
-
-.project-summary {
-  margin-top:30px;
-}
-
-
-
-
-.analysis-card strong {
-  display:inline-block;
-  margin-top:18px;
-  font-size:16px;
-  font-weight:600;
-  line-height:1.4;
-}
 
 
 .analysis-card {
-  min-height:220px;
+
+ background:white;
+
+ border:1px solid #e8e8e2;
+
+ border-radius:18px;
+
+ padding:22px;
+
+ min-height:150px;
+
+}
+
+
+
+/* sidebar direita */
+
+
+.project-info-panel {
+
+ display:flex;
+
+ flex-direction:column;
+
+ gap:12px;
+
+}
+
+
+
+.project-summary,
+.info-card,
+.entity-history {
+
+ background:white;
+
+ border:1px solid #e8e8e2;
+
+ border-radius:18px;
+
+ padding:20px;
+
+}
+
+
+
+.info-card-button {
+
+ width:100%;
+
+ display:flex;
+
+ align-items:center;
+
+ gap:12px;
+
+ background:none;
+
+ border:0;
+
+ cursor:pointer;
+
+}
+
+
+
+.info-card-content {
+
+ flex:1;
+
+}
+
+
+
+.info-card h4 {
+
+ margin:0;
+
+ font-size:14px;
+
+}
+
+
+
+.info-card p {
+
+ font-size:12px;
+
+ color:#777;
+
+}
+
+
+
+.info-card-count span {
+
+ font-size:11px;
+
+ background:#f4f4ef;
+
+ padding:5px 10px;
+
+ border-radius:20px;
+
+}
+
+
+
+.info-card-details {
+
+ margin-top:16px;
+
+ padding-top:16px;
+
+ border-top:1px solid #eee;
+
+ font-size:13px;
+
+ line-height:1.7;
+
+}
+
+
+
+/* mapa */
+
+
+.project-map {
+
+ height:170px;
+
+ margin-top:15px;
+
+ border-radius:14px;
+
+ overflow:hidden;
+
+}
+
+
+
+/* mobile */
+
+
+@media(max-width:1200px){
+
+ .analysis-layout-reference {
+
+  grid-template-columns:1fr;
+
+ }
+
+
+ .analysis-right {
+
+  width:auto;
+
+ }
+
+
+ .analysis-panels {
+
+  grid-template-columns:1fr;
+
+ }
+
 }
 
 
 
 
-.project-summary h2 {
-  font-size:22px;
-  margin-bottom:12px;
+.analysis-card strong {
+
+    display:block;
+
+    margin-top:14px;
+
+    font-size:15px;
+
+    line-height:1.4;
+
+    font-weight:600;
+
 }
+
+
+
+.analysis-card p {
+
+    font-size:13px;
+
+    line-height:1.5;
+
+    color:#666;
+
+}
+
+
+
+.analysis-card {
+
+    min-height:150px;
+
+}
+
+
+
+.info-card-details {
+
+    font-size:12px;
+
+}
+
+
+
+.info-card-details div {
+
+    margin-bottom:8px;
+
+}
+
 
 
 .project-summary {
-  min-height:140px;
+
+    order:10;
+
+}
+
+
+.project-summary p {
+
+    font-size:12px;
+
 }
 
 
 
 
-.timeline-dashboard {
-  background:white;
-  border:1px solid #e8e8e2;
-  border-radius:22px;
-  padding:28px;
-  margin-top:30px;
-}
 
+.analysis-panels {
 
-.timeline-dashboard h2 {
-  font-size:22px;
-  margin:0 0 24px;
-}
-
-
-.timeline-grid {
   display:grid;
   grid-template-columns:repeat(3,1fr);
-  gap:20px;
-}
-
-
-.timeline-grid div {
-  padding:20px;
-  background:#fafaf7;
-  border-radius:14px;
-}
-
-
-.timeline-grid span {
-  display:block;
-  font-size:12px;
-  color:#777;
-  margin-bottom:10px;
-}
-
-
-.timeline-grid strong {
-  font-size:16px;
-}
-
-
-
-
-.timeline-dashboard {
-  background:white;
-  border:1px solid #e8e8e2;
-  border-radius:22px;
-  padding:32px;
-  margin-top:20px;
-}
-
-
-.timeline-dashboard h2 {
-  font-size:20px;
-  margin-bottom:35px;
-}
-
-
-.timeline-track {
-
-  display:flex;
-  justify-content:space-between;
-  position:relative;
-
-}
-
-
-.timeline-track::before {
-
-  content:"";
-  position:absolute;
-  top:18px;
-  left:35px;
-  right:35px;
-  height:2px;
-  background:#e5e5df;
-
-}
-
-
-.timeline-step {
-
-  position:relative;
-  width:16%;
-  text-align:center;
-  z-index:1;
-
-}
-
-
-.timeline-icon {
-
-  width:38px;
-  height:38px;
-  margin:auto;
-  border-radius:50%;
-  background:#f1f1ec;
-  border:2px solid #ddd;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:16px;
-
-}
-
-
-.timeline-step.active .timeline-icon {
-
-  background:#ffffff;
-  border-color:#6d9360;
-  color:#6d9360;
-
-}
-
-
-.timeline-step strong {
-
-  display:block;
-  font-size:13px;
-  margin-top:14px;
-
-}
-
-
-.timeline-step span {
-
-  display:block;
-  font-size:12px;
-  color:#777;
-  margin-top:6px;
-
-}
-
-
-
-
-.timeline-dashboard {
-  background:white;
-  border:1px solid #e8e8e2;
-  border-radius:22px;
-  padding:32px;
-  margin-top:20px;
-}
-
-
-.timeline-dashboard h2 {
-  font-size:20px;
-  margin-bottom:35px;
-}
-
-
-.timeline-track {
-
-  display:flex;
-  justify-content:space-between;
-  position:relative;
-
-}
-
-
-.timeline-track::before {
-
-  content:"";
-  position:absolute;
-  top:18px;
-  left:35px;
-  right:35px;
-  height:2px;
-  background:#e5e5df;
-
-}
-
-
-.timeline-step {
-
-  position:relative;
-  width:16%;
-  text-align:center;
-  z-index:1;
-
-}
-
-
-.timeline-icon {
-
-  width:38px;
-  height:38px;
-  margin:auto;
-  border-radius:50%;
-  background:#f1f1ec;
-  border:2px solid #ddd;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:16px;
-
-}
-
-
-.timeline-step.active .timeline-icon {
-
-  background:#ffffff;
-  border-color:#6d9360;
-  color:#6d9360;
-
-}
-
-
-.timeline-step strong {
-
-  display:block;
-  font-size:13px;
-  margin-top:14px;
-
-}
-
-
-.timeline-step span {
-
-  display:block;
-  font-size:12px;
-  color:#777;
-  margin-top:6px;
-
-}
-
-
-
-
-.decision-positive ul,
-.decision-alerts ul {
-
-  list-style:none;
-  padding:0;
-  margin:18px 0;
-
-}
-
-
-.decision-positive li,
-.decision-alerts li {
-
-  display:flex;
-  align-items:flex-start;
-  gap:10px;
-  margin-bottom:12px;
-  font-size:14px;
-
-}
-
-
-.positive-icon {
-
-  color:#6d9360;
-  font-weight:bold;
-
-}
-
-
-.alert-icon {
-
-  width:18px;
-  height:18px;
-  border-radius:50%;
-  background:#f3dfd8;
-  color:#b45b3b;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:12px;
-  font-weight:bold;
-
-}
-
-
-.decision-alerts {
-
-  margin-top:25px;
-
-}
-
-
-
-
-.criterion-layout {
-  display:flex;
-  align-items:center;
-  gap:30px;
-}
-
-
-.criterion-circle {
-
-  width:130px;
-  height:130px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-}
-
-
-.criterion-inner {
-
-  background:white;
-  width:95px;
-  height:95px;
-  border-radius:50%;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-
-}
-
-
-.criterion-inner strong {
-  font-size:28px;
-}
-
-
-.criterion-inner span {
-  font-size:13px;
-}
-
-
-
-.criterion-values div {
-
-  display:flex;
-  flex-direction:column;
-  margin-bottom:12px;
-
-}
-
-
-.criterion-values strong {
-  font-size:20px;
-}
-
-
-
-.complexity-title {
-
-  display:block;
-  margin:20px 0 15px;
-  font-size:18px;
-
-}
-
-
-
-.complexity-dots {
-
-  display:flex;
-  gap:8px;
-  margin-bottom:20px;
-
-}
-
-
-.complexity-dots span {
-
-  width:14px;
-  height:14px;
-  border-radius:50%;
-  background:#ddd;
-
-}
-
-
-.complexity-dots .active {
-
-  background:#b4232c;
-
-}
-
-
-
-.team-number {
+  gap:14px;
+  margin-top:18px;
 
-  font-size:32px;
-  font-weight:600;
-
-}
-
-
-.team-number span {
-
-  display:block;
-  font-size:14px;
-  font-weight:400;
-
-}
-
-
-.team-list p {
-
-  margin:8px 0;
-
-}
-
-
-
-.analysis-lower{
-margin-top:30px;
-}
-
-
-.accordion-section{
-
-background:white;
-border:1px solid #e8e8e2;
-border-radius:18px;
-margin-bottom:12px;
-overflow:hidden;
-
-}
-
-
-.accordion-section button{
-
-width:100%;
-padding:22px 26px;
-display:flex;
-justify-content:space-between;
-border:0;
-background:white;
-font-size:16px;
-cursor:pointer;
-
-}
-
-
-.accordion-content{
-
-padding:0 26px 22px;
-color:#666;
-
-}
-
-
-.criterion-circle{
-
-width:130px;
-height:130px;
-border-radius:50%;
-background:conic-gradient(
-#6d9360 0 60%,
-#eadfc5 60% 100%
-);
-
-display:flex;
-align-items:center;
-justify-content:center;
-
-}
-
-
-.criterion-circle div{
-
-background:white;
-width:95px;
-height:95px;
-border-radius:50%;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-
-}
-
-
-.updates-box{
-
-margin-top:30px;
-background:white;
-border:1px solid #e8e8e2;
-border-radius:22px;
-padding:30px;
-
-}
-
-
-.updates-box button{
-
-background:#6d9360;
-color:white;
-border:0;
-border-radius:20px;
-padding:12px 24px;
-
-}
-
-
-
-
-/* ===== AJUSTE LAYOUT ANALISE MOCKUP ===== */
-
-
-
-
-
-.analysis-card {
-
-background:white;
-border:1px solid #e8e8e2;
-border-radius:24px;
-padding:30px;
-min-height:300px;
-
-}
-
-
-.analysis-card h3 {
-
-font-size:18px;
-margin-bottom:25px;
-
-}
-
-
-
-.analysis-lower {
-
-margin-top:35px;
-width:100%;
-
-}
-
-
-.accordion-section {
-
-border-radius:18px;
-background:white;
-border:1px solid #e8e8e2;
-margin-bottom:14px;
-
-}
-
-
-.accordion-section button {
-
-height:70px;
-padding:0 30px;
-font-size:16px;
-font-weight:500;
-
-}
-
-
-
-.updates-box {
-
-margin-top:35px;
-border-radius:24px;
-
-}
-
-
-
-.team-number {
-
-font-size:46px;
-font-weight:600;
-line-height:1;
-
-}
-
-
-.team-number span {
-
-font-size:14px;
-color:#777;
-
-}
-
-
-
-.complexity-dots span {
-
-width:16px;
-height:16px;
-
-}
-
-
-
-.criterion-circle {
-
-margin:auto;
-
-}
-
-
-
-@media(max-width:1000px){
-
-
-
-}
-
-
-
-
-
-
-
-.project-info-panel{
-
-background:white;
-border:1px solid #e8e8e2;
-border-radius:24px;
-padding:30px;
-height:fit-content;
-
-}
-
-
-
-.project-info-panel h3{
-
-font-size:20px;
-margin-top:0;
-
-}
-
-
-
-.project-info-panel p{
-
-color:#666;
-line-height:1.6;
-
-}
-
-
-
-.info-block{
-
-border-top:1px solid #eeeeea;
-padding-top:18px;
-margin-top:18px;
-
-}
-
-
-
-.info-block span{
-
-display:block;
-font-size:12px;
-color:#888;
-margin-bottom:8px;
-
-}
-
-
-
-.info-block strong{
-
-font-size:15px;
-
-}
-
-
-
-@media(max-width:1000px){
-
-
-
 }
-
-
-
-/* ============================= */
-/* AJUSTES MOCKUP ANALISE FINAL */
-/* ============================= */
-
-
-/* composição inferior */
-
-
-
-
-/* cartões superiores */
-
-
 
 
 .analysis-card {
 
   background:white;
   border:1px solid #e8e8e2;
-  border-radius:24px;
-  padding:32px;
-  min-height:260px;
+  border-radius:16px;
+  padding:18px;
+
+  min-height:150px;
 
 }
 
 
-.analysis-card h3 {
+.card-label {
 
-  font-size:18px;
+  display:block;
+  font-size:13px;
   font-weight:600;
-  margin-bottom:25px;
+  margin-bottom:12px;
 
 }
 
 
 .analysis-card p {
 
+  font-size:12px;
+  line-height:1.45;
   color:#666;
-  font-size:14px;
-  line-height:1.6;
+  margin-bottom:16px;
 
 }
 
 
-
-/* critério */
-
-.criterion-circle {
-
-  width:130px;
-  height:130px;
-  margin:10px auto 20px;
-
-}
-
-
-.criterion-values {
-
-  display:flex;
-  justify-content:center;
-  gap:40px;
-  margin-top:20px;
-
-}
-
-
-.criterion-values strong {
-
-  font-size:20px;
-
-}
-
-
-.criterion-values span {
+.card-highlight {
 
   display:block;
-  font-size:12px;
-  color:#888;
+  font-size:17px;
+  line-height:1.25;
 
 }
 
 
+.complexity-badge {
 
-/* complexidade */
-
-.complexity-dots {
-
-  display:flex;
-  gap:8px;
-  margin:20px 0;
+  margin-top:18px;
 
 }
 
 
-.complexity-dots span {
+.complexity-badge strong {
 
-  width:14px;
-  height:14px;
-  border-radius:50%;
-  background:#ededed;
+  font-size:22px;
 
 }
 
-
-.complexity-dots span.active {
-
-  background:#719768;
-
-}
-
-
-
-/* equipa */
 
 
 .team-number {
 
-  font-size:52px;
-  font-weight:700;
+  display:flex;
+  flex-direction:column;
+
+  font-size:28px;
   line-height:1;
 
 }
 
 
-.team-number span {
+.team-number small {
 
-  display:block;
-  font-size:13px;
-  color:#999;
-  font-weight:400;
-
-}
-
-
-.analysis-card ul {
-
-  padding-left:0;
-  list-style:none;
-
-}
-
-
-.analysis-card li {
-
-  margin:8px 0;
-  font-size:14px;
-
-}
-
-
-
-/* painel direito */
-
-
-.project-info-panel {
-
-  background:white;
-  border:1px solid #e8e8e2;
-  border-radius:24px;
-  padding:30px;
-
-}
-
-
-.project-info-panel h3 {
-
-  font-size:20px;
-  margin-bottom:20px;
-
-}
-
-
-
-.info-block {
-
-  border-top:1px solid #eeeeea;
-  padding:18px 0;
-
-}
-
-
-.info-block span {
-
-  display:block;
   font-size:12px;
-  color:#999;
-  margin-bottom:8px;
-
-}
-
-
-/* accordions */
-
-
-.analysis-lower {
-
-  margin-top:30px;
-
-}
-
-
-.accordion-section {
-
-  border-radius:18px;
-  margin-bottom:12px;
-  border:1px solid #e8e8e2;
-  background:white;
-
-}
-
-
-.accordion-section button {
-
-  height:72px;
-  padding:0 28px;
-
-}
-
-
-
-/* alertas */
-
-.updates-box {
-
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-
-  background:white;
-  border:1px solid #e8e8e2;
-  border-radius:24px;
-
-  padding:28px 36px;
-  margin-top:35px;
-
-}
-
-
-.updates-box h3 {
-
-  margin:0 0 8px;
-
-}
-
-
-.updates-box p {
-
-  margin:0;
+  font-weight:400;
+  margin-top:8px;
   color:#777;
 
 }
 
 
-.updates-box button {
+@media(max-width:900px){
 
-  background:#111;
-  color:white;
-  border-radius:20px;
-  padding:14px 30px;
-  border:0;
-
+.analysis-panels{
+grid-template-columns:1fr;
 }
 
-
-
-@media(max-width:1100px){
-
-
-
-
-
-
 }
-
-
-
-
-/* CORREÇÃO ESTRUTURA ANALISE */
-
-
-
-
-
-
-
-
-
-
-.analysis-content {
-
-    width:100%;
-
-}
-
-
-
-
-
-.analysis-lower {
-
-    margin-top:25px;
-
-}
-
-
-
-@media(max-width:1200px){
-
-
-
-
-
-
-}
-
-
-
-/* AJUSTE FINAL LAYOUT ANALISE */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-.analysis-card {
-
-background:#fff;
-border:1px solid #eeeeee;
-border-radius:24px;
-padding:32px;
-
-}
-
-
-
-.analysis-card h3 {
-
-font-size:18px;
-margin-bottom:24px;
-
-}
-
-
-
-.analysis-lower {
-
-margin-top:24px;
-
-}
-
-
-
-.analysis-lower > * {
-
-background:white;
-border:1px solid #eeeeee;
-border-radius:16px;
-margin-bottom:12px;
-
-}
-
-
-
-.analysis-card p {
-
-color:#667085;
-line-height:1.6;
-
-}
-
-
-
-.team-number {
-
-font-size:52px;
-font-weight:600;
-
-}
-
-
-
-.team-number span {
-
-display:block;
-font-size:13px;
-font-weight:400;
-color:#999;
-
-}
-
-
-
-@media(max-width:1200px){
-
-
-
-
-
-
-}
-
-
-
-/* Layout lateral análise */
-
-
-
-
-
-
-
-
-
-
-@media(max-width:1200px){
-
-    
-
-
-    
-
-}
-
-
-
-/* CORREÇÃO POSIÇÃO PAINEL LATERAL */
-
-
-
-
-
-
-
-
-
-
-.project-info-panel {
-    width:100%;
-}
-
-
-@media(max-width:1200px){
-
-
-
-
-
-
-}
-
-
-
-/* layout final estilo referência */
-
-
-
-
-
-
-
-
-
-
-/* garante que os cartões ocupam a esquerda */
-
-
-
-
-.analysis-lower {
-    width:100%;
-}
-
-
-@media(max-width:1100px){
-
-
-
-
-
-}
-
-
-
-/* layout final estilo referência */
-
-
-
-
-
-
-
-
-
-
-/* garante que os cartões ocupam a esquerda */
-
-
-
-
-.analysis-lower {
-    width:100%;
-}
-
-
-@media(max-width:1100px){
-
-
-
-
-
-}
-
-
-
-
-
-/* Layout análise - referência */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ANALYSIS PANELS - FINAL */
-
-.analysis-panels {
-    display:grid;
-    grid-template-columns:repeat(3, minmax(0,1fr));
-    gap:24px;
-    width:100%;
-}
-
-
-.analysis-card {
-    background:white;
-    border-radius:24px;
-    padding:32px;
-}
-
-
-.analysis-lower {
-    margin-top:24px;
-}
-
-
-@media(max-width:1000px){
-
-    .analysis-panels {
-        grid-template-columns:1fr;
-    }
-
-}
-
-
-
-/* ==========================
-   LAYOUT ANALISE FINAL
-   ========================== */
-
-
-.analysis-layout-reference {
-
-    display:grid;
-    grid-template-columns:minmax(0,1fr) 330px;
-    gap:28px;
-    align-items:start;
-
-}
-
-
-.analysis-left {
-
-    grid-column:1;
-
-}
-
-
-.analysis-right {
-
-    grid-column:2;
-    grid-row:1;
-    position:sticky;
-    top:24px;
-
-}
-
-
-.analysis-panels {
-
-    display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:24px;
-
-}
-
-
-.analysis-lower {
-
-    margin-top:24px;
-
-}
-
-
-
-@media(max-width:1100px){
-
-    .analysis-layout-reference {
-
-        grid-template-columns:1fr;
-
-    }
-
-
-    .analysis-left,
-    .analysis-right {
-
-        grid-column:auto;
-        grid-row:auto;
-        position:static;
-
-    }
-
-}
-
-
-
-.analysis-layout-reference {
-    grid-template-areas:
-        "left right";
-}
-
-
-.analysis-layout-reference .analysis-left {
-    grid-area:left;
-}
-
-
-.analysis-layout-reference .analysis-right {
-    grid-area:right;
-}
-
-
-
-
-/* coluna direita acompanha toda a análise */
-
-.analysis-layout-reference {
-    align-items:stretch;
-}
-
-
-.analysis-right {
-    height:auto;
-}
-
-
-.analysis-right > * {
-    height:100%;
-}
-
-
-
-
-/* distribuição interna decisão */
-
-.decision-dashboard {
-    display:grid;
-    grid-template-columns:
-        180px
-        minmax(260px,1fr)
-        220px
-        220px;
-    gap:24px;
-}
-
 

@@ -11,58 +11,95 @@ export default function AnalysisPanels({
   estrategia,
   analise,
   equipa,
-  decisao,
   criterio_resumo,
 }: Props) {
+
+
+  const especialidades =
+    analise?.especialidades?.lista ?? [];
+
+
   return (
     <section className="analysis-panels">
 
+
       <article className="analysis-card">
-        <h3>
+
+
+        <span className="card-label">
           Critérios de adjudicação
-        </h3>
+        </span>
+
 
         <p>
-          A avaliação privilegia a qualidade técnica da proposta,
-          reduzindo o peso exclusivo do preço.
+          A avaliação privilegia a componente técnica
+          da proposta face ao preço.
         </p>
 
-        <strong>
-          70% Qualidade · 30% Preço
+
+        <strong className="card-highlight">
+          {criterio_resumo || "60% Qualidade · 40% Preço"}
         </strong>
+
+
       </article>
 
 
+
       <article className="analysis-card">
-        <h3>
+
+
+        <span className="card-label">
           Complexidade
-        </h3>
+        </span>
+
 
         <p>
-          Projeto com exigência técnica elevada e necessidade
-          de coordenação multidisciplinar.
+          {analise?.analise?.motivos?.join(". ")
+          ||
+          "Projeto com elevada exigência técnica e coordenação multidisciplinar."}
         </p>
 
-        <strong>
-          Complexidade média-alta
-        </strong>
+
+        <div className="complexity-badge">
+          <strong>
+            {analise?.analise?.complexidade || "Muito alta"}
+          </strong>
+        </div>
+
+
       </article>
+
+
 
 
       <article className="analysis-card">
-        <h3>
-          Equipa
-        </h3>
+
+
+        <span className="card-label">
+          Equipa necessária
+        </span>
+
 
         <p>
-          Avaliar requisitos curriculares, experiência anterior
-          e dimensão da equipa necessária.
+          {especialidades
+            .slice(0,5)
+            .join(" · ")
+          }
         </p>
 
-        <strong>
-          Verificar qualificações
+
+        <strong className="team-number">
+          {equipa?.total || 21}
+          <small>
+            elementos identificados
+          </small>
         </strong>
+
+
       </article>
+
+
 
     </section>
   );

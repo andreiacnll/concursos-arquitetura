@@ -1,16 +1,27 @@
-import EligibilityCard from "./EligibilityCard";
 import RiskCard from "./RiskCard";
 
 type Props = {
   decisao: any;
-  criterio_resumo?: string;
 };
-
 
 export default function DecisionDashboard({
   decisao,
-  criterio_resumo,
 }: Props) {
+
+  const pontosFortes =
+    decisao?.pontos_fortes ??
+    decisao?.oportunidades ??
+    [];
+
+  const alertas =
+    decisao?.alertas ??
+    [];
+
+  const score =
+    decisao?.score?.valor ??
+    decisao?.score ??
+    0;
+
 
   return (
     <section className="decision-dashboard">
@@ -22,7 +33,7 @@ export default function DecisionDashboard({
         </h2>
 
         <p className="decision-subtitle">
-          A nossa análise rápida para apoiar a sua decisão.
+          Análise automática para apoiar a decisão do atelier.
         </p>
 
       </div>
@@ -31,76 +42,85 @@ export default function DecisionDashboard({
       <div className="decision-content">
 
 
-      <div className="decision-score">
+        <div className="decision-score">
 
-        <span>
-          Score global
-        </span>
+          <span>
+            Score global
+          </span>
 
-        <div className="score-circle">
+          <div className="score-circle">
 
-          <strong>
-            {decisao?.score?.valor || decisao?.score || 0}
-          </strong>
+            <strong>
+              {score}
+            </strong>
 
-          <small>
-            /100
-          </small>
+            <small>
+              /100
+            </small>
+
+          </div>
+
+          <h3>
+            {decisao?.classificacao}
+          </h3>
 
         </div>
 
-        <h3>
-          {decisao.classificacao}
-        </h3>
-
-      </div>
 
 
+        <div className="decision-points">
 
-      <div>
+          <h4>
+            Porque interessa
+          </h4>
 
-        <h4>
-          Principais pontos
-        </h4>
-
-        <ul>
-
-          {decisao.oportunidades.map(
-            (item:string)=>(
-              <li key={item}>
-                ✓ {item}
-              </li>
-            )
-          )}
-
-        </ul>
+          <ul>
+            {pontosFortes.map(
+              (item: string) => (
+                <li key={item}>
+                  ✓ {item}
+                </li>
+              )
+            )}
+          </ul>
 
 
-      </div>
+          <h4>
+            Atenção
+          </h4>
 
+          <ul>
+            {alertas.map(
+              (item: string) => (
+                <li key={item}>
+                  ⚠ {item}
+                </li>
+              )
+            )}
+          </ul>
 
-
-      <div className="eligibility-card">
-
-        <h4>
-          Nível de elegibilidade
-        </h4>
-
-        <strong>
-          Compatível
-        </strong>
-
-        <p>
-          A maioria dos ateliers consegue participar,
-          desde que cumpra os requisitos mínimos.
-        </p>
-
-      </div>
+        </div>
 
 
 
-      <RiskCard />
+        <div className="eligibility-card">
 
+          <h4>
+            Elegibilidade
+          </h4>
+
+          <strong>
+            {decisao?.elegibilidade?.estado ?? "Não avaliado"}
+          </strong>
+
+          <p>
+            {decisao?.elegibilidade?.motivos?.join(". ")}
+          </p>
+
+        </div>
+
+
+        <RiskCard />
 
       </div>
 

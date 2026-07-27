@@ -96,7 +96,6 @@ export default async function AnalisePage({
 
         <DecisionDashboard
           decisao={ficha.decisao}
-          criterio_resumo={ficha.criterio_resumo}
         />
 
 
@@ -108,7 +107,6 @@ export default async function AnalisePage({
               analise={ficha}
               equipa={ficha.equipa}
               decisao={ficha}
-              criterio_resumo={ficha.criterio_resumo}
             />
 
 
@@ -117,7 +115,7 @@ export default async function AnalisePage({
 
           <aside className="analysis-right">
 
-            <ProjectInfoPanel />
+            <ProjectInfoPanel ficha={ficha} />
 
           </aside>
 

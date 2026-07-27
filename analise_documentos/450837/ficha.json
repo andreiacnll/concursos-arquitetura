@@ -166,5 +166,49 @@
     "Eficiência energética",
     "Espaço público",
     "Equipamento municipal"
-  ]
+  ],
+  "entregaveis": {
+    "total": 5,
+    "principais": [
+      "Memória descritiva e justificativa",
+      "Peças desenhadas",
+      "Declaração/certificação da ordem profissional",
+      "Termos de responsabilidade dos técnicos",
+      "Documentos comprovativos da experiência profissional"
+    ]
+  },
+  "especialidades": {
+    "total": 7,
+    "lista": [
+      "Coordenação de Projeto",
+      "Arquitetura",
+      "Estabilidade",
+      "Instalações Elétricas",
+      "AVAC",
+      "Acústica",
+      "SCIE"
+    ]
+  },
+  "requisitos": {
+    "obrigatorios": [
+      "Equipa técnica multidisciplinar",
+      "Técnicos legalmente habilitados",
+      "Comprovação de experiência profissional"
+    ],
+    "riscos_participacao": [
+      "Experiência específica em mercados municipais",
+      "Experiência em projetos de reabilitação",
+      "Necessidade de vários técnicos especializados"
+    ]
+  },
+  "localizacao": {
+    "morada": "Mercado Municipal de Castelo Branco",
+    "cidade": "Castelo Branco",
+    "latitude": 39.8222,
+    "longitude": -7.4909
+  },
+  "entidade": {
+    "nome": "Município de Castelo Branco",
+    "historico_disponivel": false
+  }
 }
