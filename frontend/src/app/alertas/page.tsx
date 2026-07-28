@@ -1,9 +1,12 @@
+import PrivateLayout from "@/components/layout/PrivateLayout";
 import AlertsDashboard from "@/components/alertas/AlertsDashboard";
 
 export default function AlertasPage(){
 
   return (
-    <AlertsDashboard />
+    <PrivateLayout>
+      <AlertsDashboard />
+    </PrivateLayout>
   );
 
 }

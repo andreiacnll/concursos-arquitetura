@@ -1,6 +1,6 @@
 import "@/components/analise/dashboard/dashboard.css";
 import MostrarMais from "@/components/MostrarMais";
-import AnaliseLayout from "@/components/layout/AnaliseLayout";
+import PrivateLayout from "@/components/layout/PrivateLayout";
 import MetricCard from "@/components/analise/MetricCard";
 import ScoreCard from "@/components/analise/ScoreCard";
 import HeroAnalise from "@/components/analise/dashboard/HeroAnalise";
@@ -80,7 +80,7 @@ export default async function AnalisePage({
 
 
   return (
-    <AnaliseLayout>
+    <PrivateLayout>
 
       <main className="site-container">
 
@@ -146,6 +146,6 @@ export default async function AnalisePage({
       </main>
 
 
-    </AnaliseLayout>
+    </PrivateLayout>
   );
 }

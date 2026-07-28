@@ -2,7 +2,6 @@
 
 import AlertCard from "./AlertCard";
 import "./alerts.css";
-import AnaliseLayout from "@/components/layout/AnaliseLayout";
 
 
 const alertas = [
@@ -43,8 +42,6 @@ export default function AlertsDashboard(){
 
 
 return (
-
-<AnaliseLayout>
 
 <main className="site-container">
 
@@ -184,8 +181,6 @@ Recebes uma notificação sempre que surgem concursos relevantes.
 </div>
 
 </main>
-
-</AnaliseLayout>
 
 );
 

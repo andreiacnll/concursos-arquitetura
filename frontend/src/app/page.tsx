@@ -1,5 +1,5 @@
 import CompetitionsDashboard from "@/components/CompetitionsDashboard";
-import Navbar from "@/components/Navbar";
+import PublicLayout from "@/components/layout/PublicLayout";
 import type { Concurso } from "@/components/competition-types";
 
 export const dynamic = "force-dynamic";
@@ -35,9 +35,8 @@ export default async function Home() {
   const concursos = await getConcursos();
 
   return (
-    <main>
-      <Navbar />
+    <PublicLayout>
       <CompetitionsDashboard concursos={concursos} />
-    </main>
+    </PublicLayout>
   );
 }

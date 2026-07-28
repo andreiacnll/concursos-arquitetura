@@ -1,10 +1,10 @@
-import PortalLayout from "@/components/layout/PortalLayout";
+import PrivateLayout from "@/components/layout/PrivateLayout";
 
 export default function EntidadesPage(){
 
 return (
 
-<PortalLayout>
+<PrivateLayout>
 
 <main className="site-container">
 
@@ -16,7 +16,7 @@ Histórico e informação das entidades adjudicantes.
 
 </main>
 
-</PortalLayout>
+</PrivateLayout>
 
 );
 

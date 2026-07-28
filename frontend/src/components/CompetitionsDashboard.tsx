@@ -534,15 +534,16 @@ export default function CompetitionsDashboard({
       <section className="hero-section">
         <div className="site-container hero-grid">
           <div className="hero-copy">
-            <p className="eyebrow">Concursos públicos</p>
+            <p className="eyebrow">Pesquisa de concursos</p>
             <h1>
-              Plataforma de
+              Encontra o
               <br />
-              acompanhamento de concursos
+              concurso certo
             </h1>
             <p className="hero-description">
-              Consulta, pesquisa e acompanhamento de concursos públicos de
-              arquitetura, urbanismo e paisagismo em Portugal.
+              Pesquisa concursos públicos de arquitetura, urbanismo e
+              paisagismo em Portugal. Filtra por categoria, distrito,
+              tipo de procedimento e muito mais.
             </p>
 
             <div className="search-row">

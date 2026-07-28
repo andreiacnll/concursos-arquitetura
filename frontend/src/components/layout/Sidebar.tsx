@@ -4,27 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import {
-  Building2,
-  Clock3,
   Heart,
   ChartNoAxesColumn,
-  Landmark,
   Bell,
   UserRound,
 } from "lucide-react";
 
 
 const items = [
-  {
-    nome:"Concursos",
-    href:"/",
-    icon:Building2,
-  },
-  {
-    nome:"Histórico",
-    href:"/historico",
-    icon:Clock3,
-  },
   {
     nome:"Favoritos",
     href:"/favoritos",
@@ -34,11 +21,6 @@ const items = [
     nome:"Análises",
     href:"/analise",
     icon:ChartNoAxesColumn,
-  },
-  {
-    nome:"Entidades",
-    href:"/entidades",
-    icon:Landmark,
   },
   {
     nome:"Alertas",

@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { ArrowLeft, Archive, CalendarDays, ExternalLink } from "lucide-react";
+import { Archive, CalendarDays, ExternalLink } from "lucide-react";
+import PublicLayout from "@/components/layout/PublicLayout";
 import type { Concurso } from "@/components/competition-types";
 
 export const dynamic = "force-dynamic";
@@ -51,88 +51,77 @@ export default async function HistoricoPage() {
   const concursos = await getHistorico();
 
   return (
-    <main className="history-page">
-      <header className="history-header">
-        <div className="site-container history-navbar">
-          <Link href="/" className="history-back">
-            <ArrowLeft size={18} />
-            Voltar aos concursos
-          </Link>
-
-          <Link href="/" className="history-brand">
-            ARQCONCURSOS
-          </Link>
-        </div>
-      </header>
-
-      <section className="site-container history-hero">
-        <div>
-          <p className="eyebrow">Arquivo</p>
-          <h1>Histórico de concursos</h1>
-          <p>
-            Consulta concursos públicos de arquitetura cujo prazo já terminou.
-          </p>
-        </div>
-
-        <div className="history-counter">
-          <Archive size={24} />
+    <PublicLayout>
+      <main className="history-page">
+        <section className="site-container history-hero">
           <div>
-            <strong>{concursos.length}</strong>
-            <span>concursos encerrados</span>
-          </div>
-        </div>
-      </section>
-
-      <section className="site-container history-list">
-        {concursos.length > 0 ? (
-          concursos.map((concurso) => (
-            <article key={concurso.id} className="history-item">
-              <div className="history-item-main">
-                <p className="history-entity">{concurso.entidade}</p>
-                <h2>{concurso.titulo}</h2>
-
-                <div className="history-meta">
-                  <span>
-                    <CalendarDays size={15} />
-                    Publicado em {formatDate(concurso.data_publicacao_iso ?? concurso.data)}
-                  </span>
-
-                  <span>
-                    <CalendarDays size={15} />
-                    Prazo terminou em {formatDate(concurso.data_entrega_propostas ?? null)}
-                  </span>
-                </div>
-              </div>
-
-              <div className="history-item-side">
-                <span className="history-status">Encerrado</span>
-
-                {concurso.preco_base && (
-                  <strong className="history-value">{concurso.preco_base}</strong>
-                )}
-
-                <a
-                  href={concurso.link}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="history-link"
-                >
-                  Ver anúncio
-                  <ExternalLink size={15} />
-                </a>
-              </div>
-            </article>
-          ))
-        ) : (
-          <div className="history-empty">
-            <Archive size={32} />
-            <h2>Ainda não existem concursos no histórico</h2>
+            <p className="eyebrow">Arquivo</p>
+            <h1>Histórico de concursos</h1>
             <p>
-              Quando existirem concursos encerrados, irão aparecer nesta página.
+              Consulta concursos públicos de arquitetura cujo prazo já terminou.
             </p>
           </div>
-        )}
-      </section>
-    </main>
+
+          <div className="history-counter">
+            <Archive size={24} />
+            <div>
+              <strong>{concursos.length}</strong>
+              <span>concursos encerrados</span>
+            </div>
+          </div>
+        </section>
+
+        <section className="site-container history-list">
+          {concursos.length > 0 ? (
+            concursos.map((concurso) => (
+              <article key={concurso.id} className="history-item">
+                <div className="history-item-main">
+                  <p className="history-entity">{concurso.entidade}</p>
+                  <h2>{concurso.titulo}</h2>
+
+                  <div className="history-meta">
+                    <span>
+                      <CalendarDays size={15} />
+                      Publicado em {formatDate(concurso.data_publicacao_iso ?? concurso.data)}
+                    </span>
+
+                    <span>
+                      <CalendarDays size={15} />
+                      Prazo terminou em {formatDate(concurso.data_entrega_propostas ?? null)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="history-item-side">
+                  <span className="history-status">Encerrado</span>
+
+                  {concurso.preco_base && (
+                    <strong className="history-value">{concurso.preco_base}</strong>
+                  )}
+
+                  <a
+                    href={concurso.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="history-link"
+                  >
+                    Ver anúncio
+                    <ExternalLink size={15} />
+                  </a>
+                </div>
+              </article>
+            ))
+          ) : (
+            <div className="history-empty">
+              <Archive size={32} />
+              <h2>Ainda não existem concursos no histórico</h2>
+              <p>
+                Quando existirem concursos encerrados, irão aparecer nesta página.
+              </p>
+            </div>
+          )}
+        </section>
+      </main>
+    </PublicLayout>
   );
 }

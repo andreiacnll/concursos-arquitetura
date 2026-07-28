@@ -1,14 +1,14 @@
-import PortalLayout from "@/components/layout/PortalLayout";
+import PrivateLayout from "@/components/layout/PrivateLayout";
 import AnalisesDashboard from "@/components/analises/AnalisesDashboard";
 
 export default function AnalisesPage(){
 
   return (
-    <PortalLayout>
+    <PrivateLayout>
 
       <AnalisesDashboard />
 
-    </PortalLayout>
+    </PrivateLayout>
   );
 
 }

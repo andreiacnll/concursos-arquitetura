@@ -1,10 +1,10 @@
-import AnaliseLayout from "@/components/layout/AnaliseLayout";
+import PrivateLayout from "@/components/layout/PrivateLayout";
 
 export default function PerfilPage(){
 
 return (
 
-<AnaliseLayout>
+<PrivateLayout>
 
 <main className="site-container">
 
@@ -13,7 +13,7 @@ return (
 
 </main>
 
-</AnaliseLayout>
+</PrivateLayout>
 
 );
 
