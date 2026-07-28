@@ -151,7 +151,7 @@ def guardar_concurso(
                 link_anuncio_dr,
                 data_entrega_propostas
             )
-            VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 titulo,
