@@ -567,7 +567,7 @@ def listar_concursos(
         description="Filtrar pelo estado do concurso.",
     ),
     limite: int = Query(
-        default=20,
+        default=100,
         ge=1,
         le=100,
     ),
@@ -616,7 +616,7 @@ def listar_historico(
         description="Filtrar pelo estado do concurso.",
     ),
     limite: int = Query(
-        default=20,
+        default=100,
         ge=1,
         le=100,
     ),
