@@ -1,0 +1,149 @@
+{
+  "identificacao": {
+    "titulo": "Reabilitação da Escola Secundária do Lumiar",
+    "entidade": "Município de Lisboa",
+    "localizacao": "Lisboa",
+    "tipo_procedimento": "Concurso de conceção",
+    "url_base": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=420959"
+  },
+  "modelo_concurso": {
+    "tipo_concurso": "Concurso público de conceção",
+    "premios": [
+      { "posicao": "1º prémio", "valor": "15.000 €" },
+      { "posicao": "2º prémio", "valor": "10.000 €" },
+      { "posicao": "3º prémio", "valor": "5.000 €" }
+    ],
+    "trabalhos_selecionados": 3,
+    "numero_vencedores": 1,
+    "jurados": [
+      "Arquiteto especializado em equipamentos educativos",
+      "Representante do Município de Lisboa",
+      "Especialista em sustentabilidade"
+    ],
+    "criterios_avaliacao": [
+      "Qualidade arquitetónica e inovação conceptual (40%)",
+      "Integração urbana e contextual (25%)",
+      "Sustentabilidade e eficiência energética (20%)",
+      "Viabilidade económica e operacional (15%)"
+    ],
+    "fase_posterior": "Sim - contratação posterior para desenvolvimento do projeto"
+  },
+  "programa": {
+    "resumo_intervencao": "Intervenção de reabilitação e modernização da Escola Secundária do Lumiar, visando a atualização das condições pedagógicas, funcionais e de conforto do edifício existente.",
+    "tipo_intervencao": "Reabilitação e modernização",
+    "equipamento": "Escola Secundária",
+    "funcoes_identificadas": [
+      "Salas de aula",
+      "Espaços laboratoriais",
+      "Áreas administrativas",
+      "Espaços comuns",
+      "Áreas exteriores"
+    ],
+    "areas": [
+      "Área total: 8.500 m²",
+      "Área intervenção: 6.200 m²"
+    ],
+    "condicionantes": [
+      "Edifício existente a preservar",
+      "Funcionamento escolar durante a intervenção",
+      "Normativas de segurança escolar"
+    ]
+  },
+  "economia": {
+    "valor_procedimento": "26.000 €",
+    "valor_estimado_obra": "Não identificado",
+    "orcamento_previsto": "Não identificado - a definir em fase posterior",
+    "observacoes": "Valor do procedimento refere-se aos prémios do concurso de conceção. Valor da obra será definido em fase posterior."
+  },
+  "criterios": {
+    "criterio_adjudicacao": "Por conceção - avaliação por mérito",
+    "modelo_avaliacao": "Júri de conceção com pontuação ponderada",
+    "percentagens": [
+      { "criterio": "Qualidade arquitetónica e inovação conceptual", "percentagem": "40%" },
+      { "criterio": "Integração urbana e contextual", "percentagem": "25%" },
+      { "criterio": "Sustentabilidade e eficiência energética", "percentagem": "20%" },
+      { "criterio": "Viabilidade económica e operacional", "percentagem": "15%" }
+    ]
+  },
+  "entregaveis": {
+    "elementos_obrigatorios": [
+      "Painéis A1 com proposta arquitetónica",
+      "Memória descritiva e justificativa",
+      "Estimativa orçamental",
+      "Ficheiros digitais da proposta",
+      "Elementos gráficos de apresentação"
+    ],
+    "formato_pecas": "Painéis A1 + documentos escritos + ficheiros digitais",
+    "numero_paineis": "A definir pelo programa do concurso",
+    "escalas_exigidas": "A definir pelo programa do concurso",
+    "documentos_escritos": [
+      "Memória descritiva",
+      "Memória justificativa",
+      "Estimativa orçamental"
+    ],
+    "ficheiros_digitais": [
+      "Ficheiros da proposta em formato digital",
+      "Elementos gráficos editáveis"
+    ],
+    "maquetes_modelos": "Não identificado"
+  },
+  "equipa": {
+    "equipa_minima": [
+      "Arquiteto coordenador",
+      "Arquiteto autor do projeto"
+    ],
+    "especialidades": [
+      "Arquitetura",
+      "Estabilidade",
+      "Instalações elétricas",
+      "AVAC",
+      "Acústica",
+      "SCIE"
+    ],
+    "consultores_obrigatorios": [
+      "Engenheiro civil (estabilidade)",
+      "Engenheiro eletrotécnico",
+      "Engenheiro mecânico (AVAC)",
+      "Especialista em acústica",
+      "Técnico de SCIE"
+    ],
+    "habilitacoes_exigidas": [
+      "Arquiteto legalmente habilitado",
+      "Engenheiros com inscrição válida na respetiva Ordem",
+      "Certificação específica para SCIE quando aplicável"
+    ]
+  },
+  "localizacao": {
+    "municipio": "Lisboa",
+    "freguesia": "Lumiar",
+    "morada": "Escola Secundária do Lumiar, Lisboa",
+    "coordenadas": "Não identificado",
+    "contexto_urbano": "Equipamento educativo inserido em zona urbana consolidada, integrado na malha da freguesia do Lumiar. A intervenção deve considerar a relação com o tecido urbano envolvente, acessibilidades e integração paisagística."
+  },
+  "analise_ai": {
+    "score": 85,
+    "interesse_arquitetonico": "Elevado",
+    "complexidade": "Alta",
+    "riscos": [
+      "Elevada concorrência esperada",
+      "Requer equipa multidisciplinar especializada",
+      "Prazo apertado para elaboração da proposta"
+    ],
+    "oportunidades": [
+      "Equipamento público de grande visibilidade",
+      "Investimento significativo em reabilitação",
+      "Critérios privilegiam qualidade técnica"
+    ],
+    "perfil_ideal_atelier": "Atelier com experiência comprovada em equipamentos públicos, reabilitação e projetos educativos.",
+    "recomendacao": "Concurso altamente recomendado para ateliers com experiência em projetos de reabilitação de equipamentos escolares.",
+    "vale_a_pena_concorrer": {
+      "veredito": "Sim",
+      "dimensao_oportunidade": "Elevada - equipamento público de grande visibilidade com investimento significativo",
+      "esforco_necessario": "Elevado - proposta de conceção completa com painéis, memória e estimativa orçamental",
+      "complexidade_programa": "Alta - reabilitação de edifício existente com funcionamento escolar durante obras",
+      "numero_entregaveis": "5 elementos obrigatórios (painéis, memória, estimativa, ficheiros digitais, elementos gráficos)",
+      "composicao_equipa": "Equipa multidisciplinar com arquitetura + 5 especialidades obrigatórias",
+      "probabilidade_exclusao": "Baixa - desde que cumpridos os requisitos de habilitação e entregáveis"
+    }
+  }
+}

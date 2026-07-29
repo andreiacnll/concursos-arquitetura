@@ -8,7 +8,9 @@ export default function PublicLayout({
   return (
     <>
       <GlobalNavbar />
-      {children}
+      <div className="public-layout">
+        {children}
+      </div>
     </>
   );
 }

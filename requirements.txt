@@ -2,4 +2,5 @@ requests
 beautifulsoup4
 playwright
 fastapi
-uvicorn[standard]pypdf
+uvicorn[standard]
+pypdf

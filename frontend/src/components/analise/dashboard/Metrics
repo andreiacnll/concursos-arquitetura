@@ -21,32 +21,6 @@ export default function MetricsBar({
         : "Não indicada")
     : programa?.areas?.total;
 
-  // Valor do contrato:
-  // - Concursos normais: investimento.valor_obra
-  // - Concursos de conceção: economia.valor_procedimento
-  const valorContrato = isConcursoConcecao
-    ? (economia?.valor_procedimento || "Não identificado")
-    : (investimento?.valor_obra || "Não identificado");
-
-  // Prazo de entrega:
-  // - Concursos normais: investimento.prazo_projeto
-  // - Concursos de conceção: não aplicável nesta fase
-  const prazoEntrega = isConcursoConcecao
-    ? "Não identificado"
-    : (investimento?.prazo_projeto || "Não identificado");
-
-  // Critério de adjudicação
-  const criterioQualidade = isConcursoConcecao ? "Conceção" : "70% Qualidade";
-  const criterioPreco = isConcursoConcecao ? "Por mérito" : "30% Preço";
-
-  // Tipo de procedimento
-  const tipoProcedimentoLabel = isConcursoConcecao
-    ? "Concurso de conceção"
-    : "Concurso público";
-  const tipoProcedimentoSub = isConcursoConcecao
-    ? "Por conceção"
-    : "Por prévia qualificação";
-
 
   return (
 
@@ -60,11 +34,13 @@ export default function MetricsBar({
         </span>
 
         <strong>
-          {valorContrato}
+          {isConcursoConcecao
+            ? (economia?.valor_procedimento || "Não disponível")
+            : (investimento?.valor_obra || '8.600.000 €')}
         </strong>
 
         <small>
-          Sem IVA
+          {isConcursoConcecao ? "Prémios do concurso" : "Sem IVA"}
         </small>
 
       </div>
@@ -78,7 +54,7 @@ export default function MetricsBar({
         </span>
 
         <strong>
-          {areaIntervencao || "Não identificado"}
+          {areaIntervencao}
         </strong>
 
       </div>
@@ -92,11 +68,13 @@ export default function MetricsBar({
         </span>
 
         <strong>
-          {prazoEntrega}
+          {isConcursoConcecao
+            ? "A definir"
+            : investimento?.prazo_projeto}
         </strong>
 
         <small>
-          Prazo previsto
+          {isConcursoConcecao ? "Definido em fase posterior" : "Prazo previsto"}
         </small>
 
       </div>
@@ -110,11 +88,11 @@ export default function MetricsBar({
         </span>
 
         <strong>
-          {criterioQualidade}
+          {isConcursoConcecao ? "Conceção" : "70% Qualidade"}
         </strong>
 
         <small>
-          {criterioPreco}
+          {isConcursoConcecao ? "Por qualidade da proposta" : "30% Preço"}
         </small>
 
 
@@ -138,11 +116,11 @@ export default function MetricsBar({
         </span>
 
         <strong>
-          {tipoProcedimentoLabel}
+          {isConcursoConcecao ? "Concurso de conceção" : "Concurso público"}
         </strong>
 
         <small>
-          {tipoProcedimentoSub}
+          {isConcursoConcecao ? "Por conceção" : "Por prévia qualificação"}
         </small>
 
       </div>

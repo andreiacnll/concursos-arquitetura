@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Moon, Sun, Menu, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { Moon, Sun, Menu, X, LogOut, UserRound } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 type Theme = "light" | "dark";
 
@@ -33,7 +34,11 @@ export default function GlobalNavbar() {
   const [theme, setTheme] = useState<Theme>("light");
   const [themeLoaded, setThemeLoaded] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, loading, signOut } = useAuth();
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const storedTheme = window.localStorage.getItem(
@@ -113,9 +118,42 @@ export default function GlobalNavbar() {
             )}
           </button>
 
-          <button className="primary-button small" type="button">
-            Entrar
-          </button>
+          {loading ? null : user ? (
+            <div className="navbar-user" ref={userMenuRef}>
+              <button
+                className="navbar-user-button"
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+              >
+                <UserRound size={18} />
+                <span>
+                  {user.user_metadata?.nome || user.email?.split("@")[0] || "Utilizador"}
+                </span>
+              </button>
+
+              {userMenuOpen && (
+                <div className="navbar-user-menu">
+                  <Link href="/perfil" onClick={() => setUserMenuOpen(false)}>
+                    <UserRound size={15} />
+                    Perfil
+                  </Link>
+                  <button
+                    onClick={async () => {
+                      setUserMenuOpen(false);
+                      await signOut();
+                      router.push("/");
+                    }}
+                  >
+                    <LogOut size={15} />
+                    Sair
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link href="/auth/login" className="primary-button small">
+              Entrar
+            </Link>
+          )}
 
           <button
             className="icon-button mobile-menu-toggle"

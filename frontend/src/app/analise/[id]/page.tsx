@@ -13,6 +13,7 @@ import ProjectInfoPanel from "@/components/analise/dashboard/ProjectInfoPanel";
 import ProjectSummary from "@/components/analise/dashboard/ProjectSummary";
 import EligibilityCard from "@/components/analise/dashboard/EligibilityCard";
 import RiskCard from "@/components/analise/dashboard/RiskCard";
+import ConcursoConcecaoAnalysis from "@/components/analise/ConcursoConcecaoAnalysis";
 
 
 
@@ -79,6 +80,17 @@ export default async function AnalisePage({
     : null;
 
 
+  // Detectar tipo de procedimento
+  const tipoProcedimento = (
+    concurso?.tipo_procedimento ||
+    ficha?.identificacao?.tipo_procedimento ||
+    ""
+  ).toLowerCase();
+
+  const isConcursoConcecao = tipoProcedimento.includes("concurso de conceção") ||
+                              tipoProcedimento.includes("concurso de concecao");
+
+
   return (
     <PrivateLayout>
 
@@ -88,40 +100,108 @@ export default async function AnalisePage({
         <HeroAnalise
           identificacao={ficha.identificacao || ficha}
           concurso={concurso}
+          concursoId={id}
         />
 
 
         <MetricsBar
           investimento={ficha.investimento}
           programa={ficha.programa}
+          economia={ficha.economia}
+          isConcursoConcecao={isConcursoConcecao}
         />
 
+        {/* Renderização condicional baseada no tipo de procedimento */}
+        {isConcursoConcecao ? (
+          <ConcursoConcecaoAnalysis
+            ficha={ficha}
+            concurso={concurso}
+          />
+        ) : (
+          <>
+            {/* Decisão AI - Destaque amarelo - apenas para concursos normais */}
+            <div className="ai-decision-section">
+              <DecisionDashboard
+                decisao={ficha.decisao}
+              />
+            </div>
+
+            {/* Programa preliminar - apenas para concursos normais */}
+            {ficha.programa && (
+              <section className="programa-preliminar-section">
+                <h2>📐 Programa preliminar analisado</h2>
+                <div className="programa-preliminar-content">
+                  <div className="programa-item">
+                    <h3>Resumo da intervenção</h3>
+                    <p>
+                      {ficha.programa.descricao ||
+                        ficha.programa.resumo ||
+                        "Informação não disponível nos documentos analisados"}
+                    </p>
+                  </div>
+
+                  {ficha.programa.tipo && ficha.programa.tipo.length > 0 && (
+                    <div className="programa-item">
+                      <h3>Tipo de intervenção</h3>
+                      <div className="programa-tags">
+                        {ficha.programa.tipo.map((tipo: string, idx: number) => (
+                          <span key={idx}>{tipo}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {(ficha.programa.usos || ficha.programa.funcoes) && (
+                    <div className="programa-item">
+                      <h3>Principais funções identificadas</h3>
+                      <ul>
+                        {(ficha.programa.usos || ficha.programa.funcoes || []).map((funcao: string, idx: number) => (
+                          <li key={idx}>{funcao}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {ficha.programa.areas && Object.keys(ficha.programa.areas).length > 0 && (
+                    <div className="programa-item">
+                      <h3>Áreas/programas relevantes</h3>
+                      <div className="programa-tags">
+                        {Object.entries(ficha.programa.areas).map(([chave, valor]: [string, any]) => (
+                          <span key={chave}>{chave}: {valor}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {ficha.programa.observacoes_ai && (
+                    <div className="programa-item">
+                      <h3>Observações arquitetónicas</h3>
+                      <p>{ficha.programa.observacoes_ai}</p>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+          </>
+        )}
 
 
-
-
-        
-        
         <div className="analysis-layout-reference">
 
 
           <div className="analysis-left">
 
-
-        <DecisionDashboard
-          decisao={ficha.decisao}
-        />
-
-
             <Timeline concursoId={id} />
 
 
-            <AnalysisPanels
-              estrategia={ficha.estrategia}
-              analise={ficha}
-              equipa={ficha.equipa}
-              decisao={ficha}
-            />
+            {!isConcursoConcecao && (
+              <AnalysisPanels
+                estrategia={ficha.estrategia}
+                analise={ficha}
+                equipa={ficha.equipa}
+                decisao={ficha}
+              />
+            )}
 
 
             <UpdatesBox />
@@ -138,9 +218,6 @@ export default async function AnalisePage({
 
 
         </div>
-
-
-
 
 
       </main>

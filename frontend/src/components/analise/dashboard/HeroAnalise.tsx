@@ -10,6 +10,7 @@ import {
 type Props = {
   identificacao?: any;
   concurso?: any;
+  concursoId?: string;
 };
 
 
@@ -18,10 +19,8 @@ type Props = {
 export default function HeroAnalise({
   identificacao,
   concurso,
+  concursoId,
 }: Props) {
-
-  console.log("CONCURSO HERO:", concurso);
-
 
   return (
     <section className="hero-analise">
@@ -52,7 +51,7 @@ export default function HeroAnalise({
 
       <div className="hero-location">
 
-        📍 {identificacao?.local || "Local não disponível"}
+        📍 {identificacao?.localizacao || identificacao?.local || "Local não disponível"}
 
       </div>
 
@@ -81,7 +80,7 @@ export default function HeroAnalise({
         <div>
           <Building2 size={16}/>
           <span>
-             {concurso?.entidade || identificacao?.local || "Município não disponível"}
+             {identificacao?.entidade || concurso?.entidade || "Entidade não disponível"}
           </span>
         </div>
 
@@ -97,7 +96,7 @@ export default function HeroAnalise({
         <div>
           <Hash size={16}/>
           <span>
-            450837
+            {concursoId || "—"}
           </span>
         </div>
 
@@ -105,7 +104,7 @@ export default function HeroAnalise({
 
         <a
           className="base-button"
-          href={concurso?.link || "#"}
+          href={identificacao?.url_base || concurso?.link || "#"}
         >
           Abrir no Base.gov
           <ExternalLink size={15}/>

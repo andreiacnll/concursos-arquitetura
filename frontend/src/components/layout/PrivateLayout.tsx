@@ -1,5 +1,6 @@
 import GlobalNavbar from "./GlobalNavbar";
 import Sidebar from "./Sidebar";
+import AuthGuard from "@/components/auth/AuthGuard";
 
 export default function PrivateLayout({
   children,
@@ -7,7 +8,7 @@ export default function PrivateLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <AuthGuard>
       <GlobalNavbar />
       <div className="private-layout">
         <Sidebar />
@@ -15,6 +16,6 @@ export default function PrivateLayout({
           {children}
         </main>
       </div>
-    </>
+    </AuthGuard>
   );
 }
