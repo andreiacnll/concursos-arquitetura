@@ -1,0 +1,187 @@
+{
+  "identificacao": {
+    "titulo": "Aquisição de serviços para a elaboração do projeto execução para a Demolição e construção de edifício para habitação multifamiliar localizado na Travessa da Horta Nova n.º 9, 11 e 13, Loulé",
+    "entidade": "Loulé Concelho Global, E.M., Unipessoal, S.A.",
+    "local": "Loulé (São Clemente)",
+    "localizacao": "Loulé (São Clemente)",
+    "tipo_procedimento": "Aquisição de serviços; Concurso público; Anúncio de procedimento",
+    "url_base": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=451989",
+    "concurso_id": 434,
+    "job_id": 13
+  },
+  "programa": {
+    "resumo": "6 - OBJETO DO CONTRATO Aquisição de serviços para a elaboração do projeto execução para a Demolição e",
+    "sintese_programa_preliminar": "6 - OBJETO DO CONTRATO Aquisição de serviços para a elaboração do projeto execução para a Demolição e",
+    "tipo": [
+      "Construcao"
+    ],
+    "funcoes": [
+      "Mercado Municipal",
+      "Habitacao",
+      "Espaco publico",
+      "Edificio"
+    ],
+    "usos": [
+      "Mercado Municipal",
+      "Habitacao",
+      "Espaco publico",
+      "Edificio"
+    ],
+    "espacos_principais": [
+      "Mercado Municipal",
+      "Habitacao",
+      "Espaco publico",
+      "Edificio"
+    ],
+    "areas": {},
+    "observacoes_ai": "Analise gerada automaticamente pelo worker CNLL com base nos dados do concurso, documentos extraidos e localizacao identificada quando disponivel."
+  },
+  "localizacao": {
+    "municipio": "Loulé",
+    "freguesia": "Loulé (São Clemente)",
+    "morada": null,
+    "codigo_postal": "8100-592",
+    "latitude": null,
+    "longitude": null,
+    "coordenadas": null,
+    "contexto_urbano": "Intervenção localizado em Loulé (São Clemente). A análise CNLL deve considerar a relação com a envolvente, os acessos, as condicionantes funcionais do local e a coordenação entre arquitetura e especialidades. Os documentos referem funcionamento/faseamento, aumentando a importância de uma estratégia de obra compatível com o uso existente. Há referências a acessibilidades e espaço exterior, relevantes para a integração urbana e paisagística. A componente técnica AVAC/elétrica deve ser articulada com as condições físicas e operacionais do edifício.",
+    "fonte": "dados_concurso"
+  },
+  "investimento": {
+    "valor_obra": "60.000,00 €",
+    "prazo_projeto": "22-08-2026 23:59"
+  },
+  "economia": {
+    "valor_procedimento": "60.000,00 €",
+    "valor_estimado_obra": "60.000,00 €"
+  },
+  "criterios": {
+    "criterio_adjudicacao": "Monofator",
+    "resumo": "Outros Outro Nome: De acordo com os critérios de adjudicação definidos na Cláusula 12.ª do Programa do Procedimento 100%",
+    "detalhe": "Outros Outro Nome: De acordo com os critérios de adjudicação definidos na Cláusula 12.ª do Programa do Procedimento 100%",
+    "percentagens": [
+      {
+        "criterio": "Qualidade",
+        "percentagem": null
+      },
+      {
+        "criterio": "Preco",
+        "percentagem": null
+      }
+    ]
+  },
+  "documentos": {
+    "total_documentos": 4,
+    "programa_procedimento": false,
+    "caderno_encargos": true,
+    "programa_preliminar": false,
+    "levantamento": false,
+    "pecas_desenhadas": false,
+    "cartografia": false,
+    "mapa_quantidades": false,
+    "elementos_prediais": false,
+    "condicoes_tecnicas": false,
+    "lista": [
+      {
+        "nome": "Carta Convite ou Anúncio DR\\419968249.pdf",
+        "tipos": []
+      },
+      {
+        "nome": "Dados do Procedimento\\Minuta do anúncio.pdf",
+        "tipos": []
+      },
+      {
+        "nome": "Processo Concurso\\1_Procedimento_38_26_Caderno_de_Encargos.pdf",
+        "tipos": [
+          "caderno_encargos"
+        ]
+      },
+      {
+        "nome": "Processo Concurso\\2_Procedimento_38_26_Programa_do_Procedimento.pdf",
+        "tipos": []
+      }
+    ]
+  },
+  "entregaveis": {
+    "principais": [
+      "por objeto principal a aquisição de serviços para a elaboração do projeto de execução",
+      "O prazo para a elaboração do projeto de execução será definido com a seguinte",
+      "Estudo Prévio - 20 (vinte) dias",
+      "Projeto de Execução para Obra - 75 (setenta e cinco) dias",
+      "O prazo global para a realização do projeto de execução objeto do contrato é de",
+      "a) 20 % (vinte por cem) com a entrega do estudo prévio;",
+      "c) 35 % (trinta e cinco por cem) com a entrega do projeto de execução para",
+      "▪ Projeto de Arquitetura – projeto coordenador;",
+      "▪ Plano de Acessibilidades;",
+      "▪ Plano de Segurança e Saúde;",
+      "projeto de execução e nomeadamente as “Instruções para a elaboração de",
+      "Estudo Prévio, Anteprojeto, Projeto de Execução e"
+    ]
+  },
+  "especialidades": {
+    "lista": [
+      "Arquitetura",
+      "Telecomunicações",
+      "AVAC",
+      "Comportamento térmico",
+      "Segurança contra incêndios",
+      "Águas e águas residuais",
+      "Gás"
+    ]
+  },
+  "requisitos": {
+    "obrigatorios": [
+      "12 - DOCUMENTOS DE HABILITAÇÃO",
+      "Habilitação para o exercício da atividade profissional:",
+      "Portaria nº 255/2023, de 7 de agosto, que aprova o conteúdo obrigatório do",
+      "Para todos os elementos da equipa técnica é obrigatória a apresentação de",
+      "i) Os documentos que constituem a proposta são obrigatoriamente redigidos em",
+      "O prazo mínimo obrigatório para manutenção das propostas é de 66 (sessenta e seis)",
+      "Documentos de habilitação",
+      "notificação de adjudicação, os seguintes documentos de habilitação:",
+      "O adjudicatário deverá apresentar a reprodução dos documentos de habilitação",
+      "apresentar os documentos de habilitação:"
+    ],
+    "riscos_participacao": [
+      "cumprimento da obrigação em falta nem da prática de outros os atos inerentes à",
+      "a falta de cumprimento destas obrigações constituir motivo de resolução do contrato",
+      "b) A eventual exclusão dos trabalhos de conceção apresentados em violação de",
+      "mencionado no artigo 2.º do presente programa, com exclusão de qualquer outro meio",
+      "dias úteis, sob pena de caducidade da adjudicação, de quaisquer documentos",
+      "à caducidade da adjudicação nos termos do disposto no artigo 86.º do CCP.",
+      "Sempre que, se verifique um facto que determine a caducidade da adjudicação, nos",
+      "Mais se informa que a não apresentação dos documentos de habilitação no prazo"
+    ]
+  },
+  "equipa": [],
+  "estrategia": {
+    "nivel": "Baixa",
+    "resumo": "Intervenção localizado em Loulé (São Clemente). A análise CNLL deve considerar a relação com a envolvente, os acessos, as condicionantes funcionais do local e a coordenação entre arquitetura e especialidades. Os documentos referem funcionamento/faseamento, aumentando a importância de uma estratégia de obra compatível com o uso existente. Há referências a acessibilidades e espaço exterior, relevantes para a integração urbana e paisagística. A componente técnica AVAC/elétrica deve ser articulada com as condições físicas e operacionais do edifício.",
+    "pontos_decisivos": [
+      "Experiência específica da equipa técnica",
+      "Projetos similares",
+      "Capacidade multidisciplinar",
+      "Enquadramento urbano e condicionantes do local"
+    ],
+    "perfil_recomendado": "Ateliers com experiência em equipamentos públicos complexos e equipas multidisciplinares."
+  },
+  "decisao": {
+    "score": 53,
+    "classificacao": "A avaliar",
+    "elegibilidade": {
+      "estado": "Sem barreiras criticas identificadas",
+      "motivos": []
+    },
+    "oportunidades": [
+      "Documentos oficiais recolhidos",
+      "Localizacao do concurso contextualizada",
+      "Criterios de adjudicacao identificados"
+    ],
+    "riscos": []
+  },
+  "analise_ai": {
+    "score": 53,
+    "gerada_em": "2026-07-30T13:48:03.236110Z",
+    "origem": "worker_backend_cnll"
+  }
+}

@@ -9,6 +9,7 @@ import AnalysisPanels from "@/components/analise/dashboard/AnalysisPanels";
 import ProjectInfoPanel from "@/components/analise/dashboard/ProjectInfoPanel";
 import ConcursoConcecaoAnalysis from "@/components/analise/ConcursoConcecaoAnalysis";
 import { API_URL } from "@/lib/api";
+import { createClient } from "@/lib/supabase/server";
 
 type Props = {
   params: {
@@ -62,10 +63,20 @@ export default async function AnalisePage({
 }: Props) {
 
   const { id } = await params;
+  const supabase = await createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const authHeaders = session?.access_token
+    ? { Authorization: `Bearer ${session.access_token}` }
+    : undefined;
 
   const resposta = await fetch(
     `${API_URL}/analise/${id}`,
-    { cache: "no-store" }
+    {
+      cache: "no-store",
+      headers: authHeaders,
+    }
   );
 
   if (!resposta.ok) {
@@ -81,7 +92,10 @@ export default async function AnalisePage({
 
   const concursoResposta = await fetch(
     `${API_URL}/concursos/${id}`,
-    { cache: "no-store" }
+    {
+      cache: "no-store",
+      headers: authHeaders,
+    }
   );
 
   const concurso = concursoResposta.ok

@@ -10,14 +10,18 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any, Literal
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database import (
     DB_PATH,
     abrir_conexao,
     criar_base_dados,
+    estados_analise_concursos,
+    listar_versoes_analise,
+    obter_analise_ativa_concurso,
 )
+from .auth import obter_utilizador_atual
 from .analise.worker import executar_worker
 from .routes.analises import router as analises_router
 from .routes.alertas import router as alertas_router
@@ -125,6 +129,25 @@ def procurar_concurso_por_identificador(
             concurso_id,
         ),
     ).fetchone()
+
+
+def obter_user_id_opcional(request: Request) -> str | None:
+    autorizacao = request.headers.get("authorization") or ""
+    if not autorizacao.lower().startswith("bearer "):
+        return None
+
+    from fastapi.security import HTTPAuthorizationCredentials
+
+    try:
+        utilizador = obter_utilizador_atual(
+            HTTPAuthorizationCredentials(
+                scheme="Bearer",
+                credentials=autorizacao.split(" ", 1)[1],
+            )
+        )
+    except HTTPException:
+        return None
+    return utilizador.id
 
 
 @app.get("/")
@@ -499,13 +522,31 @@ def executar_listagem(
     ],
     limite: int,
     pagina: int,
+    user_id: str | None = None,
 ) -> dict[str, Any]:
     dados = carregar_concursos_base_dados()
+    estados_analise = estados_analise_concursos(user_id)
 
     concursos = [
         normalizar_concurso_json(item, indice)
         for indice, item in enumerate(dados, start=1)
     ]
+    for concurso in concursos:
+        estado_da_analise = estados_analise.get(int(concurso["id"]))
+        if estado_da_analise:
+            concurso.update(estado_da_analise)
+        else:
+            concurso.update(
+                {
+                    "temAnalise": False,
+                    "estadoAnalise": None,
+                    "analiseId": None,
+                    "analiseTipo": None,
+                    "progressoAnalise": None,
+                    "scoreAnalise": None,
+                    "updatedAtAnalise": None,
+                }
+            )
 
     if periodo == "atual":
         concursos = [
@@ -639,53 +680,119 @@ def resolver_pasta_analise(id_concurso: str) -> Path:
 
 @app.get("/analise/{id_concurso}")
 def obter_analise(
+    request: Request,
     id_concurso: str,
 ) -> dict[str, Any]:
+    try:
+        identificador = int(id_concurso)
+    except ValueError:
+        raise HTTPException(
+            status_code=404,
+            detail="Identificador de concurso inv?lido.",
+        )
 
-    pasta = resolver_pasta_analise(id_concurso)
+    with closing(obter_conexao()) as conexao:
+        concurso = procurar_concurso_por_identificador(
+            conexao,
+            identificador,
+        )
 
-    ficha = pasta / "ficha.json"
-    analise_ai = pasta / "analise_ai.json"
+    if concurso is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Concurso {id_concurso} n?o encontrado.",
+        )
 
-    if not ficha.exists():
+    user_id = obter_user_id_opcional(request)
+    analise_ativa = obter_analise_ativa_concurso(
+        concurso["id"],
+        user_id,
+    )
+    if analise_ativa is None:
         raise HTTPException(
             status_code=404,
             detail=(
-                "Ficha não encontrada "
+                "An?lise ativa n?o encontrada "
                 f"para o concurso {id_concurso}"
             ),
         )
 
     try:
-        dados = json.loads(
-            ficha.read_text(
-                encoding="utf-8"
-            )
-        )
-
-        if analise_ai.exists():
-            dados_ai = json.loads(
-                analise_ai.read_text(
-                    encoding="utf-8"
+        dados = None
+        ficheiro_relativo = analise_ativa.get("ficheiro_ficha")
+        if ficheiro_relativo:
+            ficha = (BASE_DIR / ficheiro_relativo).resolve()
+            if (
+                ANALISE_DIR.resolve() in ficha.parents
+                and ficha.name == "ficha.json"
+                and ficha.is_file()
+            ):
+                dados = json.loads(
+                    ficha.read_text(encoding="utf-8-sig")
                 )
+
+        if dados is None:
+            dados = json.loads(
+                analise_ativa.get("dados_json") or "{}"
             )
 
+        pasta_legado = resolver_pasta_analise(str(concurso["id"]))
+        analise_ai = pasta_legado / "analise_ai.json"
+        if analise_ativa.get("user_id") is None and analise_ai.exists():
+            dados_ai = json.loads(
+                analise_ai.read_text(encoding="utf-8-sig")
+            )
             dados.update(dados_ai)
 
     except Exception as erro:
         raise HTTPException(
             status_code=500,
-            detail=f"Erro a ler análise: {erro}",
+            detail=f"Erro a ler an?lise ativa: {erro}",
         ) from erro
+
+    versoes_antigas = listar_versoes_analise(
+        analise_ativa["id"]
+    )
+    historico = [
+        {
+            "id": analise_ativa["id"],
+            "tipo": "atual",
+            "score": analise_ativa.get("score"),
+            "ficheiro_ficha": analise_ativa.get("ficheiro_ficha"),
+            "created_at": analise_ativa.get("updated_at"),
+        },
+        *[
+            {
+                **versao,
+                "tipo": "historico",
+            }
+            for versao in versoes_antigas
+        ],
+    ]
 
     return {
         "id_concurso": id_concurso,
+        "concurso_id": concurso["id"],
+        "analise_id": analise_ativa["id"],
+        "versao_atual": {
+            "analise_id": analise_ativa["id"],
+            "ficheiro_ficha": analise_ativa.get("ficheiro_ficha"),
+            "updated_at": analise_ativa.get("updated_at"),
+            "score": analise_ativa.get("score"),
+            "origem": (
+                "utilizador"
+                if analise_ativa.get("user_id")
+                else "sistema"
+            ),
+        },
+        "historico_versoes": historico,
         "analise": dados,
     }
 
 
 @app.get("/concursos")
 def listar_concursos(
+    request: Request,
     pesquisa: str | None = Query(
         default=None,
         description="Pesquisa no título, entidade ou CPV.",
@@ -730,11 +837,13 @@ def listar_concursos(
         estado=estado,
         limite=limite,
         pagina=pagina,
+        user_id=obter_user_id_opcional(request),
     )
 
 
 @app.get("/historico")
 def listar_historico(
+    request: Request,
     pesquisa: str | None = Query(
         default=None,
         description="Pesquisa no título, entidade ou CPV.",
@@ -779,11 +888,13 @@ def listar_historico(
         estado=estado,
         limite=limite,
         pagina=pagina,
+        user_id=obter_user_id_opcional(request),
     )
 
 
 @app.get("/concursos/{concurso_id}")
 def obter_concurso(
+    request: Request,
     concurso_id: int,
 ) -> dict[str, Any]:
     with closing(obter_conexao()) as conexao:
@@ -802,6 +913,21 @@ def obter_concurso(
     concurso["id_portal_base"] = extrair_id_portal_base(
         concurso.get("link")
     )
+    estados = estados_analise_concursos(
+        obter_user_id_opcional(request)
+    )
+    estado = estados.get(concurso["id"])
+    if estado:
+        concurso.update(estado)
+    else:
+        concurso.update(
+            {
+                "temAnalise": False,
+                "estadoAnalise": None,
+                "analiseId": None,
+                "analiseTipo": None,
+            }
+        )
     return concurso
 
 

@@ -317,6 +317,9 @@ def _sincronizar_fichas_existentes(cursor):
         except (OSError, UnicodeError, json.JSONDecodeError):
             continue
 
+        if ficha.get("identificacao", {}).get("job_id"):
+            continue
+
         caminho_relativo = caminho_ficha.relative_to(BASE_DIR).as_posix()
         score = _extrair_score(ficha)
         resumo = (
@@ -360,6 +363,23 @@ def _sincronizar_fichas_existentes(cursor):
                     caminho_relativo,
                 ),
             )
+
+
+def _limpar_analises_sistema_de_jobs(cursor):
+    """Remove falsas análises base criadas a partir de fichas de jobs."""
+    cursor.execute(
+        """
+        DELETE FROM analises
+        WHERE user_id IS NULL
+          AND ficheiro_ficha IS NOT NULL
+          AND ficheiro_ficha IN (
+              SELECT ficheiro_ficha
+              FROM analises
+              WHERE user_id IS NOT NULL
+                AND ficheiro_ficha IS NOT NULL
+          )
+        """
+    )
 
 
 def criar_base_dados():
@@ -684,6 +704,7 @@ def criar_base_dados():
         """
     )
 
+    _limpar_analises_sistema_de_jobs(cursor)
     _sincronizar_fichas_existentes(cursor)
 
     conn.commit()
@@ -1667,6 +1688,158 @@ def listar_analises_utilizador(user_id: str):
         reverse=True,
     )
     return resultados
+
+
+def estados_analise_concursos(user_id: str | None = None):
+    """
+    Estado único de análise por concurso.
+
+    Prioridade:
+    1. Job do utilizador, se estiver ativo/erro/cancelado.
+    2. Análise concluída do utilizador.
+    3. Análise base do sistema.
+    """
+    with closing(abrir_conexao()) as conexao:
+        mapa: dict[int, dict] = {}
+
+        sistema = conexao.execute(
+            """
+            SELECT
+                id AS analise_id,
+                concurso_id,
+                estado,
+                progresso,
+                score,
+                updated_at
+            FROM analises
+            WHERE user_id IS NULL
+              AND estado = 'concluida'
+            """
+        ).fetchall()
+        for linha in sistema:
+            mapa[linha["concurso_id"]] = {
+                "temAnalise": True,
+                "estadoAnalise": linha["estado"],
+                "analiseId": linha["analise_id"],
+                "analiseTipo": "sistema",
+                "progressoAnalise": linha["progresso"],
+                "scoreAnalise": linha["score"],
+                "updatedAtAnalise": linha["updated_at"],
+            }
+
+        if user_id:
+            concluidas = conexao.execute(
+                """
+                SELECT
+                    id AS analise_id,
+                    concurso_id,
+                    estado,
+                    progresso,
+                    score,
+                    updated_at
+                FROM analises
+                WHERE user_id = ?
+                  AND estado = 'concluida'
+                """,
+                (user_id,),
+            ).fetchall()
+            for linha in concluidas:
+                mapa[linha["concurso_id"]] = {
+                    "temAnalise": True,
+                    "estadoAnalise": linha["estado"],
+                    "analiseId": linha["analise_id"],
+                    "analiseTipo": "utilizador",
+                    "progressoAnalise": linha["progresso"],
+                    "scoreAnalise": linha["score"],
+                    "updatedAtAnalise": linha["updated_at"],
+                }
+
+            jobs = conexao.execute(
+                """
+                SELECT
+                    id AS job_id,
+                    concurso_id,
+                    estado,
+                    progresso,
+                    updated_at
+                FROM analise_jobs
+                WHERE user_id = ?
+                  AND estado != 'concluida'
+                """,
+                (user_id,),
+            ).fetchall()
+            for linha in jobs:
+                mapa[linha["concurso_id"]] = {
+                    "temAnalise": True,
+                    "estadoAnalise": linha["estado"],
+                    "analiseId": linha["job_id"],
+                    "analiseTipo": "job",
+                    "progressoAnalise": linha["progresso"],
+                    "scoreAnalise": None,
+                    "updatedAtAnalise": linha["updated_at"],
+                }
+
+    return mapa
+
+
+def obter_analise_ativa_concurso(
+    concurso_id: int,
+    user_id: str | None = None,
+):
+    """Resolve a ficha ativa pela BD, não pelo ficheiro solto."""
+    with closing(abrir_conexao()) as conexao:
+        if user_id:
+            linha = conexao.execute(
+                """
+                SELECT *
+                FROM analises
+                WHERE concurso_id = ?
+                  AND user_id = ?
+                  AND estado = 'concluida'
+                ORDER BY updated_at DESC, id DESC
+                LIMIT 1
+                """,
+                (concurso_id, user_id),
+            ).fetchone()
+            if linha:
+                return dict(linha)
+
+        linha = conexao.execute(
+            """
+            SELECT *
+            FROM analises
+            WHERE concurso_id = ?
+              AND user_id IS NULL
+              AND estado = 'concluida'
+            ORDER BY updated_at DESC, id DESC
+            LIMIT 1
+            """,
+            (concurso_id,),
+        ).fetchone()
+
+    return dict(linha) if linha else None
+
+
+def listar_versoes_analise(
+    analise_id: int,
+):
+    with closing(abrir_conexao()) as conexao:
+        linhas = conexao.execute(
+            """
+            SELECT
+                id,
+                analise_id,
+                concurso_id,
+                score,
+                ficheiro_ficha,
+                created_at
+            FROM analise_versoes
+            WHERE analise_id = ?
+            ORDER BY created_at DESC, id DESC
+            """,
+            (analise_id,),
+        ).fetchall()
+    return [dict(linha) for linha in linhas]
 
 
 def analise_concluida_por_concurso(

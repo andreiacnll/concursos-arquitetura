@@ -43,8 +43,15 @@ const moreCategories = [
 ];
 
 type AnaliseResumo = {
+  id?: number;
   concurso_id: number;
   estado: string;
+};
+
+type AnaliseEstado = {
+  tem_analise: boolean;
+  estado: string | null;
+  analise_id?: number | null;
 };
 
 function parseDataEntrega(valor?: string | null) {
@@ -321,7 +328,7 @@ export default function CompetitionsDashboard({
     "todos" | "ativos" | "novos" | "terminam" | "entidades"
   >("todos");
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
-  const [analisesMap, setAnalisesMap] = useState<Record<string, { tem_analise: boolean; estado: string }>>({});
+  const [analisesMap, setAnalisesMap] = useState<Record<string, AnaliseEstado>>({});
   const { user, session } = useAuth();
   const router = useRouter();
 
@@ -350,10 +357,24 @@ export default function CompetitionsDashboard({
     : 0;
 
   useEffect(() => {
+    const map: Record<string, AnaliseEstado> = {};
+    concursos.forEach((concurso) => {
+      if (concurso.temAnalise) {
+        map[String(concurso.id)] = {
+          tem_analise: true,
+          estado: concurso.estadoAnalise ?? "concluida",
+          analise_id: concurso.analiseId,
+        };
+      }
+    });
+    setAnalisesMap(map);
+  }, [concursos]);
+
+  useEffect(() => {
     const token = session?.access_token;
     if (!token) return;
 
-    fetch(`${API_URL}/analises`, {
+    const carregarAnalises = () => fetch(`${API_URL}/analises`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(async (res) => {
@@ -367,13 +388,23 @@ export default function CompetitionsDashboard({
           const obj = dados as Record<string, unknown>;
           lista = (obj.analises || obj.items || obj.resultados || []) as AnaliseResumo[];
         }
-        const map: Record<string, { tem_analise: boolean; estado: string }> = {};
+        const map: Record<string, AnaliseEstado> = {};
         lista.forEach((a) => {
-          map[String(a.concurso_id)] = { tem_analise: true, estado: a.estado || "aguarda" };
+          map[String(a.concurso_id)] = {
+            tem_analise: true,
+            estado: a.estado || "aguarda",
+            analise_id: a.id,
+          };
         });
         setAnalisesMap(map);
       })
       .catch(() => {});
+
+    carregarAnalises();
+
+    const onFocus = () => carregarAnalises();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
   }, [session?.access_token]);
 
   useEffect(() => {
@@ -1066,8 +1097,15 @@ export default function CompetitionsDashboard({
                     index={index}
                     isFavorite={favoriteIds.includes(String(concurso.id))}
                     onToggleFavorite={() => toggleFavorite(concurso.id)}
-                    temAnalise={analisesMap[String(concurso.id)]?.tem_analise}
-                    analiseEstado={analisesMap[String(concurso.id)]?.estado}
+                    temAnalise={
+                      analisesMap[String(concurso.id)]?.tem_analise ??
+                      concurso.temAnalise
+                    }
+                    analiseEstado={
+                      analisesMap[String(concurso.id)]?.estado ??
+                      concurso.estadoAnalise ??
+                      undefined
+                    }
                     onCriarAnalise={() => criarAnalise(String(concurso.id))}
                   />
                 ))}

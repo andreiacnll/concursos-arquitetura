@@ -1,0 +1,48 @@
+{
+  "preparacao": {
+    "score": 53,
+    "classificacao": "A avaliar",
+    "elegibilidade": {
+      "estado": "Sem barreiras criticas identificadas",
+      "motivos": []
+    },
+    "oportunidades": [
+      "Documentos oficiais recolhidos",
+      "Localizacao do concurso contextualizada",
+      "Criterios de adjudicacao identificados"
+    ],
+    "riscos": []
+  },
+  "resumo": {
+    "total_documentos": 4,
+    "programa_procedimento": false,
+    "caderno_encargos": true,
+    "programa_preliminar": false,
+    "levantamento": false,
+    "pecas_desenhadas": false,
+    "cartografia": false,
+    "mapa_quantidades": false,
+    "elementos_prediais": false,
+    "condicoes_tecnicas": false
+  },
+  "documentos": [
+    {
+      "nome": "Carta Convite ou Anúncio DR\\419968249.pdf",
+      "tipos": []
+    },
+    {
+      "nome": "Dados do Procedimento\\Minuta do anúncio.pdf",
+      "tipos": []
+    },
+    {
+      "nome": "Processo Concurso\\1_Procedimento_38_26_Caderno_de_Encargos.pdf",
+      "tipos": [
+        "caderno_encargos"
+      ]
+    },
+    {
+      "nome": "Processo Concurso\\2_Procedimento_38_26_Programa_do_Procedimento.pdf",
+      "tipos": []
+    }
+  ]
+}

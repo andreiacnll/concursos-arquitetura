@@ -21,4 +21,11 @@ export type Concurso = {
   criterio_resumo?: string | null;
   criterio_detalhe?: string | null;
   entregaveis?: string | null;
+  temAnalise?: boolean;
+  estadoAnalise?: string | null;
+  analiseId?: number | null;
+  analiseTipo?: string | null;
+  progressoAnalise?: number | null;
+  scoreAnalise?: number | null;
+  updatedAtAnalise?: string | null;
 };
