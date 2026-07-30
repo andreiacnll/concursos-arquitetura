@@ -1,8 +1,5 @@
 import "@/components/analise/dashboard/dashboard.css";
-import MostrarMais from "@/components/MostrarMais";
 import PrivateLayout from "@/components/layout/PrivateLayout";
-import MetricCard from "@/components/analise/MetricCard";
-import ScoreCard from "@/components/analise/ScoreCard";
 import HeroAnalise from "@/components/analise/dashboard/HeroAnalise";
 import MetricsBar from "@/components/analise/dashboard/MetricsBar";
 import DecisionDashboard from "@/components/analise/dashboard/DecisionDashboard";
@@ -10,27 +7,11 @@ import Timeline from "@/components/analise/dashboard/Timeline";
 import UpdatesBox from "@/components/analise/dashboard/UpdatesBox";
 import AnalysisPanels from "@/components/analise/dashboard/AnalysisPanels";
 import ProjectInfoPanel from "@/components/analise/dashboard/ProjectInfoPanel";
-import ProjectSummary from "@/components/analise/dashboard/ProjectSummary";
-import EligibilityCard from "@/components/analise/dashboard/EligibilityCard";
-import RiskCard from "@/components/analise/dashboard/RiskCard";
 import ConcursoConcecaoAnalysis from "@/components/analise/ConcursoConcecaoAnalysis";
-
-
-
-
-import {
-  Euro,
-  Ruler,
-  CalendarDays
-} from "lucide-react";
-
-
-
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ??
   "http://127.0.0.1:8000";
-
 
 type Props = {
   params: {
@@ -38,6 +19,46 @@ type Props = {
   };
 };
 
+/**
+ * Adapta dados de concurso de conceção para o formato dos componentes CNLL.
+ * Converte ficha.analise_ai.vale_a_pena_concorrer → decisao
+ */
+function adaptarDecisaoConcecao(ficha: any) {
+  const analiseAi = ficha?.analise_ai || {};
+  const valePena = analiseAi?.vale_a_pena_concorrer || {};
+  return {
+    score: { valor: analiseAi?.score || 0 },
+    classificacao: valePena?.veredito || "—",
+    oportunidades: analiseAi?.oportunidades || [],
+    risco: {
+      nivel: analiseAi?.complexidade === "Alta" ? "Alto"
+           : analiseAi?.complexidade === "Média" ? "Médio"
+           : "Baixo"
+    },
+    elegibilidade: {
+      estado: (valePena?.probabilidade_exclusao || "").includes("Baixa") ? "Compatível" : "Avaliar",
+      motivos: analiseAi?.riscos || []
+    },
+  };
+}
+
+/**
+ * Adapta programa de conceção para o formato dos concursos normais.
+ */
+function adaptarProgramaConcecao(ficha: any) {
+  const programa = ficha?.programa || {};
+  return {
+    descricao: programa?.resumo_intervencao,
+    resumo: programa?.resumo_intervencao || "Informação não disponível nos documentos analisados",
+    tipo: programa?.tipo_intervencao ? [programa.tipo_intervencao] : [],
+    funcoes: programa?.funcoes_identificadas || [],
+    usos: programa?.funcoes_identificadas || [],
+    areas: programa?.areas ? Object.fromEntries(programa.areas.map((a: string) => [a, ""])) : {},
+    observacoes_ai: programa?.condicionantes?.length
+      ? `Condicionantes: ${programa.condicionantes.join("; ")}`
+      : null,
+  };
+}
 
 export default async function AnalisePage({
   params,
@@ -45,14 +66,10 @@ export default async function AnalisePage({
 
   const { id } = await params;
 
-
   const resposta = await fetch(
     `${API_URL}/analise/${id}`,
-    {
-      cache: "no-store",
-    }
+    { cache: "no-store" }
   );
-
 
   if (!resposta.ok) {
     return (
@@ -62,23 +79,17 @@ export default async function AnalisePage({
     );
   }
 
-
   const dados = await resposta.json();
   const ficha = dados.analise;
 
-
   const concursoResposta = await fetch(
     `${API_URL}/concursos/${id}`,
-    {
-      cache: "no-store",
-    }
+    { cache: "no-store" }
   );
-
 
   const concurso = concursoResposta.ok
     ? await concursoResposta.json()
     : null;
-
 
   // Detectar tipo de procedimento
   const tipoProcedimento = (
@@ -90,19 +101,24 @@ export default async function AnalisePage({
   const isConcursoConcecao = tipoProcedimento.includes("concurso de conceção") ||
                               tipoProcedimento.includes("concurso de concecao");
 
+  // ── Dados adaptados para concursos de conceção ──
+  const decisaoData = isConcursoConcecao
+    ? adaptarDecisaoConcecao(ficha)
+    : ficha.decisao;
+
+  const programaData = isConcursoConcecao
+    ? adaptarProgramaConcecao(ficha)
+    : ficha.programa;
 
   return (
     <PrivateLayout>
-
       <main className="site-container">
-
 
         <HeroAnalise
           identificacao={ficha.identificacao || ficha}
           concurso={concurso}
           concursoId={id}
         />
-
 
         <MetricsBar
           investimento={ficha.investimento}
@@ -111,88 +127,75 @@ export default async function AnalisePage({
           isConcursoConcecao={isConcursoConcecao}
         />
 
-        {/* Renderização condicional baseada no tipo de procedimento */}
-        {isConcursoConcecao ? (
-          <ConcursoConcecaoAnalysis
-            ficha={ficha}
-            concurso={concurso}
-          />
-        ) : (
-          <>
-            {/* Decisão AI - Destaque amarelo - apenas para concursos normais */}
-            <div className="ai-decision-section">
-              <DecisionDashboard
-                decisao={ficha.decisao}
-              />
-            </div>
+        {/* ═══ VALE A PENA CONCORRER? (mesmo componente para ambos) ═══ */}
+        <div className="ai-decision-section">
+          <DecisionDashboard decisao={decisaoData} />
+        </div>
 
-            {/* Programa preliminar - apenas para concursos normais */}
-            {ficha.programa && (
-              <section className="programa-preliminar-section">
-                <h2>📐 Programa preliminar analisado</h2>
-                <div className="programa-preliminar-content">
-                  <div className="programa-item">
-                    <h3>Resumo da intervenção</h3>
-                    <p>
-                      {ficha.programa.descricao ||
-                        ficha.programa.resumo ||
-                        "Informação não disponível nos documentos analisados"}
-                    </p>
+        {/* ═══ PROGRAMA PRELIMINAR ANALISADO (mesmo bloco para ambos) ═══ */}
+        {programaData && (
+          <section className="programa-preliminar-section">
+            <h2>📐 Programa preliminar analisado</h2>
+            <div className="programa-preliminar-content">
+              <div className="programa-item">
+                <h3>Resumo da intervenção</h3>
+                <p>{programaData.resumo}</p>
+              </div>
+
+              {programaData.tipo && programaData.tipo.length > 0 && (
+                <div className="programa-item">
+                  <h3>Tipo de intervenção</h3>
+                  <div className="programa-tags">
+                    {programaData.tipo.map((t: string, idx: number) => (
+                      <span key={idx}>{t}</span>
+                    ))}
                   </div>
-
-                  {ficha.programa.tipo && ficha.programa.tipo.length > 0 && (
-                    <div className="programa-item">
-                      <h3>Tipo de intervenção</h3>
-                      <div className="programa-tags">
-                        {ficha.programa.tipo.map((tipo: string, idx: number) => (
-                          <span key={idx}>{tipo}</span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {(ficha.programa.usos || ficha.programa.funcoes) && (
-                    <div className="programa-item">
-                      <h3>Principais funções identificadas</h3>
-                      <ul>
-                        {(ficha.programa.usos || ficha.programa.funcoes || []).map((funcao: string, idx: number) => (
-                          <li key={idx}>{funcao}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {ficha.programa.areas && Object.keys(ficha.programa.areas).length > 0 && (
-                    <div className="programa-item">
-                      <h3>Áreas/programas relevantes</h3>
-                      <div className="programa-tags">
-                        {Object.entries(ficha.programa.areas).map(([chave, valor]: [string, any]) => (
-                          <span key={chave}>{chave}: {valor}</span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {ficha.programa.observacoes_ai && (
-                    <div className="programa-item">
-                      <h3>Observações arquitetónicas</h3>
-                      <p>{ficha.programa.observacoes_ai}</p>
-                    </div>
-                  )}
                 </div>
-              </section>
-            )}
-          </>
+              )}
+
+              {(programaData.usos || programaData.funcoes) && (
+                <div className="programa-item">
+                  <h3>Principais funções identificadas</h3>
+                  <ul>
+                    {(programaData.usos || programaData.funcoes || []).map((fn: string, idx: number) => (
+                      <li key={idx}>{fn}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {programaData.areas && Object.keys(programaData.areas).length > 0 && (
+                <div className="programa-item">
+                  <h3>Áreas / programa</h3>
+                  <div className="programa-tags">
+                    {Object.entries(programaData.areas).map(([chave, valor]: [string, any]) => (
+                      <span key={chave}>{chave}: {valor}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {programaData.observacoes_ai && (
+                <div className="programa-item">
+                  <h3>Observações arquitetónicas</h3>
+                  <p>{programaData.observacoes_ai}</p>
+                </div>
+              )}
+            </div>
+          </section>
         )}
 
+        {/* ═══ CARDS EXTRA: específicos de concursos de conceção ═══ */}
+        {isConcursoConcecao && (
+          <ConcursoConcecaoAnalysis ficha={ficha} concurso={concurso} />
+        )}
 
+        {/* ═══ LAYOUT DUAS COLUNAS (comum a ambos) ═══ */}
         <div className="analysis-layout-reference">
-
 
           <div className="analysis-left">
 
             <Timeline concursoId={id} />
-
 
             {!isConcursoConcecao && (
               <AnalysisPanels
@@ -203,26 +206,17 @@ export default async function AnalisePage({
               />
             )}
 
-
             <UpdatesBox />
-
 
           </div>
 
-
           <aside className="analysis-right">
-
             <ProjectInfoPanel ficha={ficha} />
-
           </aside>
-
 
         </div>
 
-
       </main>
-
-
     </PrivateLayout>
   );
 }
