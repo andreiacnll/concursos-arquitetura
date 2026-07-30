@@ -1,0 +1,122 @@
+{
+  "identificacao": {
+    "titulo": "3026004804_0679_DI - Serviço de Projeto de Execução de Climatização do Auditório Principal da Escola Naval (EN)",
+    "entidade": "Ministério da Defesa Nacional - Marinha",
+    "local": "Escola Naval, Alfeite, 2810-001 Almada",
+    "localizacao": "Escola Naval, Alfeite, 2810-001 Almada",
+    "tipo_procedimento": "Aquisição de serviços; Concurso público; Anúncio de procedimento",
+    "url_base": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=452366",
+    "concurso_id": 437,
+    "job_id": 7
+  },
+  "programa": {
+    "resumo": "Resumo gerado a partir dos documentos oficiais recolhidos.",
+    "tipo": [
+      "Intervencao geral"
+    ],
+    "funcoes": [
+      "Equipamento educativo",
+      "Auditorio"
+    ],
+    "usos": [
+      "Equipamento educativo",
+      "Auditorio"
+    ],
+    "areas": {},
+    "observacoes_ai": "Analise gerada automaticamente pelo worker CNLL com base nos dados do concurso, documentos extraidos e localizacao identificada quando disponivel."
+  },
+  "localizacao": {
+    "municipio": "Almada",
+    "freguesia": "Laranjeiro e Feijó",
+    "morada": "Escola Naval, Alfeite, 2810-001 Almada",
+    "codigo_postal": "2810-001",
+    "latitude": 38.66221,
+    "longitude": -9.1472,
+    "coordenadas": "38.66221, -9.14720",
+    "contexto_urbano": "Intervenção técnica no auditório principal da Escola Naval, integrada no perímetro militar do Alfeite. A estratégia deve considerar condicionantes de acesso, coordenação com serviços da Marinha, compatibilização AVAC/eletricidade e execução em equipamento institucional sensível.",
+    "fonte": "referencia_osm"
+  },
+  "investimento": {
+    "valor_obra": "2.000,00 €",
+    "prazo_projeto": "03-08-2026 23:59"
+  },
+  "economia": {
+    "valor_procedimento": "2.000,00 €",
+    "valor_estimado_obra": "2.000,00 €"
+  },
+  "criterios": {
+    "criterio_adjudicacao": "Nao identificado",
+    "resumo": "",
+    "detalhe": "",
+    "percentagens": [
+      {
+        "criterio": "Qualidade",
+        "percentagem": null
+      },
+      {
+        "criterio": "Preco",
+        "percentagem": null
+      }
+    ]
+  },
+  "documentos": {
+    "total_documentos": 4,
+    "programa_procedimento": false,
+    "caderno_encargos": true,
+    "programa_preliminar": false,
+    "levantamento": false,
+    "pecas_desenhadas": false,
+    "cartografia": false,
+    "mapa_quantidades": false,
+    "elementos_prediais": false,
+    "condicoes_tecnicas": false,
+    "lista": [
+      {
+        "nome": "Carta Convite ou Anúncio DR\\419968685.pdf",
+        "tipos": []
+      },
+      {
+        "nome": "Processo Concurso\\1_3026004804_0679_20260723_CE.pdf",
+        "tipos": [
+          "caderno_encargos"
+        ]
+      },
+      {
+        "nome": "Processo Concurso\\2_3026004804_0679_20260723_PP.pdf",
+        "tipos": []
+      },
+      {
+        "nome": "Processo Concurso\\3_3026004804_0679_20260723_ET.pdf",
+        "tipos": []
+      }
+    ]
+  },
+  "equipa": [],
+  "estrategia": {
+    "nivel": "Baixa",
+    "resumo": "",
+    "pontos_decisivos": [
+      "Experiência específica da equipa técnica",
+      "Projetos similares",
+      "Capacidade multidisciplinar"
+    ],
+    "perfil_recomendado": "Ateliers com experiência em equipamentos públicos complexos e equipas multidisciplinares."
+  },
+  "decisao": {
+    "score": 53,
+    "classificacao": "A avaliar",
+    "elegibilidade": {
+      "estado": "Sem barreiras criticas identificadas",
+      "motivos": []
+    },
+    "oportunidades": [
+      "Documentos oficiais recolhidos"
+    ],
+    "riscos": []
+  },
+  "analise_ai": {
+    "score": 53,
+    "gerada_em": "2026-07-30T12:16:10.443950Z",
+    "origem": "worker_backend_cnll"
+  }
+}

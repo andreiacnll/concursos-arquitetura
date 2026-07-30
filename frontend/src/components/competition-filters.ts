@@ -50,14 +50,30 @@ export function parseMonetaryValue(
 
 export function getCompetitionValue(item: CompetitionFilterItem) {
   for (const value of [
-    item.valor_procedimento,
     item.valor_obra,
     item.preco_base,
+    item.valor_procedimento,
   ]) {
     const parsed = parseMonetaryValue(value);
     if (parsed !== null) return parsed;
   }
   return null;
+}
+
+export function getCompetitionPriceRange(
+  items: CompetitionFilterItem[],
+): { min: number; max: number; count: number } | null {
+  const values = items
+    .map(getCompetitionValue)
+    .filter((value): value is number => value !== null);
+
+  if (values.length === 0) return null;
+
+  return {
+    min: Math.min(...values),
+    max: Math.max(...values),
+    count: values.length,
+  };
 }
 
 export function parseFilterDate(value?: string | null): Date | null {
@@ -106,9 +122,11 @@ export function matchesAdvancedFilters(
   const min = parseMonetaryValue(filters.precoMin);
   const max = parseMonetaryValue(filters.precoMax);
   const value = getCompetitionValue(item);
+  // Concursos sem valor permanecem visíveis; apenas não participam
+  // no cálculo nem na comparação do intervalo.
   const matchesPrice =
-    (min === null || (value !== null && value >= min)) &&
-    (max === null || (value !== null && value <= max));
+    value === null ||
+    ((min === null || value >= min) && (max === null || value <= max));
 
   const entity = normalizeText(filters.entidadeQuery.trim());
   const matchesEntity =

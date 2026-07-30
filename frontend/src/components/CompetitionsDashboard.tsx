@@ -20,6 +20,7 @@ import { useRouter } from "next/navigation";
 import { API_URL } from "@/lib/api";
 import {
   compareCompetitions,
+  getCompetitionPriceRange,
   matchesAdvancedFilters,
   type CompetitionSort,
 } from "./competition-filters";
@@ -141,6 +142,15 @@ function categoryForTitle(title: string) {
 
 function uniqueCount(values: Array<string | null | undefined>) {
   return new Set(values.filter(Boolean)).size;
+}
+
+function formatPriceFilter(value: number) {
+  return new Intl.NumberFormat("pt-PT", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(value);
 }
 
 const procedureOptions = [
@@ -321,6 +331,24 @@ export default function CompetitionsDashboard({
   const [entidadeQuery, setEntidadeQuery] = useState("");
   const [prazoFilter, setPrazoFilter] = useState<"todos" | "7" | "15" | "30">("todos");
 
+  const priceRange = useMemo(
+    () => getCompetitionPriceRange(concursos),
+    [concursos],
+  );
+  const priceScaleMin = priceRange ? Math.min(0, priceRange.min) : 0;
+  const selectedPriceMin = priceRange
+    ? Math.max(
+        priceScaleMin,
+        Math.min(Number(precoMin || priceScaleMin), priceRange.max),
+      )
+    : 0;
+  const selectedPriceMax = priceRange
+    ? Math.max(
+        selectedPriceMin,
+        Math.min(Number(precoMax || priceRange.max), priceRange.max),
+      )
+    : 0;
+
   useEffect(() => {
     const token = session?.access_token;
     if (!token) return;
@@ -496,8 +524,8 @@ export default function CompetitionsDashboard({
       );
       const matchesSelectedService = matchesService(item, selectedServices);
       const matchesAdditional = matchesAdvancedFilters(item, {
-        precoMin,
-        precoMax,
+        precoMin: precoMin === "" ? "" : String(selectedPriceMin),
+        precoMax: precoMax === "" ? "" : String(selectedPriceMax),
         entidadeQuery,
         prazoFilter,
       });
@@ -550,6 +578,8 @@ export default function CompetitionsDashboard({
     statFilter,
     precoMin,
     precoMax,
+    selectedPriceMin,
+    selectedPriceMax,
     entidadeQuery,
     prazoFilter,
   ]);
@@ -811,29 +841,79 @@ export default function CompetitionsDashboard({
             </div>
 
             <div className="filter-group">
-              <p>Valor do procedimento</p>
-              <div className="price-range">
-                <label>
-                  <span>Mínimo</span>
-                  <input
-                    className="filter-text-input"
-                    inputMode="decimal"
-                    value={precoMin}
-                    onChange={(event) => setPrecoMin(event.target.value)}
-                    placeholder="0 €"
-                  />
-                </label>
-                <label>
-                  <span>Máximo</span>
-                  <input
-                    className="filter-text-input"
-                    inputMode="decimal"
-                    value={precoMax}
-                    onChange={(event) => setPrecoMax(event.target.value)}
-                    placeholder="Sem limite"
-                  />
-                </label>
-              </div>
+              <p>Intervalo de preço</p>
+              {priceRange ? (
+                <div className="dynamic-price-filter">
+                  <div className="dynamic-price-values">
+                    <strong>{formatPriceFilter(selectedPriceMin)}</strong>
+                    <strong>{formatPriceFilter(selectedPriceMax)}</strong>
+                  </div>
+                  <div
+                    className="dynamic-price-slider"
+                    style={{
+                      "--price-start": `${
+                        ((selectedPriceMin - priceScaleMin) /
+                          Math.max(priceRange.max - priceScaleMin, 1)) *
+                        100
+                      }%`,
+                      "--price-end": `${
+                        ((selectedPriceMax - priceScaleMin) /
+                          Math.max(priceRange.max - priceScaleMin, 1)) *
+                        100
+                      }%`,
+                    } as React.CSSProperties}
+                  >
+                    <input
+                      type="range"
+                      min={priceScaleMin}
+                      max={priceRange.max}
+                      step="any"
+                      value={selectedPriceMin}
+                      aria-label="Valor mínimo"
+                      onChange={(event) =>
+                        setPrecoMin(
+                          String(
+                            Math.min(
+                              Number(event.target.value),
+                              selectedPriceMax,
+                            ),
+                          ),
+                        )
+                      }
+                    />
+                    <input
+                      type="range"
+                      min={priceScaleMin}
+                      max={priceRange.max}
+                      step="any"
+                      value={selectedPriceMax}
+                      aria-label="Valor máximo"
+                      onChange={(event) =>
+                        setPrecoMax(
+                          String(
+                            Math.max(
+                              Number(event.target.value),
+                              selectedPriceMin,
+                            ),
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="dynamic-price-extremes">
+                    <span>{formatPriceFilter(priceScaleMin)}</span>
+                    <span>{formatPriceFilter(priceRange.max)}</span>
+                  </div>
+                  <small>
+                    {priceRange.count} concursos com valor · menor valor
+                    encontrado: {formatPriceFilter(priceRange.min)}
+                  </small>
+                </div>
+              ) : (
+                <p className="dynamic-price-empty">
+                  Sem valores disponíveis nos concursos atuais.
+                </p>
+              )}
             </div>
 
             <div className="filter-group">

@@ -1,0 +1,118 @@
+{
+  "identificacao": {
+    "titulo": "Aquisição de serviços de elaboração de projetos de execução de arquitetura e de todas as especialidades da Escola Básica Quinta da Charnequinha",
+    "entidade": "Município do Seixal",
+    "local": "Escola Básica Quinta da Charnequinha, Amora, Seixal",
+    "localizacao": "Escola Básica Quinta da Charnequinha, Amora, Seixal",
+    "tipo_procedimento": "Aquisição de serviços; Concurso público; Anúncio de procedimento",
+    "url_base": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=452500",
+    "concurso_id": 436,
+    "job_id": 6
+  },
+  "programa": {
+    "resumo": "Resumo gerado a partir dos documentos oficiais recolhidos.",
+    "tipo": [
+      "Construcao"
+    ],
+    "funcoes": [
+      "Equipamento educativo",
+      "Edificio"
+    ],
+    "usos": [
+      "Equipamento educativo",
+      "Edificio"
+    ],
+    "areas": {},
+    "observacoes_ai": "Analise gerada automaticamente pelo worker CNLL com base nos dados do concurso, documentos extraidos e localizacao identificada quando disponivel."
+  },
+  "localizacao": {
+    "municipio": "Seixal",
+    "freguesia": "Amora",
+    "morada": "Escola Básica Quinta da Charnequinha, Amora, Seixal",
+    "codigo_postal": null,
+    "latitude": 38.60726,
+    "longitude": -9.1346,
+    "coordenadas": "38.60726, -9.13460",
+    "contexto_urbano": "Equipamento educativo localizado na Quinta da Charnequinha, na freguesia de Amora, Seixal, numa área urbana residencial. O projeto deve articular a intervenção escolar com acessos, espaço exterior, continuidade de funcionamento e necessidades da comunidade educativa.",
+    "fonte": "referencia_osm"
+  },
+  "investimento": {
+    "valor_obra": "72.500,00 €",
+    "prazo_projeto": "13-08-2026 23:59"
+  },
+  "economia": {
+    "valor_procedimento": "72.500,00 €",
+    "valor_estimado_obra": "72.500,00 €"
+  },
+  "criterios": {
+    "criterio_adjudicacao": "Nao identificado",
+    "resumo": "",
+    "detalhe": "",
+    "percentagens": [
+      {
+        "criterio": "Qualidade",
+        "percentagem": null
+      },
+      {
+        "criterio": "Preco",
+        "percentagem": null
+      }
+    ]
+  },
+  "documentos": {
+    "total_documentos": 3,
+    "programa_procedimento": false,
+    "caderno_encargos": true,
+    "programa_preliminar": false,
+    "levantamento": false,
+    "pecas_desenhadas": false,
+    "cartografia": false,
+    "mapa_quantidades": false,
+    "elementos_prediais": false,
+    "condicoes_tecnicas": false,
+    "lista": [
+      {
+        "nome": "Carta Convite ou Anúncio DR\\419968844.pdf",
+        "tipos": []
+      },
+      {
+        "nome": "Processo Concurso\\1_Caderno_de_Encargos.pdf",
+        "tipos": [
+          "caderno_encargos"
+        ]
+      },
+      {
+        "nome": "Processo Concurso\\2_Programa_Concurso.pdf",
+        "tipos": []
+      }
+    ]
+  },
+  "equipa": [],
+  "estrategia": {
+    "nivel": "Baixa",
+    "resumo": "",
+    "pontos_decisivos": [
+      "Experiência específica da equipa técnica",
+      "Projetos similares",
+      "Capacidade multidisciplinar"
+    ],
+    "perfil_recomendado": "Ateliers com experiência em equipamentos públicos complexos e equipas multidisciplinares."
+  },
+  "decisao": {
+    "score": 53,
+    "classificacao": "A avaliar",
+    "elegibilidade": {
+      "estado": "Sem barreiras criticas identificadas",
+      "motivos": []
+    },
+    "oportunidades": [
+      "Documentos oficiais recolhidos"
+    ],
+    "riscos": []
+  },
+  "analise_ai": {
+    "score": 53,
+    "gerada_em": "2026-07-30T12:15:26.851957Z",
+    "origem": "worker_backend_cnll"
+  }
+}

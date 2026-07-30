@@ -194,8 +194,17 @@ export default function ConcursoConcecaoAnalysis({
                 <p>{localizacao.morada || "Não identificado"}</p>
               </div>
               <div className="concecao-localizacao-item">
+                <h3>Código postal</h3>
+                <p>{localizacao.codigo_postal || "Não identificado"}</p>
+              </div>
+              <div className="concecao-localizacao-item">
                 <h3>Coordenadas</h3>
-                <p>{localizacao.coordenadas || "Não identificado"}</p>
+                <p>
+                  {localizacao.coordenadas ||
+                    (localizacao.latitude && localizacao.longitude
+                      ? `${localizacao.latitude}, ${localizacao.longitude}`
+                      : "Não identificado")}
+                </p>
               </div>
             </div>
             {localizacao.contexto_urbano && (

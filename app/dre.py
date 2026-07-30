@@ -474,6 +474,10 @@ def enriquecer_concurso(
         extrair_data_esclarecimentos(texto)
     )
 
+    # Permite distinguir uma extração concluída (mesmo quando o
+    # documento não contém todos os campos) de uma tentativa que falhou.
+    enriquecido["enriquecimento_dr_concluido"] = True
+
     return enriquecido
 
 

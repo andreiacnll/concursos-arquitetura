@@ -1,11 +1,22 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
 import requests
+from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Em produção prevalecem sempre as variáveis do ambiente. Em
+# desenvolvimento local, o frontend e a API partilham a configuração
+# Supabase já existente no projeto.
+load_dotenv(BASE_DIR / ".env", override=False)
+load_dotenv(BASE_DIR / "frontend" / ".env.local", override=False)
 
 
 class UtilizadorAutenticado(BaseModel):

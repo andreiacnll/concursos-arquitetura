@@ -29,25 +29,45 @@ export default function ProjectInfoPanel({
   const riscos = ficha?.requisitos?.riscos_participacao ?? [];
 
 
-  const latitude = ficha?.localizacao?.latitude;
-  const longitude = ficha?.localizacao?.longitude;
+  const normalizarNumero = (valor: unknown) => {
+    if (typeof valor === "number") return Number.isFinite(valor) ? valor : null;
+    if (typeof valor === "string") {
+      const numero = Number(valor.replace(",", "."));
+      return Number.isFinite(numero) ? numero : null;
+    }
+    return null;
+  };
+
+  const latitude = normalizarNumero(ficha?.localizacao?.latitude);
+  const longitude = normalizarNumero(ficha?.localizacao?.longitude);
   const nomeLocal =
     ficha?.localizacao?.morada ||
+    ficha?.localizacao?.freguesia ||
     ficha?.localizacao?.municipio ||
     ficha?.localizacao?.cidade ||
     ficha?.identificacao?.localizacao ||
     ficha?.identificacao?.local ||
-    "Portugal";
+    "Localização oficial não identificada";
+  const localGenerico = ["portugal", "lisboa"].includes(
+    String(nomeLocal).trim().toLowerCase()
+  );
   const temCoordenadas =
-    typeof latitude === "number" && typeof longitude === "number";
+    latitude !== null &&
+    longitude !== null &&
+    latitude >= 32 &&
+    latitude <= 42.5 &&
+    longitude >= -32 &&
+    longitude <= -6;
 
 
   const mapaUrl =
     temCoordenadas
       ? `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`
-      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      : !localGenerico && nomeLocal
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
           nomeLocal
-        )}`;
+        )}`
+      : null;
 
 
 
@@ -154,6 +174,7 @@ export default function ProjectInfoPanel({
         </span>
 
 
+        {mapaUrl && (
         <a
           className="map-button"
           href={mapaUrl}
@@ -162,6 +183,7 @@ export default function ProjectInfoPanel({
         >
           Ver localização ↗
         </a>
+        )}
 
 
 

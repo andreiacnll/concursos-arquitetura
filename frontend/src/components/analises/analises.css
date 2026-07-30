@@ -276,6 +276,11 @@ font-size:13px;
   color: #b42318;
 }
 
+.analise-status-badge.status-cancelada {
+  background: #f1f1ee;
+  color: #62645f;
+}
+
 .analise-status-label {
   display: inline-flex;
   align-items: center;
@@ -305,6 +310,11 @@ font-size:13px;
 .analise-status-label.status-erro {
   background: #fdecec;
   color: #b42318;
+}
+
+.analise-status-label.status-cancelada {
+  background: #f1f1ee;
+  color: #565954;
 }
 
 .analise-status-info {
@@ -344,4 +354,130 @@ font-size:13px;
   background: #f7f7f5;
   color: #8a8d91;
   cursor: default;
+}
+
+.analise-actions {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.analise-lifecycle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.analise-lifecycle-btn.is-cancel {
+  border: 1px solid #d8c9a9;
+  color: #765f2d;
+}
+
+.analise-lifecycle-btn.is-cancel:hover {
+  border-color: #a98539;
+  background: #fff9ec;
+}
+
+.analise-lifecycle-btn.is-delete {
+  border: 1px solid #e2c1bd;
+  color: #9b3b32;
+}
+
+.analise-lifecycle-btn.is-delete:hover {
+  border-color: #b94b40;
+  background: #fff4f2;
+}
+
+.analise-action-error {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px solid #efcbc7;
+  border-radius: 10px;
+  background: #fff7f6;
+  color: #9b3028;
+  font-size: 13px;
+}
+
+.analise-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(20, 24, 18, 0.48);
+  backdrop-filter: blur(3px);
+}
+
+.analise-confirm-modal {
+  width: min(100%, 480px);
+  padding: 28px;
+  border: 1px solid #dedfd8;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(20, 24, 18, 0.2);
+}
+
+.analise-confirm-modal h2 {
+  margin: 0 0 12px;
+  font-size: 22px;
+}
+
+.analise-confirm-modal p {
+  margin: 0 0 14px;
+  color: #5d6259;
+  line-height: 1.55;
+}
+
+.analise-confirm-modal > strong {
+  display: block;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.analise-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.analise-confirm-actions button {
+  padding: 11px 16px;
+  border: 1px solid #d9dad4;
+  border-radius: 11px;
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.analise-confirm-actions button.is-danger {
+  border-color: #a84339;
+  background: #a84339;
+  color: #fff;
+}
+
+.analise-confirm-actions button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+@media(max-width:1000px){
+  .analise-actions {
+    justify-content: flex-start;
+  }
 }

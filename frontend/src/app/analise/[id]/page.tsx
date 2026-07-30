@@ -203,7 +203,7 @@ export default async function AnalisePage({
               />
             )}
 
-            <UpdatesBox />
+            <UpdatesBox concursoId={Number(concurso?.id || id)} />
 
           </div>
 

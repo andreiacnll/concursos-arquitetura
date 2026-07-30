@@ -1807,5 +1807,165 @@
     "entregaveis": null,
     "data_entrega_propostas": "22-08-2026 23:59",
     "data_esclarecimentos": null
+  },
+  {
+    "titulo": "Aquisição de Prestação de Serviços de Elaboração, Implementação e Acompanhamento dos Planos de Segurança de Águas (PSA) e Planos de Prevenção e Controlo de Legionella (PPCL) da Unidade Local de Saúde",
+    "entidade": "Unidade Local de Saúde de Coimbra, EPE",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=452583",
+    "data": "30-07-2026",
+    "data_limite": "34 dias.",
+    "texto": "Descrição: Aquisição de Prestação de Serviços de Elaboração, Implementação e Acompanhamento dos Planos de Segurança de Águas (PSA) e Planos de Prevenção e Controlo de Legionella (PPCL) da Unidade Local de Saúde\nEntidade: Unidade Local de Saúde de Coimbra, EPE\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71800000-6, Serviços de consultaria sobre abastecimento de água e resíduos\nPreço base: 410.000,04 €\nPrazo para propostas: 34 dias.\nData de publicação: 30-07-2026\nNúmero do anúncio: 19498/2026",
+    "numero_anuncio": "19498/2026",
+    "preco_base": "410.000,04 €",
+    "cpvs": [
+      "71800000-6, Serviços de consultaria sobre abastecimento de água e resíduos"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/07/146/419968655.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/RTFWY21kS1RwbVlSVmZGR3BRRGNhekQzbHRqb3lXVmUyeTRKNnRIWGw4bFJCeFFyQUJ2RGRrV2xHaEpiT1J0QUwzcnMrSjFrYjJ4T1hnbTJKbEJHUUE9PVIhZlV5",
+    "id_portal_base": "452583",
+    "id_procedimento": "20094496"
+  },
+  {
+    "titulo": "Aquisição de serviços de elaboração de projetos de execução de arquitetura e de todas as especialidades da Escola Básica Quinta da Charnequinha",
+    "entidade": "Município do Seixal",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=452500",
+    "data": "29-07-2026",
+    "data_limite": "15 dias.",
+    "texto": "Descrição: Aquisição de serviços de elaboração de projetos de execução de arquitetura e de todas as especialidades da Escola Básica Quinta da Charnequinha\nEntidade: Município do Seixal\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71240000-2, Serviços de arquitectura, engenharia e planeamento\nPreço base: 72.500,00 €\nPrazo para propostas: 15 dias.\nData de publicação: 29-07-2026\nNúmero do anúncio: 19440/2026",
+    "numero_anuncio": "19440/2026",
+    "preco_base": "72.500,00 €",
+    "cpvs": [
+      "71240000-2, Serviços de arquitectura, engenharia e planeamento"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/07/145/419968844.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEyNjY2MA",
+    "id_portal_base": "452500",
+    "id_procedimento": "20089662",
+    "criterio_tipo": null,
+    "criterio_resumo": null,
+    "criterio_detalhe": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "13-08-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Contratação de serviços externos para a elaboração do projeto de execução de requalificação do sistema de abastecimento de água do IPB",
+    "entidade": "Instituto Politécnico de Bragança",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=452494",
+    "data": "29-07-2026",
+    "data_limite": "12 dias.",
+    "texto": "Descrição: Contratação de serviços externos para a elaboração do projeto de execução de requalificação do sistema de abastecimento de água do IPB\nEntidade: Instituto Politécnico de Bragança\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 98300000-6, Serviços diversos\nPreço base: 45.000,00 €\nPrazo para propostas: 12 dias.\nData de publicação: 29-07-2026\nNúmero do anúncio: 19446/2026",
+    "numero_anuncio": "19446/2026",
+    "preco_base": "45.000,00 €",
+    "cpvs": [
+      "98300000-6, Serviços diversos"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/07/145/419968865.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEyNjY0Nw",
+    "id_portal_base": "452494",
+    "id_procedimento": "20089656"
+  },
+  {
+    "titulo": "3026004804_0679_DI - Serviço de Projeto de Execução de Climatização do Auditório Principal da Escola Naval (EN)",
+    "entidade": "Ministério da Defesa Nacional - Marinha",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=452366",
+    "data": "28-07-2026",
+    "data_limite": "6 dias.",
+    "texto": "Descrição: 3026004804_0679_DI - Serviço de Projeto de Execução de Climatização do Auditório Principal da Escola Naval (EN)\nEntidade: Ministério da Defesa Nacional - Marinha\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71250000-5, Serviços de arquitectura, engenharia e levantamento topográfico\nPreço base: 2.000,00 €\nPrazo para propostas: 6 dias.\nData de publicação: 28-07-2026\nNúmero do anúncio: 19308/2026",
+    "numero_anuncio": "19308/2026",
+    "preco_base": "2.000,00 €",
+    "cpvs": [
+      "71250000-5, Serviços de arquitectura, engenharia e levantamento topográfico"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/07/144/419968685.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEyNjA3Nw",
+    "id_portal_base": "452366",
+    "id_procedimento": "20065186",
+    "criterio_tipo": null,
+    "criterio_resumo": null,
+    "criterio_detalhe": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "03-08-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "3026005872_0932_DI - Serviço de Projeto de Execução para Remodelação e Ampliação da Cozinha do Edifício Sede da Direção de Faróis (DF)",
+    "entidade": "Ministério da Defesa Nacional - Marinha",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=452365",
+    "data": "28-07-2026",
+    "data_limite": "6 dias.",
+    "texto": "Descrição: 3026005872_0932_DI - Serviço de Projeto de Execução para Remodelação e Ampliação da Cozinha do Edifício Sede da Direção de Faróis (DF)\nEntidade: Ministério da Defesa Nacional - Marinha\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71250000-5, Serviços de arquitectura, engenharia e levantamento topográfico\nPreço base: 15.000,00 €\nPrazo para propostas: 6 dias.\nData de publicação: 28-07-2026\nNúmero do anúncio: 19309/2026",
+    "numero_anuncio": "19309/2026",
+    "preco_base": "15.000,00 €",
+    "cpvs": [
+      "71250000-5, Serviços de arquitectura, engenharia e levantamento topográfico"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/07/144/419968696.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEyNjIzNQ",
+    "id_portal_base": "452365",
+    "id_procedimento": "20065185",
+    "criterio_tipo": null,
+    "criterio_resumo": null,
+    "criterio_detalhe": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "03-08-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Acordo-Quadro Para Aquisição De Serviços De Elaboração E Revisão De Projetos De Arquitetura E/Ou Projetos De Especialidade E Elaboração De Levantamentos Topográficos E Prospeção Geológica-Geoténica Para Obras Em Edifícios E Espaços Exteriores",
+    "entidade": "Comunidade Intermunicipal do Oeste",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=452313",
+    "data": "28-07-2026",
+    "data_limite": "41 dias.",
+    "texto": "Descrição: Acordo-Quadro Para Aquisição De Serviços De Elaboração E Revisão De Projetos De Arquitetura E/Ou Projetos De Especialidade E Elaboração De Levantamentos Topográficos E Prospeção Geológica-Geoténica Para Obras Em Edifícios E Espaços Exteriores\nEntidade: Comunidade Intermunicipal do Oeste\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71221000-3, Serviços de arquitectura para edifícios\nPreço base: 1,00 €\nPrazo para propostas: 41 dias.\nData de publicação: 28-07-2026\nNúmero do anúncio: 19232/2026",
+    "numero_anuncio": "19232/2026",
+    "preco_base": "1,00 €",
+    "cpvs": [
+      "71221000-3, Serviços de arquitectura para edifícios"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/07/144/419968372.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEyNTM0NA",
+    "id_portal_base": "452313",
+    "id_procedimento": "20051755",
+    "criterio_tipo": null,
+    "criterio_resumo": null,
+    "criterio_detalhe": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "07-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
   }
 ]

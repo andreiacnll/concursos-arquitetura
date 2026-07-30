@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PrivateLayout from "@/components/layout/PrivateLayout";
-import { Heart, Star, Sparkles, Loader2 } from "lucide-react";
+import { Bell, Heart, Star, Sparkles, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import AnalysisConfirmationModal from "@/components/analises/AnalysisConfirmationModal";
 import { API_URL } from "@/lib/api";
@@ -20,11 +20,17 @@ type Favorito = {
   score?: number;
   tem_analise?: boolean;
   analise_estado?: string;
+  alerta_ativo?: boolean;
 };
 
 type AnaliseJob = {
   concurso_id: number;
   estado: string;
+};
+
+type AlertaSubscricao = {
+  concurso_id: number;
+  ativo: boolean | number;
 };
 
 export default function FavoritosPage() {
@@ -54,21 +60,34 @@ export default function FavoritosPage() {
       fetch(`${API_URL}/analises`, {
         headers: { Authorization: `Bearer ${token}` },
       }),
+      fetch(`${API_URL}/alertas/subscricoes`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
     ])
-      .then(async ([favoritosResponse, analisesResponse]) => {
-        if (!favoritosResponse.ok || !analisesResponse.ok) {
+      .then(async ([favoritosResponse, analisesResponse, alertasResponse]) => {
+        if (!favoritosResponse.ok || !analisesResponse.ok || !alertasResponse.ok) {
           throw new Error("Não foi possível carregar os favoritos.");
         }
 
         return Promise.all([
           favoritosResponse.json(),
           analisesResponse.json(),
+          alertasResponse.json(),
         ]);
       })
-      .then(([favoritosData, analisesData]) => {
+      .then(([favoritosData, analisesData, alertasData]) => {
         const jobs = (analisesData.analises ?? []) as AnaliseJob[];
         const jobsMap = new Map(
           jobs.map((job) => [job.concurso_id, job.estado]),
+        );
+        const subscricoes = (
+          alertasData.subscricoes ?? []
+        ) as AlertaSubscricao[];
+        const alertasMap = new Map(
+          subscricoes.map((item) => [
+            item.concurso_id,
+            Boolean(item.ativo),
+          ]),
         );
         const lista = (favoritosData.favoritos ?? []) as Favorito[];
 
@@ -77,6 +96,7 @@ export default function FavoritosPage() {
             ...favorito,
             tem_analise: jobsMap.has(favorito.concurso_id),
             analise_estado: jobsMap.get(favorito.concurso_id),
+            alerta_ativo: alertasMap.get(favorito.concurso_id) ?? true,
           })),
         );
         setLoading(false);
@@ -102,6 +122,30 @@ export default function FavoritosPage() {
     if (response.ok) {
       setFavoritos((current) =>
         current.filter((item) => item.id !== favorito.id),
+      );
+    }
+  }
+
+  async function alternarAlertas(favorito: Favorito) {
+    const token = session?.access_token;
+    if (!token) return;
+
+    const ativo = Boolean(favorito.alerta_ativo);
+    const response = await fetch(
+      `${API_URL}/alertas/${favorito.concurso_id}/${ativo ? "desativar" : "ativar"}`,
+      {
+        method: ativo ? "DELETE" : "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+
+    if (response.ok) {
+      setFavoritos((current) =>
+        current.map((item) =>
+          item.id === favorito.id
+            ? { ...item, alerta_ativo: !ativo }
+            : item,
+        ),
       );
     }
   }
@@ -295,6 +339,26 @@ export default function FavoritosPage() {
                       <><Sparkles size={14} /> Criar análise AI</>
                     </button>
                   )}
+
+                  <button
+                    onClick={() => alternarAlertas(fav)}
+                    style={{
+                      padding: "10px 14px",
+                      background: fav.alerta_ativo ? "#f0f4ea" : "white",
+                      color: fav.alerta_ativo ? "#607b43" : "#999",
+                      border: fav.alerta_ativo ? "1px solid #607b43" : "1px solid #ddd",
+                      borderRadius: "10px",
+                      cursor: "pointer",
+                      fontSize: "13px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                    title={fav.alerta_ativo ? "Desativar alertas" : "Ativar alertas"}
+                  >
+                    <Bell size={14} />
+                    {fav.alerta_ativo ? "Alertas ativos" : "Ativar alertas"}
+                  </button>
 
                   <button
                     onClick={() => removerFavorito(fav)}

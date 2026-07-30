@@ -96,10 +96,11 @@ export function adaptarFichaConcecao(ficha: any): any {
   // --- Adaptar localizacao para ProjectInfoPanel ---
   // ProjectInfoPanel espera: localizacao.cidade, localizacao.latitude, localizacao.longitude
   const localizacao = {
+    ...localizacaoConcecao,
     cidade: localizacaoConcecao?.municipio || ficha?.identificacao?.localizacao || "Não identificado",
     morada: localizacaoConcecao?.morada || "Não identificado",
-    latitude: null,
-    longitude: null,
+    latitude: localizacaoConcecao?.latitude ?? null,
+    longitude: localizacaoConcecao?.longitude ?? null,
   };
 
 

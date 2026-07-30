@@ -60,9 +60,12 @@ if dias_pedidos > DIAS_MAXIMOS_PESQUISA:
         f"Será utilizado esse valor."
     )
 
-DIAS_A_PESQUISAR = min(
-    dias_pedidos,
-    DIAS_MAXIMOS_PESQUISA,
+DIAS_A_PESQUISAR = max(
+    1,
+    min(
+        dias_pedidos,
+        DIAS_MAXIMOS_PESQUISA,
+    ),
 )
 MAXIMO_PAGINAS = int(os.getenv("BASE_MAX_PAGINAS", "100"))
 MAXIMO_DETALHES = int(os.getenv("BASE_MAX_DETALHES", "300"))
@@ -363,7 +366,11 @@ def data_atual_portugal() -> date:
 
 
 def data_minima() -> date:
-    return data_atual_portugal() - timedelta(days=DIAS_A_PESQUISAR)
+    # O dia atual conta como o primeiro dia do intervalo. Assim,
+    # BASE_DIAS_PESQUISA=7 cobre hoje e os seis dias anteriores.
+    return data_atual_portugal() - timedelta(
+        days=DIAS_A_PESQUISAR - 1,
+    )
 
 
 def criar_link_detalhe(identificador: Any) -> str:
@@ -803,11 +810,6 @@ def normalizar_anuncio(anuncio: dict[str, Any]) -> dict[str, Any]:
     if not numero_anuncio:
         numero_anuncio = normalizar_texto(identificador)
 
-    print(
-        "DEBUG proposalDeadline:",
-        anuncio.get("proposalDeadline")
-    )
-
     return {
         "titulo": titulo,
         "entidade": obter_nome_entidade(anuncio),
@@ -913,6 +915,47 @@ def enriquecer(
             continue
 
         if identificador in por_id:
+            guardado = por_id[identificador]
+            ja_enriquecido = bool(
+                guardado.get("enriquecimento_dr_concluido")
+                or any(
+                    guardado.get(campo)
+                    for campo in (
+                        "criterio_tipo",
+                        "criterio_resumo",
+                        "criterio_detalhe",
+                        "data_entrega_propostas",
+                        "data_esclarecimentos",
+                    )
+                )
+            )
+
+            if ja_enriquecido:
+                guardado["enriquecimento_dr_concluido"] = True
+
+            elif guardado.get("link_anuncio_dr"):
+                try:
+                    from app.dre import enriquecer_concurso
+
+                    por_id[identificador] = enriquecer_concurso(
+                        guardado,
+                        guardado["link_anuncio_dr"],
+                    )
+                    guardar_checkpoint(list(por_id.values()))
+
+                    if MOSTRAR_DIAGNOSTICO:
+                        print(
+                            "Enriquecimento DR recuperado para "
+                            f"{identificador}."
+                        )
+
+                except Exception as erro:
+                    print(
+                        "Aviso: não foi possível repetir o "
+                        "enriquecimento DR de "
+                        f"{identificador}: {erro}"
+                    )
+
             if MOSTRAR_DIAGNOSTICO:
                 print(
                     f"Já guardado {indice}/{len(candidatos)}: "
@@ -954,26 +997,12 @@ def enriquecer(
                         normalizado["link_anuncio_dr"],
                     )
 
-                    print(
-                        "DATA ENTREGA PROPOSTAS:",
-                        normalizado.get(
-                            "data_entrega_propostas"
-                        ),
-                    )
-
             except Exception as erro:
                 print(
                     "Aviso: não foi possível extrair "
                     "data de entrega do PDF DR:",
                     erro,
                 )
-
-            print(
-                "DEBUG NORMALIZADO DATA:",
-                normalizado.get(
-                    "data_entrega_propostas"
-                ),
-            )
 
             por_id[identificador] = normalizado
             novos += 1
@@ -1079,36 +1108,4 @@ if __name__ == "__main__":
                 indent=2,
             )
         )
-
-
-
-def extrair_data_entrega_propostas(texto_pdf: str):
-    """
-    Extrai a data limite de apresentação de propostas
-    a partir do texto do PDF DR.
-    """
-    import re
-
-    padrao = (
-        r"Prazo para apresentação das propostas:"
-        r"\s*(\d{2}-\d{2}-\d{4})"
-        r"(?:\s+(\d{2}:\d{2}))?"
-    )
-
-    resultado = re.search(
-        padrao,
-        texto_pdf,
-        re.IGNORECASE
-    )
-
-    if not resultado:
-        return None
-
-    data = resultado.group(1)
-    hora = resultado.group(2)
-
-    if hora:
-        return f"{data} {hora}"
-
-    return data
 

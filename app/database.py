@@ -2,7 +2,7 @@ import json
 import re
 import sqlite3
 from contextlib import closing
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 
@@ -15,7 +15,15 @@ ESTADOS_ANALISE = (
     "processamento",
     "geracao",
     "concluida",
+    "cancelada",
     "erro",
+)
+
+ESTADOS_ANALISE_ATIVOS = (
+    "aguarda",
+    "extracao",
+    "processamento",
+    "geracao",
 )
 
 COLUNAS_ANALISE = {
@@ -23,8 +31,26 @@ COLUNAS_ANALISE = {
     "progresso": "INTEGER NOT NULL DEFAULT 100",
     "score": "INTEGER",
     "ficheiro_ficha": "TEXT",
+    "user_id": "TEXT",
+    "job_id": "INTEGER",
     # O SQLite não aceita CURRENT_TIMESTAMP ao acrescentar uma coluna.
     "updated_at": "TEXT",
+}
+
+COLUNAS_ALERTA = {
+    "origem_evento": "TEXT NOT NULL DEFAULT 'workflow_concursos'",
+    "analise_job_id": "INTEGER",
+    "documento_anterior": "TEXT",
+    "documento_novo": "TEXT",
+    "hash_anterior": "TEXT",
+    "hash_novo": "TEXT",
+}
+
+TIPOS_ALERTA_RELEVANTES = {
+    "novo_documento",
+    "alteracao_economica",
+    "alteracao_programa",
+    "alteracao_criterio",
 }
 
 
@@ -39,7 +65,15 @@ COLUNAS_ADICIONAIS = {
     "criterio_detalhe": "TEXT",
     "entregaveis": "TEXT",
     "link_anuncio_dr": "TEXT",
+    "link_pecas": "TEXT",
     "data_entrega_propostas": "TEXT",
+    "municipio": "TEXT",
+    "freguesia": "TEXT",
+    "morada": "TEXT",
+    "codigo_postal": "TEXT",
+    "latitude": "REAL",
+    "longitude": "REAL",
+    "localizacao_contexto": "TEXT",
 }
 
 
@@ -92,6 +126,112 @@ def _adicionar_colunas_analise_em_falta(cursor):
             cursor.execute(
                 f"ALTER TABLE analises ADD COLUMN {nome_coluna} {definicao}"
             )
+
+
+def _adicionar_colunas_alertas_em_falta(cursor):
+    """Mantem a tabela pronta para eventos vindos do worker documental."""
+    cursor.execute("PRAGMA table_info(alertas)")
+    colunas_existentes = {linha[1] for linha in cursor.fetchall()}
+
+    for nome_coluna, definicao in COLUNAS_ALERTA.items():
+        if nome_coluna not in colunas_existentes:
+            cursor.execute(
+                f"ALTER TABLE alertas ADD COLUMN {nome_coluna} {definicao}"
+            )
+
+
+def _migrar_tabela_analises(cursor):
+    """Permite uma análise por utilizador sem tocar nas fichas legadas."""
+    definicao = cursor.execute(
+        "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'analises'"
+    ).fetchone()
+    if not definicao or "concurso_id INTEGER UNIQUE" not in (definicao[0] or ""):
+        return
+
+    cursor.execute("ALTER TABLE analises RENAME TO analises_legado")
+    cursor.execute(
+        """
+        CREATE TABLE analises (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT,
+            job_id INTEGER,
+            concurso_id INTEGER NOT NULL,
+            nivel TEXT,
+            resumo TEXT,
+            dados_json TEXT,
+            criado_em TEXT DEFAULT CURRENT_TIMESTAMP,
+            estado TEXT NOT NULL DEFAULT 'concluida',
+            progresso INTEGER NOT NULL DEFAULT 100,
+            score INTEGER,
+            ficheiro_ficha TEXT,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY(concurso_id)
+            REFERENCES concursos(id)
+        )
+        """
+    )
+    cursor.execute(
+        """
+        INSERT INTO analises (
+            id, user_id, job_id, concurso_id, nivel, resumo,
+            dados_json, criado_em, estado, progresso, score,
+            ficheiro_ficha, updated_at
+        )
+        SELECT
+            id, user_id, job_id, concurso_id, nivel, resumo,
+            dados_json, criado_em, estado, progresso, score,
+            ficheiro_ficha, updated_at
+        FROM analises_legado
+        """
+    )
+    cursor.execute("DROP TABLE analises_legado")
+
+
+def _migrar_estados_analise_jobs(cursor, estados_sql: str):
+    """Acrescenta o estado cancelada ao CHECK dos jobs existentes."""
+    definicao = cursor.execute(
+        "SELECT sql FROM sqlite_master "
+        "WHERE type = 'table' AND name = 'analise_jobs'"
+    ).fetchone()
+    if not definicao or "cancelada" in (definicao[0] or ""):
+        return
+
+    cursor.execute("ALTER TABLE analise_jobs RENAME TO analise_jobs_legado")
+    cursor.execute(
+        f"""
+        CREATE TABLE analise_jobs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL,
+            concurso_id INTEGER NOT NULL,
+            estado TEXT NOT NULL DEFAULT 'aguarda'
+                CHECK (estado IN ({estados_sql})),
+            progresso INTEGER NOT NULL DEFAULT 0
+                CHECK (progresso BETWEEN 0 AND 100),
+            erro TEXT,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+            UNIQUE(user_id, concurso_id),
+            FOREIGN KEY(concurso_id)
+            REFERENCES concursos(id)
+            ON DELETE CASCADE
+        )
+        """
+    )
+    cursor.execute(
+        """
+        INSERT INTO analise_jobs (
+            id, user_id, concurso_id, estado, progresso,
+            erro, created_at, updated_at
+        )
+        SELECT
+            id, user_id, concurso_id, estado, progresso,
+            erro, created_at, updated_at
+        FROM analise_jobs_legado
+        """
+    )
+    cursor.execute("DROP TABLE analise_jobs_legado")
 
 
 def _id_portal_base(link: str | None):
@@ -152,37 +292,41 @@ def _sincronizar_fichas_existentes(cursor):
             or concurso["titulo"]
         )
 
-        cursor.execute(
-            """
-            INSERT INTO analises (
-                concurso_id,
-                nivel,
-                resumo,
-                dados_json,
-                estado,
-                progresso,
-                score,
-                ficheiro_ficha
-            )
-            VALUES (?, 'AI', ?, ?, 'concluida', 100, ?, ?)
-            ON CONFLICT(concurso_id) DO UPDATE SET
-                nivel = excluded.nivel,
-                resumo = excluded.resumo,
-                dados_json = excluded.dados_json,
-                estado = 'concluida',
-                progresso = 100,
-                score = excluded.score,
-                ficheiro_ficha = excluded.ficheiro_ficha,
-                updated_at = CURRENT_TIMESTAMP
-            """,
-            (
-                concurso["id"],
-                resumo,
-                json.dumps(ficha, ensure_ascii=False),
-                score,
-                caminho_relativo,
-            ),
+        parametros = (
+            resumo,
+            json.dumps(ficha, ensure_ascii=False),
+            score,
+            caminho_relativo,
+            concurso["id"],
         )
+        atualizado = cursor.execute(
+            """
+            UPDATE analises
+            SET nivel = 'AI', resumo = ?, dados_json = ?,
+                estado = 'concluida', progresso = 100, score = ?,
+                ficheiro_ficha = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE concurso_id = ? AND user_id IS NULL
+            """,
+            parametros,
+        ).rowcount
+
+        if not atualizado:
+            cursor.execute(
+                """
+                INSERT INTO analises (
+                    user_id, concurso_id, nivel, resumo, dados_json,
+                    estado, progresso, score, ficheiro_ficha
+                )
+                VALUES (NULL, ?, 'AI', ?, ?, 'concluida', 100, ?, ?)
+                """,
+                (
+                    concurso["id"],
+                    resumo,
+                    json.dumps(ficha, ensure_ascii=False),
+                    score,
+                    caminho_relativo,
+                ),
+            )
 
 
 def criar_base_dados():
@@ -233,7 +377,9 @@ def criar_base_dados():
         """
         CREATE TABLE IF NOT EXISTS analises (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            concurso_id INTEGER UNIQUE,
+            user_id TEXT,
+            job_id INTEGER,
+            concurso_id INTEGER NOT NULL,
             nivel TEXT,
             resumo TEXT,
             dados_json TEXT,
@@ -295,6 +441,64 @@ def criar_base_dados():
 
     cursor.execute(
         """
+        CREATE TABLE IF NOT EXISTS alerta_subscricoes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL,
+            concurso_id INTEGER NOT NULL,
+            ativo INTEGER NOT NULL DEFAULT 1,
+            origem TEXT NOT NULL DEFAULT 'manual',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+            UNIQUE(user_id, concurso_id),
+            FOREIGN KEY(concurso_id)
+            REFERENCES concursos(id)
+            ON DELETE CASCADE
+        )
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS alertas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL,
+            concurso_id INTEGER NOT NULL,
+            tipo TEXT NOT NULL,
+            titulo TEXT NOT NULL,
+            descricao TEXT,
+            dados_extraidos TEXT,
+            documento_origem TEXT,
+            documento_anterior TEXT,
+            documento_novo TEXT,
+            hash_anterior TEXT,
+            hash_novo TEXT,
+            link TEXT,
+            data_deteccao TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            estado TEXT NOT NULL DEFAULT 'novo',
+            relevante INTEGER NOT NULL DEFAULT 0,
+            origem_evento TEXT NOT NULL DEFAULT 'workflow_concursos',
+            analise_job_id INTEGER,
+            fingerprint TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+            UNIQUE(user_id, concurso_id, fingerprint),
+            FOREIGN KEY(concurso_id)
+            REFERENCES concursos(id)
+            ON DELETE CASCADE
+        )
+        """
+    )
+
+    _migrar_estados_analise_jobs(cursor, estados_sql)
+    _adicionar_colunas_em_falta(cursor)
+    _adicionar_colunas_analise_em_falta(cursor)
+    _migrar_tabela_analises(cursor)
+    _adicionar_colunas_alertas_em_falta(cursor)
+
+    cursor.execute(
+        """
         CREATE INDEX IF NOT EXISTS idx_favoritos_user_id
         ON favoritos(user_id)
         """
@@ -316,6 +520,58 @@ def criar_base_dados():
 
     cursor.execute(
         """
+        CREATE INDEX IF NOT EXISTS idx_alerta_subscricoes_user_id
+        ON alerta_subscricoes(user_id)
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_alerta_subscricoes_concurso_id
+        ON alerta_subscricoes(concurso_id)
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_alertas_user_id
+        ON alertas(user_id, estado, data_deteccao)
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_alertas_concurso_id
+        ON alertas(concurso_id)
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_analises_legado_concurso
+        ON analises(concurso_id)
+        WHERE user_id IS NULL
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_analises_user_concurso
+        ON analises(user_id, concurso_id)
+        WHERE user_id IS NOT NULL
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_analises_job_id
+        ON analises(job_id)
+        WHERE job_id IS NOT NULL
+        """
+    )
+
+    cursor.execute(
+        """
         CREATE TRIGGER IF NOT EXISTS analise_jobs_updated_at
         AFTER UPDATE ON analise_jobs
         FOR EACH ROW
@@ -328,14 +584,39 @@ def criar_base_dados():
         """
     )
 
-
-    _adicionar_colunas_em_falta(cursor)
-    _adicionar_colunas_analise_em_falta(cursor)
     cursor.execute(
         """
         UPDATE analises
         SET updated_at = COALESCE(updated_at, criado_em, CURRENT_TIMESTAMP)
         WHERE updated_at IS NULL
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE TRIGGER IF NOT EXISTS alerta_subscricoes_updated_at
+        AFTER UPDATE ON alerta_subscricoes
+        FOR EACH ROW
+        WHEN NEW.updated_at = OLD.updated_at
+        BEGIN
+            UPDATE alerta_subscricoes
+            SET updated_at = CURRENT_TIMESTAMP
+            WHERE id = NEW.id;
+        END
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE TRIGGER IF NOT EXISTS alertas_updated_at
+        AFTER UPDATE ON alertas
+        FOR EACH ROW
+        WHEN NEW.updated_at = OLD.updated_at
+        BEGIN
+            UPDATE alertas
+            SET updated_at = CURRENT_TIMESTAMP
+            WHERE id = NEW.id;
+        END
         """
     )
 
@@ -381,6 +662,61 @@ def concurso_por_id(concurso_id: int):
         ).fetchone()
 
     return dict(linha) if linha else None
+
+
+def atualizar_localizacao_concurso(
+    concurso_id: int,
+    localizacao: dict,
+) -> bool:
+    """Guarda localização verificada sem substituir dados bons por vazio."""
+    if not concurso_id or not localizacao:
+        return False
+
+    campos = {
+        "municipio": _texto_ou_none(localizacao.get("municipio")),
+        "freguesia": _texto_ou_none(localizacao.get("freguesia")),
+        "morada": _texto_ou_none(localizacao.get("morada")),
+        "codigo_postal": _texto_ou_none(localizacao.get("codigo_postal")),
+        "latitude": localizacao.get("latitude"),
+        "longitude": localizacao.get("longitude"),
+        "localizacao_contexto": _texto_ou_none(
+            localizacao.get("contexto_urbano")
+        ),
+    }
+
+    if not any(valor is not None for valor in campos.values()):
+        return False
+
+    with closing(abrir_conexao()) as conexao:
+        cursor = conexao.execute(
+            """
+            UPDATE concursos
+            SET
+                municipio = COALESCE(?, municipio),
+                freguesia = COALESCE(?, freguesia),
+                morada = COALESCE(?, morada),
+                codigo_postal = COALESCE(?, codigo_postal),
+                latitude = COALESCE(?, latitude),
+                longitude = COALESCE(?, longitude),
+                localizacao_contexto = COALESCE(
+                    ?,
+                    localizacao_contexto
+                )
+            WHERE id = ?
+            """,
+            (
+                campos["municipio"],
+                campos["freguesia"],
+                campos["morada"],
+                campos["codigo_postal"],
+                campos["latitude"],
+                campos["longitude"],
+                campos["localizacao_contexto"],
+                concurso_id,
+            ),
+        )
+        conexao.commit()
+        return cursor.rowcount > 0
 
 
 def listar_favoritos_utilizador(user_id: str):
@@ -473,6 +809,733 @@ def remover_favorito(
         return cursor.rowcount > 0
 
 
+def _normalizar_alerta(valor):
+    if valor is None:
+        return ""
+    return " ".join(str(valor).strip().split())
+
+
+def _serializar_dados_alerta(dados: dict | None) -> str:
+    return json.dumps(dados or {}, ensure_ascii=False)
+
+
+def _criar_alerta(
+    conexao,
+    *,
+    user_id: str,
+    concurso_id: int,
+    tipo: str,
+    titulo: str,
+    descricao: str | None,
+    dados_extraidos: dict | None,
+    documento_origem: str | None,
+    link: str | None,
+    fingerprint: str,
+    relevante: bool = False,
+    origem_evento: str = "workflow_concursos",
+    analise_job_id: int | None = None,
+    documento_anterior: str | None = None,
+    documento_novo: str | None = None,
+    hash_anterior: str | None = None,
+    hash_novo: str | None = None,
+):
+    conexao.execute(
+        """
+        INSERT OR IGNORE INTO alertas (
+            user_id,
+            concurso_id,
+            tipo,
+            titulo,
+            descricao,
+            dados_extraidos,
+            documento_origem,
+            documento_anterior,
+            documento_novo,
+            hash_anterior,
+            hash_novo,
+            link,
+            estado,
+            relevante,
+            origem_evento,
+            analise_job_id,
+            fingerprint
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'novo', ?, ?, ?, ?)
+        """,
+        (
+            user_id,
+            concurso_id,
+            tipo,
+            titulo,
+            descricao,
+            _serializar_dados_alerta(dados_extraidos),
+            documento_origem,
+            documento_anterior,
+            documento_novo,
+            hash_anterior,
+            hash_novo,
+            link,
+            1 if relevante else 0,
+            origem_evento,
+            analise_job_id,
+            fingerprint,
+        ),
+    )
+
+
+def _utilizadores_monitorizar_concurso(
+    conexao,
+    concurso_id: int,
+) -> list[str]:
+    linhas = conexao.execute(
+        """
+        SELECT user_id
+        FROM favoritos
+        WHERE concurso_id = ?
+
+        UNION
+
+        SELECT user_id
+        FROM analises
+        WHERE concurso_id = ?
+          AND user_id IS NOT NULL
+
+        UNION
+
+        SELECT user_id
+        FROM analise_jobs
+        WHERE concurso_id = ?
+
+        UNION
+
+        SELECT user_id
+        FROM alerta_subscricoes
+        WHERE concurso_id = ?
+          AND ativo = 1
+        """,
+        (concurso_id, concurso_id, concurso_id, concurso_id),
+    ).fetchall()
+
+    utilizadores = [linha["user_id"] for linha in linhas]
+    if not utilizadores:
+        return []
+
+    desativados = conexao.execute(
+        """
+        SELECT user_id
+        FROM alerta_subscricoes
+        WHERE concurso_id = ?
+          AND ativo = 0
+        """,
+        (concurso_id,),
+    ).fetchall()
+    bloqueados = {linha["user_id"] for linha in desativados}
+    return [
+        user_id
+        for user_id in utilizadores
+        if user_id not in bloqueados
+    ]
+
+
+def ativar_alertas_concurso(
+    user_id: str,
+    concurso_id: int,
+    origem: str = "manual",
+):
+    with closing(abrir_conexao()) as conexao:
+        conexao.execute(
+            """
+            INSERT INTO alerta_subscricoes (
+                user_id,
+                concurso_id,
+                ativo,
+                origem
+            )
+            VALUES (?, ?, 1, ?)
+            ON CONFLICT(user_id, concurso_id)
+            DO UPDATE SET
+                ativo = 1,
+                origem = excluded.origem
+            """,
+            (user_id, concurso_id, origem),
+        )
+        linha = conexao.execute(
+            """
+            SELECT
+                s.id,
+                s.user_id,
+                s.concurso_id,
+                s.ativo,
+                s.origem,
+                s.created_at,
+                s.updated_at,
+                c.titulo,
+                c.entidade,
+                c.link
+            FROM alerta_subscricoes AS s
+            JOIN concursos AS c
+              ON c.id = s.concurso_id
+            WHERE s.user_id = ?
+              AND s.concurso_id = ?
+            """,
+            (user_id, concurso_id),
+        ).fetchone()
+        conexao.commit()
+    return dict(linha) if linha else None
+
+
+def desativar_alertas_concurso(
+    user_id: str,
+    concurso_id: int,
+):
+    with closing(abrir_conexao()) as conexao:
+        conexao.execute(
+            """
+            INSERT INTO alerta_subscricoes (
+                user_id,
+                concurso_id,
+                ativo,
+                origem
+            )
+            VALUES (?, ?, 0, 'manual')
+            ON CONFLICT(user_id, concurso_id)
+            DO UPDATE SET
+                ativo = 0,
+                origem = 'manual'
+            """,
+            (user_id, concurso_id),
+        )
+        linha = conexao.execute(
+            """
+            SELECT *
+            FROM alerta_subscricoes
+            WHERE user_id = ?
+              AND concurso_id = ?
+            """,
+            (user_id, concurso_id),
+        ).fetchone()
+        conexao.commit()
+    return dict(linha) if linha else None
+
+
+def obter_alertas_concurso_utilizador(
+    user_id: str,
+    concurso_id: int,
+):
+    with closing(abrir_conexao()) as conexao:
+        linha = conexao.execute(
+            """
+            SELECT
+                s.id,
+                s.user_id,
+                s.concurso_id,
+                s.ativo,
+                s.origem,
+                s.created_at,
+                s.updated_at,
+                EXISTS (
+                    SELECT 1 FROM favoritos AS f
+                    WHERE f.user_id = s.user_id
+                      AND f.concurso_id = s.concurso_id
+                ) AS e_favorito,
+                EXISTS (
+                    SELECT 1 FROM analises AS a
+                    WHERE a.user_id = s.user_id
+                      AND a.concurso_id = s.concurso_id
+                ) AS tem_analise
+            FROM alerta_subscricoes AS s
+            WHERE s.user_id = ?
+              AND s.concurso_id = ?
+            """,
+            (user_id, concurso_id),
+        ).fetchone()
+
+        if linha is not None:
+            return dict(linha)
+
+        acompanhado = conexao.execute(
+            """
+            SELECT
+                ? AS user_id,
+                ? AS concurso_id,
+                EXISTS (
+                    SELECT 1 FROM favoritos
+                    WHERE user_id = ?
+                      AND concurso_id = ?
+                ) AS e_favorito,
+                EXISTS (
+                    SELECT 1 FROM analises
+                    WHERE user_id = ?
+                      AND concurso_id = ?
+                ) AS tem_analise,
+                EXISTS (
+                    SELECT 1 FROM analise_jobs
+                    WHERE user_id = ?
+                      AND concurso_id = ?
+                ) AS tem_job
+            """,
+            (
+                user_id,
+                concurso_id,
+                user_id,
+                concurso_id,
+                user_id,
+                concurso_id,
+                user_id,
+                concurso_id,
+            ),
+        ).fetchone()
+
+    dados = dict(acompanhado)
+    dados["ativo"] = bool(
+        dados.get("e_favorito")
+        or dados.get("tem_analise")
+        or dados.get("tem_job")
+    )
+    dados["origem"] = "automatica" if dados["ativo"] else "manual"
+    return dados
+
+
+def listar_alerta_subscricoes_utilizador(user_id: str):
+    with closing(abrir_conexao()) as conexao:
+        linhas = conexao.execute(
+            """
+            WITH acompanhados AS (
+                SELECT concurso_id, 'favorito' AS origem
+                FROM favoritos
+                WHERE user_id = ?
+
+                UNION
+
+                SELECT concurso_id, 'analise' AS origem
+                FROM analises
+                WHERE user_id = ?
+
+                UNION
+
+                SELECT concurso_id, 'analise' AS origem
+                FROM analise_jobs
+                WHERE user_id = ?
+
+                UNION
+
+                SELECT concurso_id, origem
+                FROM alerta_subscricoes
+                WHERE user_id = ?
+            )
+            SELECT
+                c.id AS concurso_id,
+                c.titulo,
+                c.entidade,
+                c.link,
+                COALESCE(s.ativo, 1) AS ativo,
+                COALESCE(s.origem, a.origem) AS origem,
+                EXISTS (
+                    SELECT 1 FROM favoritos AS f
+                    WHERE f.user_id = ?
+                      AND f.concurso_id = c.id
+                ) AS e_favorito,
+                EXISTS (
+                    SELECT 1 FROM analises AS an
+                    WHERE an.user_id = ?
+                      AND an.concurso_id = c.id
+                ) AS tem_analise
+            FROM acompanhados AS a
+            JOIN concursos AS c
+              ON c.id = a.concurso_id
+            LEFT JOIN alerta_subscricoes AS s
+              ON s.user_id = ?
+             AND s.concurso_id = c.id
+            GROUP BY c.id
+            ORDER BY c.titulo
+            """,
+            (
+                user_id,
+                user_id,
+                user_id,
+                user_id,
+                user_id,
+                user_id,
+                user_id,
+            ),
+        ).fetchall()
+
+    return [dict(linha) for linha in linhas]
+
+
+def _data_limite_alerta(concurso) -> date | None:
+    data_direta = _converter_data_guardada(
+        concurso["data_entrega_propostas"]
+        if "data_entrega_propostas" in concurso.keys()
+        else None
+    )
+    if data_direta:
+        return data_direta
+
+    data_limite = concurso["data_limite"] if "data_limite" in concurso.keys() else None
+    data_convertida = _converter_data_guardada(data_limite)
+    if data_convertida:
+        return data_convertida
+
+    data_publicacao = _converter_data_guardada(concurso["data"])
+    if not data_publicacao or not data_limite:
+        return None
+
+    correspondencia = re.search(r"\d+", str(data_limite))
+    if not correspondencia:
+        return None
+
+    return data_publicacao + timedelta(days=int(correspondencia.group()))
+
+
+def gerar_alertas_datas_monitorizados(user_id: str | None = None):
+    hoje = date.today()
+
+    with closing(abrir_conexao()) as conexao:
+        if user_id:
+            concursos = conexao.execute(
+                """
+                WITH acompanhados AS (
+                    SELECT concurso_id
+                    FROM favoritos
+                    WHERE user_id = ?
+
+                    UNION
+
+                    SELECT concurso_id
+                    FROM analises
+                    WHERE user_id = ?
+
+                    UNION
+
+                    SELECT concurso_id
+                    FROM analise_jobs
+                    WHERE user_id = ?
+
+                    UNION
+
+                    SELECT concurso_id
+                    FROM alerta_subscricoes
+                    WHERE user_id = ?
+                      AND ativo = 1
+                )
+                SELECT DISTINCT c.*
+                FROM concursos AS c
+                JOIN acompanhados AS a
+                  ON a.concurso_id = c.id
+                """,
+                (user_id, user_id, user_id, user_id),
+            ).fetchall()
+        else:
+            concursos = conexao.execute(
+                """
+                WITH acompanhados AS (
+                    SELECT concurso_id FROM favoritos
+                    UNION
+                    SELECT concurso_id FROM analises WHERE user_id IS NOT NULL
+                    UNION
+                    SELECT concurso_id FROM analise_jobs
+                    UNION
+                    SELECT concurso_id
+                    FROM alerta_subscricoes
+                    WHERE ativo = 1
+                )
+                SELECT DISTINCT c.*
+                FROM concursos AS c
+                JOIN acompanhados AS a
+                  ON a.concurso_id = c.id
+                """
+            ).fetchall()
+
+        criados = 0
+        for concurso in concursos:
+            data_limite = _data_limite_alerta(concurso)
+            if data_limite is None:
+                continue
+
+            dias_restantes = (data_limite - hoje).days
+            if dias_restantes not in {30, 15, 7}:
+                continue
+
+            for utilizador in _utilizadores_monitorizar_concurso(
+                conexao,
+                concurso["id"],
+            ):
+                if user_id and utilizador != user_id:
+                    continue
+
+                antes = conexao.total_changes
+                _criar_alerta(
+                    conexao,
+                    user_id=utilizador,
+                    concurso_id=concurso["id"],
+                    tipo="prazo",
+                    titulo=f"Faltam {dias_restantes} dias",
+                    descricao=(
+                        "O prazo deste concurso esta a aproximar-se."
+                    ),
+                    dados_extraidos={
+                        "data_limite": data_limite.isoformat(),
+                        "dias_restantes": dias_restantes,
+                    },
+                    documento_origem=None,
+                    link=concurso["link"],
+                    fingerprint=(
+                        f"prazo:{dias_restantes}:"
+                        f"{data_limite.isoformat()}"
+                    ),
+                    relevante=False,
+                )
+                criados += int(conexao.total_changes > antes)
+
+        conexao.commit()
+        return criados
+
+
+def listar_alertas_utilizador(user_id: str):
+    gerar_alertas_datas_monitorizados(user_id)
+
+    with closing(abrir_conexao()) as conexao:
+        linhas = conexao.execute(
+            """
+            SELECT
+                a.id,
+                a.user_id,
+                a.concurso_id,
+                a.tipo,
+                a.titulo,
+                a.descricao,
+                a.dados_extraidos,
+                a.documento_origem,
+                a.documento_anterior,
+                a.documento_novo,
+                a.hash_anterior,
+                a.hash_novo,
+                a.link,
+                a.data_deteccao,
+                a.estado,
+                a.relevante,
+                a.origem_evento,
+                a.analise_job_id,
+                a.created_at,
+                a.updated_at,
+                c.titulo AS concurso_titulo,
+                c.entidade,
+                c.link AS concurso_link,
+                c.data_limite,
+                c.data_entrega_propostas,
+                EXISTS (
+                    SELECT 1 FROM analises AS an
+                    WHERE an.user_id = a.user_id
+                      AND an.concurso_id = a.concurso_id
+                      AND an.estado = 'concluida'
+                ) AS tem_analise
+            FROM alertas AS a
+            JOIN concursos AS c
+              ON c.id = a.concurso_id
+            WHERE a.user_id = ?
+              AND a.estado != 'arquivado'
+            ORDER BY a.data_deteccao DESC, a.id DESC
+            """,
+            (user_id,),
+        ).fetchall()
+
+    resultados = []
+    for linha in linhas:
+        item = dict(linha)
+        try:
+            item["dados_extraidos"] = json.loads(
+                item.get("dados_extraidos") or "{}"
+            )
+        except json.JSONDecodeError:
+            item["dados_extraidos"] = {}
+        resultados.append(item)
+
+    return resultados
+
+
+def arquivar_alerta_utilizador(user_id: str, alerta_id: int) -> bool:
+    with closing(abrir_conexao()) as conexao:
+        cursor = conexao.execute(
+            """
+            UPDATE alertas
+            SET estado = 'arquivado'
+            WHERE id = ?
+              AND user_id = ?
+            """,
+            (alerta_id, user_id),
+        )
+        conexao.commit()
+        return cursor.rowcount == 1
+
+
+def _registar_alertas_alteracoes_concurso_conexao(
+    conexao,
+    concurso_atual,
+    novos: dict,
+):
+    utilizadores = _utilizadores_monitorizar_concurso(
+        conexao,
+        concurso_atual["id"],
+    )
+    if not utilizadores:
+        return 0
+
+    alteracoes = []
+
+    def mudou(campo: str) -> bool:
+        antigo = _normalizar_alerta(concurso_atual[campo])
+        novo = _normalizar_alerta(novos.get(campo))
+        return bool(novo and antigo and novo != antigo)
+
+    def adicionado(campo: str) -> bool:
+        antigo = _normalizar_alerta(concurso_atual[campo])
+        novo = _normalizar_alerta(novos.get(campo))
+        return bool(novo and not antigo)
+
+    if mudou("preco_base"):
+        alteracoes.append(
+            {
+                "tipo": "alteracao_economica",
+                "titulo": "Valor estimado alterado",
+                "descricao": "Foi detetada uma alteracao economica no concurso.",
+                "dados": {
+                    "campo": "preco_base",
+                    "antes": concurso_atual["preco_base"],
+                    "agora": novos.get("preco_base"),
+                    "impacto": (
+                        "Pode alterar a leitura de escala, risco e adequacao da equipa."
+                    ),
+                },
+                "documento": novos.get("link_anuncio_dr"),
+                "link": novos.get("link_anuncio_dr") or concurso_atual["link"],
+            }
+        )
+
+    for campo in ("data_limite", "data_entrega_propostas"):
+        if mudou(campo):
+            alteracoes.append(
+                {
+                    "tipo": "alteracao_prazo",
+                    "titulo": "Prazo do concurso alterado",
+                    "descricao": "Foi detetada uma alteracao no calendario.",
+                    "dados": {
+                        "campo": campo,
+                        "antes": concurso_atual[campo],
+                        "agora": novos.get(campo),
+                        "impacto": (
+                            "Revê o planeamento da candidatura e a disponibilidade da equipa."
+                        ),
+                    },
+                    "documento": novos.get("link_anuncio_dr"),
+                    "link": novos.get("link_anuncio_dr") or concurso_atual["link"],
+                }
+            )
+
+    if mudou("criterio_resumo") or mudou("criterio_detalhe"):
+        alteracoes.append(
+            {
+                "tipo": "alteracao_criterio",
+                "titulo": "Criterios de adjudicacao alterados",
+                "descricao": (
+                    "Foram detetadas alteracoes nos criterios ou ponderacoes."
+                ),
+                "dados": {
+                    "antes": concurso_atual["criterio_resumo"],
+                    "agora": novos.get("criterio_resumo"),
+                    "impacto": (
+                        "Esta alteracao pode influenciar a analise existente."
+                    ),
+                },
+                "documento": novos.get("link_anuncio_dr"),
+                "link": novos.get("link_anuncio_dr") or concurso_atual["link"],
+            }
+        )
+
+    if mudou("entregaveis") or adicionado("entregaveis"):
+        alteracoes.append(
+            {
+                "tipo": "alteracao_programa",
+                "titulo": "Entregaveis ou programa alterados",
+                "descricao": (
+                    "Foi detetada informacao nova sobre entregaveis ou programa."
+                ),
+                "dados": {
+                    "antes": concurso_atual["entregaveis"],
+                    "agora": novos.get("entregaveis"),
+                    "impacto": (
+                        "Pode afetar o esforço de preparacao da proposta."
+                    ),
+                },
+                "documento": novos.get("link_anuncio_dr"),
+                "link": novos.get("link_anuncio_dr") or concurso_atual["link"],
+            }
+        )
+
+    if mudou("link_pecas") or adicionado("link_pecas"):
+        alteracoes.append(
+            {
+                "tipo": "novo_documento",
+                "titulo": "Novo documento ou pacote de pecas publicado",
+                "descricao": (
+                    "Foi detetado um link novo para pecas do procedimento."
+                ),
+                "dados": {
+                    "documento": "Pecas do procedimento",
+                    "tipo_documento": "documentos_base_gov",
+                    "impacto": (
+                        "Os documentos oficiais podem alterar a leitura do concurso."
+                    ),
+                },
+                "documento": novos.get("link_pecas"),
+                "link": novos.get("link_pecas") or concurso_atual["link"],
+            }
+        )
+
+    if mudou("data_esclarecimentos") or adicionado("data_esclarecimentos"):
+        alteracoes.append(
+            {
+                "tipo": "esclarecimento",
+                "titulo": "Informacao de esclarecimentos atualizada",
+                "descricao": (
+                    "Foi detetada informacao nova sobre pedidos de esclarecimento."
+                ),
+                "dados": {
+                    "antes": concurso_atual["data_esclarecimentos"],
+                    "agora": novos.get("data_esclarecimentos"),
+                    "entidade": concurso_atual["entidade"],
+                },
+                "documento": novos.get("link_anuncio_dr"),
+                "link": novos.get("link_anuncio_dr") or concurso_atual["link"],
+            }
+        )
+
+    criados = 0
+    for alteracao in alteracoes:
+        relevante = alteracao["tipo"] in TIPOS_ALERTA_RELEVANTES
+        for utilizador in utilizadores:
+            antes = conexao.total_changes
+            _criar_alerta(
+                conexao,
+                user_id=utilizador,
+                concurso_id=concurso_atual["id"],
+                tipo=alteracao["tipo"],
+                titulo=alteracao["titulo"],
+                descricao=alteracao["descricao"],
+                dados_extraidos=alteracao["dados"],
+                documento_origem=alteracao["documento"],
+                link=alteracao["link"],
+                fingerprint=(
+                    f"{alteracao['tipo']}:"
+                    f"{_normalizar_alerta(alteracao['dados'].get('agora') or alteracao['link'])}"
+                ),
+                relevante=relevante,
+            )
+            criados += int(conexao.total_changes > antes)
+
+    return criados
+
+
 def listar_analises_utilizador(user_id: str):
     with closing(abrir_conexao()) as conexao:
         fichas = conexao.execute(
@@ -480,7 +1543,7 @@ def listar_analises_utilizador(user_id: str):
             SELECT
                 a.id,
                 'analise' AS tipo,
-                NULL AS user_id,
+                a.user_id,
                 a.concurso_id,
                 a.estado,
                 a.progresso,
@@ -488,6 +1551,8 @@ def listar_analises_utilizador(user_id: str):
                 a.score,
                 a.criado_em AS created_at,
                 a.updated_at,
+                CASE WHEN a.user_id = ? THEN 1 ELSE 0 END AS pode_apagar,
+                0 AS pode_cancelar,
                 c.titulo,
                 c.entidade,
                 c.link,
@@ -497,7 +1562,9 @@ def listar_analises_utilizador(user_id: str):
             JOIN concursos AS c
               ON c.id = a.concurso_id
             WHERE a.estado = 'concluida'
-            """
+              AND (a.user_id IS NULL OR a.user_id = ?)
+            """,
+            (user_id, user_id),
         ).fetchall()
 
         jobs = conexao.execute(
@@ -513,6 +1580,12 @@ def listar_analises_utilizador(user_id: str):
                 NULL AS score,
                 j.created_at,
                 j.updated_at,
+                0 AS pode_apagar,
+                CASE
+                    WHEN j.estado IN (
+                        'aguarda', 'extracao', 'processamento', 'geracao'
+                    ) THEN 1 ELSE 0
+                END AS pode_cancelar,
                 c.titulo,
                 c.entidade,
                 c.link,
@@ -541,14 +1614,17 @@ def listar_analises_utilizador(user_id: str):
     return resultados
 
 
-def analise_concluida_por_concurso(concurso_id: int):
+def analise_concluida_por_concurso(
+    concurso_id: int,
+    user_id: str | None = None,
+):
     with closing(abrir_conexao()) as conexao:
         linha = conexao.execute(
             """
             SELECT
                 a.id,
                 'analise' AS tipo,
-                NULL AS user_id,
+                a.user_id,
                 a.concurso_id,
                 a.estado,
                 a.progresso,
@@ -556,6 +1632,8 @@ def analise_concluida_por_concurso(concurso_id: int):
                 a.score,
                 a.criado_em AS created_at,
                 a.updated_at,
+                CASE WHEN a.user_id = ? THEN 1 ELSE 0 END AS pode_apagar,
+                0 AS pode_cancelar,
                 c.titulo,
                 c.entidade,
                 c.link,
@@ -563,9 +1641,13 @@ def analise_concluida_por_concurso(concurso_id: int):
                 c.tipo_procedimento
             FROM analises AS a
             JOIN concursos AS c ON c.id = a.concurso_id
-            WHERE a.concurso_id = ? AND a.estado = 'concluida'
+            WHERE a.concurso_id = ?
+              AND a.estado = 'concluida'
+              AND (a.user_id IS NULL OR a.user_id = ?)
+            ORDER BY CASE WHEN a.user_id = ? THEN 0 ELSE 1 END
+            LIMIT 1
             """,
-            (concurso_id,),
+            (user_id, concurso_id, user_id, user_id),
         ).fetchone()
     return dict(linha) if linha else None
 
@@ -636,6 +1718,7 @@ def atualizar_analise_job(
             UPDATE analise_jobs
             SET estado = ?, progresso = ?, erro = ?
             WHERE id = ?
+              AND estado != 'cancelada'
             """,
             (estado, progresso, erro, job_id),
         )
@@ -693,6 +1776,117 @@ def criar_ou_obter_analise_job(
     return dict(linha), criado
 
 
+def obter_analise_job_utilizador(
+    user_id: str,
+    job_id: int,
+):
+    with closing(abrir_conexao()) as conexao:
+        linha = conexao.execute(
+            """
+            SELECT *
+            FROM analise_jobs
+            WHERE id = ? AND user_id = ?
+            """,
+            (job_id, user_id),
+        ).fetchone()
+    return dict(linha) if linha else None
+
+
+def cancelar_analise_job(
+    user_id: str,
+    job_id: int,
+):
+    """Cancela atomicamente um job ativo do próprio utilizador."""
+    with closing(abrir_conexao()) as conexao:
+        conexao.execute("BEGIN IMMEDIATE")
+        cursor = conexao.execute(
+            """
+            UPDATE analise_jobs
+            SET estado = 'cancelada', erro = NULL
+            WHERE id = ?
+              AND user_id = ?
+              AND estado IN ('aguarda', 'extracao', 'processamento', 'geracao')
+            """,
+            (job_id, user_id),
+        )
+        if cursor.rowcount != 1:
+            conexao.rollback()
+            return None
+
+        linha = conexao.execute(
+            "SELECT * FROM analise_jobs WHERE id = ?",
+            (job_id,),
+        ).fetchone()
+        conexao.commit()
+    return dict(linha)
+
+
+def analise_job_esta_cancelado(job_id: int) -> bool:
+    """Ponto de cancelamento cooperativo para o worker entre fases."""
+    with closing(abrir_conexao()) as conexao:
+        linha = conexao.execute(
+            "SELECT estado FROM analise_jobs WHERE id = ?",
+            (job_id,),
+        ).fetchone()
+    return linha is not None and linha["estado"] == "cancelada"
+
+
+def remover_analise_utilizador(
+    user_id: str,
+    analise_id: int,
+):
+    """Remove apenas uma análise concluída pertencente ao utilizador."""
+    with closing(abrir_conexao()) as conexao:
+        conexao.execute("BEGIN IMMEDIATE")
+        linha = conexao.execute(
+            """
+            SELECT id, user_id, job_id, concurso_id, ficheiro_ficha
+            FROM analises
+            WHERE id = ?
+              AND user_id = ?
+              AND estado = 'concluida'
+            """,
+            (analise_id, user_id),
+        ).fetchone()
+        if linha is None:
+            conexao.rollback()
+            return None
+
+        dados = dict(linha)
+        conexao.execute(
+            "DELETE FROM analises WHERE id = ? AND user_id = ?",
+            (analise_id, user_id),
+        )
+
+        if dados.get("job_id") is not None:
+            conexao.execute(
+                "DELETE FROM analise_jobs WHERE id = ? AND user_id = ?",
+                (dados["job_id"], user_id),
+            )
+        else:
+            conexao.execute(
+                """
+                DELETE FROM analise_jobs
+                WHERE user_id = ?
+                  AND concurso_id = ?
+                  AND estado = 'concluida'
+                """,
+                (user_id, dados["concurso_id"]),
+            )
+
+        ficheiro = dados.get("ficheiro_ficha")
+        dados["ficheiro_exclusivo"] = bool(
+            ficheiro
+            and conexao.execute(
+                "SELECT 1 FROM analises WHERE ficheiro_ficha = ? LIMIT 1",
+                (ficheiro,),
+            ).fetchone()
+            is None
+        )
+        conexao.commit()
+    return dados
+
+
 def _texto_ou_none(valor):
     """
     Converte valores vazios em None.
@@ -718,8 +1912,20 @@ def guardar_concurso(
     preco_base=None,
     cpv=None,
     tipo_procedimento=None,
+    criterio_tipo=None,
+    criterio_resumo=None,
+    criterio_detalhe=None,
+    entregaveis=None,
     link_anuncio_dr=None,
+    link_pecas=None,
     data_entrega_propostas=None,
+    municipio=None,
+    freguesia=None,
+    morada=None,
+    codigo_postal=None,
+    latitude=None,
+    longitude=None,
+    localizacao_contexto=None,
 ):
     """
     Guarda um concurso na base de dados.
@@ -745,10 +1951,25 @@ def guardar_concurso(
                 preco_base,
                 cpv,
                 tipo_procedimento,
+                criterio_tipo,
+                criterio_resumo,
+                criterio_detalhe,
+                entregaveis,
                 link_anuncio_dr,
-                data_entrega_propostas
+                link_pecas,
+                data_entrega_propostas,
+                municipio,
+                freguesia,
+                morada,
+                codigo_postal,
+                latitude,
+                longitude,
+                localizacao_contexto
             )
-            VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (
+                ?, ?, ?, ?, 1, ?, ?, ?, ?, ?,
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+            )
             """,
             (
                 titulo,
@@ -760,8 +1981,20 @@ def guardar_concurso(
                 _texto_ou_none(preco_base),
                 _texto_ou_none(cpv),
                 _texto_ou_none(tipo_procedimento),
+                _texto_ou_none(criterio_tipo),
+                _texto_ou_none(criterio_resumo),
+                _texto_ou_none(criterio_detalhe),
+                _texto_ou_none(entregaveis),
                 _texto_ou_none(link_anuncio_dr),
+                _texto_ou_none(link_pecas),
                 _texto_ou_none(data_entrega_propostas),
+                _texto_ou_none(municipio),
+                _texto_ou_none(freguesia),
+                _texto_ou_none(morada),
+                _texto_ou_none(codigo_postal),
+                latitude,
+                longitude,
+                _texto_ou_none(localizacao_contexto),
             ),
         )
 
@@ -790,8 +2023,17 @@ def atualizar_dados_concurso(
     criterio_tipo=None,
     criterio_resumo=None,
     criterio_detalhe=None,
+    entregaveis=None,
     link_anuncio_dr=None,
+    link_pecas=None,
     data_entrega_propostas=None,
+    municipio=None,
+    freguesia=None,
+    morada=None,
+    codigo_postal=None,
+    latitude=None,
+    longitude=None,
+    localizacao_contexto=None,
 ):
     """
     Atualiza os dados complementares de um concurso existente.
@@ -823,9 +2065,59 @@ def atualizar_dados_concurso(
     criterio_detalhe = _texto_ou_none(
         criterio_detalhe
     )
+    entregaveis = _texto_ou_none(entregaveis)
+    link_anuncio_dr = _texto_ou_none(link_anuncio_dr)
+    link_pecas = _texto_ou_none(link_pecas)
+    data_entrega_propostas = _texto_ou_none(
+        data_entrega_propostas
+    )
+    municipio = _texto_ou_none(municipio)
+    freguesia = _texto_ou_none(freguesia)
+    morada = _texto_ou_none(morada)
+    codigo_postal = _texto_ou_none(codigo_postal)
+    localizacao_contexto = _texto_ou_none(localizacao_contexto)
 
     conn = abrir_conexao()
     cursor = conn.cursor()
+
+    concurso_atual = cursor.execute(
+        """
+        SELECT *
+        FROM concursos
+        WHERE link = ?
+        """,
+        (link,),
+    ).fetchone()
+
+    if concurso_atual is not None:
+        _registar_alertas_alteracoes_concurso_conexao(
+            conn,
+            concurso_atual,
+            {
+                "titulo": titulo,
+                "entidade": entidade,
+                "data": data,
+                "data_limite": data_limite,
+                "data_esclarecimentos": data_esclarecimentos,
+                "preco_base": preco_base,
+                "cpv": cpv,
+                "tipo_procedimento": tipo_procedimento,
+                "criterio_tipo": criterio_tipo,
+                "criterio_resumo": criterio_resumo,
+                "criterio_detalhe": criterio_detalhe,
+                "entregaveis": entregaveis,
+                "link_anuncio_dr": link_anuncio_dr,
+                "link_pecas": link_pecas,
+                "data_entrega_propostas": data_entrega_propostas,
+                "municipio": municipio,
+                "freguesia": freguesia,
+                "morada": morada,
+                "codigo_postal": codigo_postal,
+                "latitude": latitude,
+                "longitude": longitude,
+                "localizacao_contexto": localizacao_contexto,
+            },
+        )
 
     cursor.execute(
         """
@@ -862,6 +2154,50 @@ def atualizar_dados_concurso(
             criterio_detalhe = COALESCE(
                 ?,
                 criterio_detalhe
+            ),
+            entregaveis = COALESCE(
+                ?,
+                entregaveis
+            ),
+            link_anuncio_dr = COALESCE(
+                ?,
+                link_anuncio_dr
+            ),
+            link_pecas = COALESCE(
+                ?,
+                link_pecas
+            ),
+            data_entrega_propostas = COALESCE(
+                ?,
+                data_entrega_propostas
+            ),
+            municipio = COALESCE(
+                ?,
+                municipio
+            ),
+            freguesia = COALESCE(
+                ?,
+                freguesia
+            ),
+            morada = COALESCE(
+                ?,
+                morada
+            ),
+            codigo_postal = COALESCE(
+                ?,
+                codigo_postal
+            ),
+            latitude = COALESCE(
+                ?,
+                latitude
+            ),
+            longitude = COALESCE(
+                ?,
+                longitude
+            ),
+            localizacao_contexto = COALESCE(
+                ?,
+                localizacao_contexto
             )
         WHERE link = ?
         """,
@@ -877,6 +2213,17 @@ def atualizar_dados_concurso(
             criterio_tipo,
             criterio_resumo,
             criterio_detalhe,
+            entregaveis,
+            link_anuncio_dr,
+            link_pecas,
+            data_entrega_propostas,
+            municipio,
+            freguesia,
+            morada,
+            codigo_postal,
+            latitude,
+            longitude,
+            localizacao_contexto,
             link,
         ),
     )
@@ -1086,45 +2433,115 @@ def guardar_analise(
     nivel,
     resumo,
     dados_json,
+    user_id=None,
+    job_id=None,
+    score=None,
+    ficheiro_ficha=None,
 ):
     """
     Guarda ou atualiza a análise automática
     de um concurso.
     """
 
-    conn = abrir_conexao()
-    cursor = conn.cursor()
+    with closing(abrir_conexao()) as conexao:
+        conexao.execute("BEGIN IMMEDIATE")
 
-    cursor.execute(
-        """
-        INSERT INTO analises
-        (
-            concurso_id,
-            nivel,
-            resumo,
-            dados_json
-        )
-        VALUES (?, ?, ?, ?)
+        if job_id is not None:
+            job = conexao.execute(
+                """
+                SELECT user_id, concurso_id, estado
+                FROM analise_jobs
+                WHERE id = ?
+                """,
+                (job_id,),
+            ).fetchone()
+            if (
+                job is None
+                or job["estado"] == "cancelada"
+                or job["concurso_id"] != concurso_id
+                or (user_id is not None and job["user_id"] != user_id)
+            ):
+                conexao.rollback()
+                return False
+            user_id = job["user_id"]
 
-        ON CONFLICT(concurso_id)
-        DO UPDATE SET
-            nivel = excluded.nivel,
-            resumo = excluded.resumo,
-            dados_json = excluded.dados_json,
-            estado = 'concluida',
-            progresso = 100,
-            updated_at = CURRENT_TIMESTAMP
-        """,
-        (
-            concurso_id,
+        if user_id is None:
+            existente = conexao.execute(
+                """
+                SELECT id FROM analises
+                WHERE concurso_id = ? AND user_id IS NULL
+                """,
+                (concurso_id,),
+            ).fetchone()
+        else:
+            existente = conexao.execute(
+                """
+                SELECT id FROM analises
+                WHERE concurso_id = ? AND user_id = ?
+                """,
+                (concurso_id, user_id),
+            ).fetchone()
+
+        parametros = (
             nivel,
             resumo,
             dados_json,
+            score,
+            ficheiro_ficha,
+            job_id,
         )
-    )
+        if existente:
+            analise_id = existente["id"]
+            conexao.execute(
+                """
+                UPDATE analises
+                SET nivel = ?, resumo = ?, dados_json = ?,
+                    estado = 'concluida', progresso = 100,
+                    score = COALESCE(?, score),
+                    ficheiro_ficha = COALESCE(?, ficheiro_ficha),
+                    job_id = COALESCE(?, job_id),
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                """,
+                (*parametros, analise_id),
+            )
+        else:
+            cursor = conexao.execute(
+                """
+                INSERT INTO analises (
+                    user_id, job_id, concurso_id, nivel, resumo,
+                    dados_json, estado, progresso, score, ficheiro_ficha
+                )
+                VALUES (?, ?, ?, ?, ?, ?, 'concluida', 100, ?, ?)
+                """,
+                (
+                    user_id,
+                    job_id,
+                    concurso_id,
+                    nivel,
+                    resumo,
+                    dados_json,
+                    score,
+                    ficheiro_ficha,
+                ),
+            )
+            analise_id = cursor.lastrowid
 
-    conn.commit()
-    conn.close()
+        if job_id is not None:
+            atualizado = conexao.execute(
+                """
+                UPDATE analise_jobs
+                SET estado = 'concluida', progresso = 100, erro = NULL
+                WHERE id = ? AND estado != 'cancelada'
+                """,
+                (job_id,),
+            )
+            if atualizado.rowcount != 1:
+                conexao.rollback()
+                return False
+
+        conexao.commit()
+        return analise_id
 
 
 def obter_analise(concurso_id):
@@ -1142,6 +2559,8 @@ def obter_analise(concurso_id):
         SELECT *
         FROM analises
         WHERE concurso_id = ?
+        ORDER BY CASE WHEN user_id IS NULL THEN 0 ELSE 1 END, id DESC
+        LIMIT 1
         """,
         (
             concurso_id,

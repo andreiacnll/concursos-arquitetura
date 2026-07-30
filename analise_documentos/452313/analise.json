@@ -1,0 +1,90 @@
+{
+  "preparacao": {
+    "score": 53,
+    "classificacao": "A avaliar",
+    "elegibilidade": {
+      "estado": "Sem barreiras criticas identificadas",
+      "motivos": []
+    },
+    "oportunidades": [
+      "Documentos oficiais recolhidos"
+    ],
+    "riscos": []
+  },
+  "resumo": {
+    "total_documentos": 15,
+    "programa_procedimento": false,
+    "caderno_encargos": true,
+    "programa_preliminar": false,
+    "levantamento": false,
+    "pecas_desenhadas": false,
+    "cartografia": false,
+    "mapa_quantidades": false,
+    "elementos_prediais": false,
+    "condicoes_tecnicas": false
+  },
+  "documentos": [
+    {
+      "nome": "Carta Convite ou Anúncio DR\\419968372.pdf",
+      "tipos": []
+    },
+    {
+      "nome": "Processo Concurso\\10_Anexo_A.pdf",
+      "tipos": []
+    },
+    {
+      "nome": "Processo Concurso\\11_Caderno_de_Encargos.pdf",
+      "tipos": [
+        "caderno_encargos"
+      ]
+    },
+    {
+      "nome": "Processo Concurso\\12_Programa_de_Concurso.pdf",
+      "tipos": []
+    },
+    {
+      "nome": "Processo Concurso\\1_DEU.pdf",
+      "tipos": []
+    },
+    {
+      "nome": "Processo Concurso\\3_Anexo_II_PC.pdf",
+      "tipos": []
+    },
+    {
+      "nome": "Processo Concurso\\4_Anexo_II_PC.docx",
+      "tipos": []
+    },
+    {
+      "nome": "Processo Concurso\\5_Anexo_III.xlsx",
+      "tipos": []
+    },
+    {
+      "nome": "Processo Concurso\\6_Anexo_IV_PC_entidades.pdf",
+      "tipos": []
+    },
+    {
+      "nome": "Processo Concurso\\7_Anexo_V.pdf",
+      "tipos": []
+    },
+    {
+      "nome": "Processo Concurso\\8_Anexo_VI.pdf",
+      "tipos": []
+    },
+    {
+      "nome": "Processo Concurso\\9_Anexo_VI.docx",
+      "tipos": []
+    },
+    {
+      "nome": "Processo Concurso\\2_espd_request\\espd-request.pdf",
+      "tipos": []
+    },
+    {
+      "nome": "Processo Concurso\\2_espd_request\\espd-request.xml",
+      "tipos": []
+    },
+    {
+      "nome": "Processo Concurso\\2_espd_request\\README.txt",
+      "tipos": []
+    }
+  ]
+}

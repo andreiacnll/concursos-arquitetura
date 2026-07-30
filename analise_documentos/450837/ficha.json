@@ -204,8 +204,14 @@
   "localizacao": {
     "morada": "Mercado Municipal de Castelo Branco",
     "cidade": "Castelo Branco",
-    "latitude": 39.8222,
-    "longitude": -7.4909
+    "municipio": "Castelo Branco",
+    "freguesia": "Castelo Branco",
+    "codigo_postal": null,
+    "latitude": 39.82201,
+    "longitude": -7.49367,
+    "coordenadas": "39.82201, -7.49367",
+    "contexto_urbano": "Intervenção num mercado municipal existente no centro urbano de Castelo Branco, com impacto direto na atividade comercial local e na qualificação do espaço público envolvente. A leitura CNLL deve ponderar operação faseada, compatibilização técnica em edifício público e continuidade funcional.",
+    "fonte": "referencia_osm"
   },
   "entidade": {
     "nome": "Município de Castelo Branco",

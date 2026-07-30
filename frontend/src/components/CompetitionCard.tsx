@@ -243,7 +243,11 @@ export default function CompetitionCard({
               }
               aria-pressed={isFavorite}
               title={isFavorite ? "Remover dos favoritos" : "Guardar nos favoritos"}
-              onClick={onToggleFavorite}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                onToggleFavorite();
+              }}
             >
               <Bookmark
                 size={19}
@@ -341,7 +345,13 @@ export default function CompetitionCard({
                 className="card-link card-link-analise"
                 style={{ background: "#111", color: "white", border: "none" }}
               >
-                {analiseEstado === "aguarda" ? "⏳ Em fila" : "⚙ Em processamento"}
+                {analiseEstado === "aguarda"
+                  ? "⏳ Em fila"
+                  : analiseEstado === "cancelada"
+                    ? "× Análise cancelada"
+                    : analiseEstado === "erro"
+                      ? "⚠ Erro na análise"
+                      : "⚙ Em processamento"}
               </Link>
             ) : (
               <button

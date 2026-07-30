@@ -1396,6 +1396,94 @@ a {
   font-size: 11px;
 }
 
+.dynamic-price-filter {
+  display: grid;
+  gap: 10px;
+}
+
+.dynamic-price-values,
+.dynamic-price-extremes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dynamic-price-values strong {
+  color: #303235;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.dynamic-price-slider {
+  --price-start: 0%;
+  --price-end: 100%;
+  position: relative;
+  height: 24px;
+}
+
+.dynamic-price-slider::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  right: 0;
+  left: 0;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    #e1e3de 0 var(--price-start),
+    #718d59 var(--price-start) var(--price-end),
+    #e1e3de var(--price-end) 100%
+  );
+}
+
+.dynamic-price-slider input[type="range"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 24px;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  pointer-events: none;
+}
+
+.dynamic-price-slider input[type="range"]::-webkit-slider-thumb {
+  width: 16px;
+  height: 16px;
+  border: 2px solid white;
+  border-radius: 50%;
+  appearance: none;
+  background: #607b43;
+  box-shadow: 0 0 0 1px #607b43;
+  cursor: grab;
+  pointer-events: auto;
+}
+
+.dynamic-price-slider input[type="range"]::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border: 2px solid white;
+  border-radius: 50%;
+  background: #607b43;
+  box-shadow: 0 0 0 1px #607b43;
+  cursor: grab;
+  pointer-events: auto;
+}
+
+.dynamic-price-extremes,
+.dynamic-price-filter small,
+.dynamic-price-empty {
+  color: #858984;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.dynamic-price-filter small {
+  display: block;
+}
+
 .analise-confirm-detail strong {
   font-size: 14px;
   line-height: 1.45;
@@ -1743,6 +1831,16 @@ a {
 :root[data-theme="dark"] .filter-group > p,
 :root[data-theme="dark"] .check-row {
   color: var(--foreground) !important;
+}
+
+:root[data-theme="dark"] .dynamic-price-values strong {
+  color: var(--foreground);
+}
+
+:root[data-theme="dark"] .dynamic-price-extremes,
+:root[data-theme="dark"] .dynamic-price-filter small,
+:root[data-theme="dark"] .dynamic-price-empty {
+  color: var(--muted);
 }
 
 :root[data-theme="dark"] .filter-group select,

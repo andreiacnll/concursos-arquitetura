@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import json
+import asyncio
+import os
 import re
 import sqlite3
-from contextlib import asynccontextmanager, closing
+from contextlib import asynccontextmanager, closing, suppress
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any, Literal
@@ -16,7 +18,9 @@ from .database import (
     abrir_conexao,
     criar_base_dados,
 )
+from .analise.worker import executar_worker
 from .routes.analises import router as analises_router
+from .routes.alertas import router as alertas_router
 from .routes.favoritos import router as favoritos_router
 
 
@@ -27,7 +31,28 @@ CHECKPOINT_PATH = BASE_DIR / "concursos_recolhidos.json"
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     criar_base_dados()
-    yield
+    stop_worker = asyncio.Event()
+    worker_task = None
+
+    if os.getenv("CNLL_ANALISE_WORKER", "1").strip().lower() not in {
+        "0",
+        "false",
+        "nao",
+        "não",
+        "off",
+    }:
+        worker_task = asyncio.create_task(
+            executar_worker(stop_worker)
+        )
+
+    try:
+        yield
+    finally:
+        stop_worker.set()
+        if worker_task is not None:
+            worker_task.cancel()
+            with suppress(asyncio.CancelledError):
+                await worker_task
 
 
 app = FastAPI(
@@ -51,6 +76,7 @@ app.add_middleware(
 
 app.include_router(favoritos_router)
 app.include_router(analises_router)
+app.include_router(alertas_router)
 
 
 def obter_conexao() -> sqlite3.Connection:
@@ -332,7 +358,18 @@ def carregar_concursos_base_dados() -> list[dict[str, Any]]:
                 criterio_tipo,
                 criterio_resumo,
                 criterio_detalhe,
-                entregaveis
+                entregaveis,
+                link_anuncio_dr,
+                link_pecas,
+                data_entrega_propostas,
+                data_esclarecimentos,
+                municipio,
+                freguesia,
+                morada,
+                codigo_postal,
+                latitude,
+                longitude,
+                localizacao_contexto
             FROM concursos
             WHERE relevante = 1
             ORDER BY id DESC
@@ -417,6 +454,19 @@ def normalizar_concurso_json(
         "numero_anuncio": item.get("numero_anuncio"),
         "link_anuncio_dr": item.get("link_anuncio_dr"),
         "link_pecas": item.get("link_pecas"),
+        "data_entrega_propostas": item.get(
+            "data_entrega_propostas"
+        ),
+        "data_esclarecimentos": item.get(
+            "data_esclarecimentos"
+        ),
+        "municipio": item.get("municipio"),
+        "freguesia": item.get("freguesia"),
+        "morada": item.get("morada"),
+        "codigo_postal": item.get("codigo_postal"),
+        "latitude": item.get("latitude"),
+        "longitude": item.get("longitude"),
+        "localizacao_contexto": item.get("localizacao_contexto"),
         "id_portal_base": id_portal_base,
         "id_procedimento": item.get("id_procedimento"),
         "texto": item.get("texto"),

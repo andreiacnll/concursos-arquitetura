@@ -7,6 +7,8 @@ import {
   Clock3,
   CheckCircle2,
   FileSearch,
+  Trash2,
+  XCircle,
 } from "lucide-react";
 import "./analises.css";
 import { useAuth } from "@/context/AuthContext";
@@ -24,6 +26,13 @@ type Analise = {
   created_at: string;
   updated_at: string;
   score?: number | null;
+  pode_apagar?: boolean | number;
+  pode_cancelar?: boolean | number;
+};
+
+type Confirmacao = {
+  tipo: "cancelar" | "apagar";
+  analise: Analise;
 };
 
 function statusLabel(estado: string): { texto: string; icone: string; classe: string } {
@@ -38,6 +47,8 @@ function statusLabel(estado: string): { texto: string; icone: string; classe: st
       return { texto: "📝 A gerar análise", icone: "📝", classe: "status-processando" };
     case "concluida":
       return { texto: "✓ Concluída", icone: "✓", classe: "status-concluida" };
+    case "cancelada":
+      return { texto: "Cancelada", icone: "×", classe: "status-cancelada" };
     case "erro":
       return { texto: "⚠️ Erro", icone: "⚠️", classe: "status-erro" };
     default:
@@ -51,6 +62,9 @@ export default function AnalisesDashboard() {
   const [analises, setAnalises] = useState<Analise[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [confirmacao, setConfirmacao] = useState<Confirmacao | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     const token = session?.access_token;
@@ -86,6 +100,67 @@ export default function AnalisesDashboard() {
         setLoading(false);
       });
   }, [session?.access_token]);
+
+  async function confirmarAcao() {
+    const token = session?.access_token;
+    if (!token || !confirmacao) return;
+
+    const { tipo, analise } = confirmacao;
+    setActionLoading(true);
+    setActionError(null);
+
+    try {
+      const resposta = await fetch(
+        tipo === "cancelar"
+          ? `${API_URL}/analises/${analise.id}/cancelar`
+          : `${API_URL}/analises/${analise.id}`,
+        {
+          method: tipo === "cancelar" ? "POST" : "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      if (!resposta.ok) {
+        const dados = await resposta.json().catch(() => null);
+        throw new Error(
+          dados?.detail || "Não foi possível atualizar a análise.",
+        );
+      }
+
+      if (tipo === "cancelar") {
+        const dados = await resposta.json();
+        setAnalises((atuais) =>
+          atuais.map((item) =>
+            item.tipo === "job" && item.id === analise.id
+              ? {
+                  ...item,
+                  estado: dados.estado || "cancelada",
+                  pode_cancelar: false,
+                  updated_at: dados.updated_at || item.updated_at,
+                }
+              : item,
+          ),
+        );
+      } else {
+        setAnalises((atuais) =>
+          atuais.filter(
+            (item) =>
+              !(item.tipo === "analise" && item.id === analise.id),
+          ),
+        );
+      }
+
+      setConfirmacao(null);
+    } catch (erro) {
+      setActionError(
+        erro instanceof Error
+          ? erro.message
+          : "Não foi possível atualizar a análise.",
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  }
 
   const totalAnalises = analises.length;
   const concluidas = analises.filter(a => a.estado === "concluida").length;
@@ -149,6 +224,11 @@ export default function AnalisesDashboard() {
       ) : (
         <section className="analises-card">
           <h2>Histórico de análises geradas</h2>
+          {actionError && (
+            <p className="analise-action-error" role="alert">
+              {actionError}
+            </p>
+          )}
           {analises.map((analise) => {
             const st = statusLabel(analise.estado);
             return (
@@ -185,19 +265,103 @@ export default function AnalisesDashboard() {
                     : `${analise.progresso}%`}
                 </div>
 
-                {analise.estado === "concluida" ? (
-                  <Link href={`/analise/${analise.concurso_id}`} className="analise-view-btn">
-                    Ver análise
-                  </Link>
-                ) : (
-                  <span className="analise-view-btn is-disabled">
-                    Acompanhar aqui
-                  </span>
-                )}
+                <div className="analise-actions">
+                  {analise.estado === "concluida" ? (
+                    <>
+                      <Link href={`/analise/${analise.concurso_id}`} className="analise-view-btn">
+                        Ver análise
+                      </Link>
+                      {Boolean(analise.pode_apagar) && (
+                        <button
+                          type="button"
+                          className="analise-lifecycle-btn is-delete"
+                          onClick={() =>
+                            setConfirmacao({ tipo: "apagar", analise })
+                          }
+                        >
+                          <Trash2 size={15} />
+                          Apagar análise
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <span className="analise-view-btn is-disabled">
+                        {analise.estado === "cancelada"
+                          ? "Processamento cancelado"
+                          : "Acompanhar aqui"}
+                      </span>
+                      {Boolean(analise.pode_cancelar) && (
+                        <button
+                          type="button"
+                          className="analise-lifecycle-btn is-cancel"
+                          onClick={() =>
+                            setConfirmacao({ tipo: "cancelar", analise })
+                          }
+                        >
+                          <XCircle size={15} />
+                          Cancelar análise
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
             );
           })}
         </section>
+      )}
+
+      {confirmacao && (
+        <div
+          className="analise-confirm-overlay"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !actionLoading) {
+              setConfirmacao(null);
+            }
+          }}
+        >
+          <section
+            className="analise-confirm-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="analise-confirm-title"
+          >
+            <h2 id="analise-confirm-title">
+              {confirmacao.tipo === "cancelar"
+                ? "Cancelar análise"
+                : "Apagar análise"}
+            </h2>
+            <p>
+              {confirmacao.tipo === "cancelar"
+                ? "Tem a certeza que pretende cancelar esta análise?"
+                : "Esta ação irá remover a análise gerada. O concurso continuará disponível."}
+            </p>
+            <strong>{confirmacao.analise.titulo}</strong>
+            <div className="analise-confirm-actions">
+              <button
+                type="button"
+                onClick={() => setConfirmacao(null)}
+                disabled={actionLoading}
+              >
+                Voltar
+              </button>
+              <button
+                type="button"
+                className="is-danger"
+                onClick={confirmarAcao}
+                disabled={actionLoading}
+              >
+                {actionLoading
+                  ? "A processar..."
+                  : confirmacao.tipo === "cancelar"
+                    ? "Cancelar análise"
+                    : "Apagar análise"}
+              </button>
+            </div>
+          </section>
+        </div>
       )}
 
     </div>

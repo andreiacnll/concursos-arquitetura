@@ -19,8 +19,8 @@ export default function ProjectMap({
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
 
-  const googleUrl =
-    `https://www.google.com/maps?q=${latitude},${longitude}`;
+  const openStreetMapUrl =
+    `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=16/${latitude}/${longitude}`;
 
 
 
@@ -30,7 +30,7 @@ export default function ProjectMap({
 
       <a
         className="project-map-placeholder"
-        href={googleUrl}
+        href={openStreetMapUrl}
         target="_blank"
         rel="noopener noreferrer"
       >
