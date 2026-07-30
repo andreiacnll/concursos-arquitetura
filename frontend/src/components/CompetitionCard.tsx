@@ -1,14 +1,17 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 import {
   Bookmark,
   CalendarDays,
   ExternalLink,
   MapPin,
+  Sparkles,
 } from "lucide-react";
+import Link from "next/link";
 import type { Concurso } from "./competition-types";
+import { useAuth } from "@/context/AuthContext";
+import AnalysisConfirmationModal from "./analises/AnalysisConfirmationModal";
 
 function formatDataEntrega(valor?: string | null) {
   if (!valor) return "Sem data";
@@ -150,13 +153,21 @@ export default function CompetitionCard({
   index,
   isFavorite,
   onToggleFavorite,
+  temAnalise,
+  analiseEstado,
+  onCriarAnalise,
 }: {
   concurso: Concurso;
   index: number;
   isFavorite: boolean;
   onToggleFavorite: () => void;
+  temAnalise?: boolean;
+  analiseEstado?: string;
+  onCriarAnalise?: () => Promise<void>;
 }) {
   const [tituloExpandido, setTituloExpandido] = useState(false);
+  const [showConfirmacao, setShowConfirmacao] = useState(false);
+  const { user } = useAuth();
   const tituloLongo = concurso.titulo.length > 75;
 
   const category = concurso.categoria || getCategory(concurso.titulo);
@@ -170,6 +181,10 @@ export default function CompetitionCard({
   const freshness = getFreshness(concurso.data);
   const location =
     concurso.municipio || concurso.distrito || concurso.entidade || "Portugal";
+
+  function handleCriarAnalise() {
+    setShowConfirmacao(true);
+  }
 
   return (
     <article className="competition-card">
@@ -218,22 +233,25 @@ export default function CompetitionCard({
             )}
           </div>
 
-          <button
-            type="button"
-            className={`bookmark-button ${isFavorite ? "is-favorite" : ""}`}
-            aria-label={
-              isFavorite ? "Remover dos favoritos" : "Guardar nos favoritos"
-            }
-            aria-pressed={isFavorite}
-            title={isFavorite ? "Remover dos favoritos" : "Guardar nos favoritos"}
-            onClick={onToggleFavorite}
-          >
-            <Bookmark
-              size={19}
-              strokeWidth={1.65}
-              fill={isFavorite ? "currentColor" : "none"}
-            />
-          </button>
+          {/* Bookmark apenas para utilizadores autenticados */}
+          {user && (
+            <button
+              type="button"
+              className={`bookmark-button ${isFavorite ? "is-favorite" : ""}`}
+              aria-label={
+                isFavorite ? "Remover dos favoritos" : "Guardar nos favoritos"
+              }
+              aria-pressed={isFavorite}
+              title={isFavorite ? "Remover dos favoritos" : "Guardar nos favoritos"}
+              onClick={onToggleFavorite}
+            >
+              <Bookmark
+                size={19}
+                strokeWidth={1.65}
+                fill={isFavorite ? "currentColor" : "none"}
+              />
+            </button>
+          )}
         </div>
 
         <div className="card-meta">
@@ -293,17 +311,65 @@ export default function CompetitionCard({
           </strong>
         </div>
 
-        <a
-          className="card-link"
-          href={concurso.link}
-          target="_blank"
-          rel="noreferrer"
-          aria-label={`Abrir ${concurso.titulo}`}
-        >
-          Ver concurso
-          <ExternalLink size={15} />
-        </a>
+        {/* Grupo de botões: Base.gov sempre visível + Análise AI (se autenticado) */}
+        <div className="card-actions">
+          {/* Link Base.gov - SEMPRE visível para todos os utilizadores */}
+          <a
+            className="card-link card-link-basegov"
+            href={concurso.link}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`Abrir concurso na Base.gov: ${concurso.titulo}`}
+          >
+            Ver concurso Base.gov
+            <ExternalLink size={15} />
+          </a>
+
+          {/* Botão de análise AI - apenas para utilizadores autenticados */}
+          {user && (
+            temAnalise && analiseEstado === "concluida" ? (
+              <Link
+                href={`/analise/${concurso.id}`}
+                className="card-link card-link-analise"
+                style={{ background: "#111", color: "white", border: "none" }}
+              >
+                ✓ Ver análise AI
+              </Link>
+            ) : temAnalise ? (
+              <Link
+                href="/analises"
+                className="card-link card-link-analise"
+                style={{ background: "#111", color: "white", border: "none" }}
+              >
+                {analiseEstado === "aguarda" ? "⏳ Em fila" : "⚙ Em processamento"}
+              </Link>
+            ) : (
+              <button
+                type="button"
+                className="card-link card-link-analise"
+                style={{ background: "#f0f4ea", color: "#607b43", border: "1px solid #607b43", cursor: "pointer" }}
+                onClick={handleCriarAnalise}
+              >
+                <Sparkles size={14} /> ✨ Criar análise AI
+              </button>
+            )
+          )}
+        </div>
       </div>
+
+      <AnalysisConfirmationModal
+        open={showConfirmacao}
+        titulo={concurso.titulo}
+        entidade={concurso.entidade}
+        localizacao={concurso.municipio || concurso.distrito}
+        onClose={() => setShowConfirmacao(false)}
+        onConfirm={async () => {
+          if (!onCriarAnalise) {
+            throw new Error("Não foi possível iniciar a análise.");
+          }
+          await onCriarAnalise();
+        }}
+      />
     </article>
   );
 }

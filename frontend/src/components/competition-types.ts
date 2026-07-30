@@ -10,6 +10,8 @@ export type Concurso = {
   relevante: number;
   data_limite: string | null;
   preco_base: string | null;
+  valor_procedimento?: string | number | null;
+  valor_obra?: string | number | null;
   estado: "aberto" | "encerrado" | "sem_prazo";
   distrito?: string | null;
   municipio?: string | null;

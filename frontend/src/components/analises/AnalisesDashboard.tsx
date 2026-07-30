@@ -7,62 +7,92 @@ import {
   Clock3,
   CheckCircle2,
   FileSearch,
-  Building2,
-  CircleDot
 } from "lucide-react";
 import "./analises.css";
-
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://127.0.0.1:8000";
+import { useAuth } from "@/context/AuthContext";
+import { API_URL } from "@/lib/api";
 
 type Analise = {
-  id: string;
+  id: number;
+  tipo?: "analise" | "job";
+  concurso_id: number;
   titulo: string;
   entidade: string;
   estado: string;
-  score?: number;
-  progresso?: number;
+  progresso: number;
+  erro?: string | null;
+  created_at: string;
+  updated_at: string;
+  score?: number | null;
 };
+
+function statusLabel(estado: string): { texto: string; icone: string; classe: string } {
+  switch (estado) {
+    case "aguarda":
+      return { texto: "⏳ Na fila", icone: "⏳", classe: "status-gerando" };
+    case "extracao":
+      return { texto: "📥 A recolher documentos", icone: "📥", classe: "status-processando" };
+    case "processamento":
+      return { texto: "⚙️ A analisar", icone: "⚙️", classe: "status-processando" };
+    case "geracao":
+      return { texto: "📝 A gerar análise", icone: "📝", classe: "status-processando" };
+    case "concluida":
+      return { texto: "✓ Concluída", icone: "✓", classe: "status-concluida" };
+    case "erro":
+      return { texto: "⚠️ Erro", icone: "⚠️", classe: "status-erro" };
+    default:
+      return { texto: estado, icone: "•", classe: "" };
+  }
+}
 
 export default function AnalisesDashboard() {
 
+  const { session } = useAuth();
   const [analises, setAnalises] = useState<Analise[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Buscar análises reais do backend
-    fetch(`${API_URL}/analises`)
-      .then(res => res.json())
-      .then((dados: Analise[]) => {
-        setAnalises(dados);
+    const token = session?.access_token;
+    if (!token) return;
+
+    fetch(`${API_URL}/analises`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error("Não foi possível carregar as análises.");
+        }
+        return res.json();
+      })
+      .then((dados: unknown) => {
+        let lista: Analise[] = [];
+        if (Array.isArray(dados)) {
+          lista = dados;
+        } else if (dados && typeof dados === 'object') {
+          const obj = dados as Record<string, unknown>;
+          lista = (obj.analises || obj.items || obj.resultados || []) as Analise[];
+        }
+        setAnalises(lista);
+        setError(null);
         setLoading(false);
       })
-      .catch(() => {
-        // Fallback: análises conhecidas
-        setAnalises([
-          {
-            id: "450837",
-            titulo: "Requalificação do Mercado Municipal de Castelo Branco",
-            entidade: "Município de Castelo Branco",
-            estado: "concluida",
-            score: 86,
-          },
-          {
-            id: "420959",
-            titulo: "Reabilitação da Escola Secundária do Lumiar",
-            entidade: "Município de Lisboa",
-            estado: "concluida",
-            score: 85,
-          },
-        ]);
+      .catch((erro) => {
+        setError(
+          erro instanceof Error
+            ? erro.message
+            : "Não foi possível carregar as análises.",
+        );
         setLoading(false);
       });
-  }, []);
+  }, [session?.access_token]);
 
   const totalAnalises = analises.length;
   const concluidas = analises.filter(a => a.estado === "concluida").length;
-  const emProcessamento = analises.filter(a => a.estado === "processamento" || a.estado === "a_gerar").length;
+  const emFila = analises.filter(a => a.estado === "aguarda").length;
+  const emProcessamento = analises.filter(a =>
+    ["extracao", "processamento", "geracao"].includes(a.estado),
+  ).length;
 
   return (
     <div className="analises-page">
@@ -72,7 +102,7 @@ export default function AnalisesDashboard() {
           <h1>Análises <span>IA</span></h1>
           <p>Acompanha as análises dos concursos que selecionaste.</p>
         </div>
-        <Link href="/entidades">
+        <Link href="/">
           <button>Explorar concursos</button>
         </Link>
       </header>
@@ -89,7 +119,7 @@ export default function AnalisesDashboard() {
           <span>Em análise</span>
         </div>
         <div>
-          <Clock3 size={26} /><strong>0</strong>
+          <Clock3 size={26} /><strong>{emFila}</strong>
           <p>Em fila</p>
           <span>A aguardar</span>
         </div>
@@ -104,7 +134,13 @@ export default function AnalisesDashboard() {
         <section className="analises-card">
           <p style={{ padding: "24px", textAlign: "center", color: "#777" }}>A carregar análises...</p>
         </section>
-      ) : analises.length === 0 ? (
+      ) : error ? (
+        <section className="analises-card">
+          <p role="alert" style={{ padding: "24px", textAlign: "center", color: "#a33" }}>
+            {error}
+          </p>
+        </section>
+      ) : !Array.isArray(analises) || analises.length === 0 ? (
         <section className="analises-card">
           <p style={{ padding: "24px", textAlign: "center", color: "#777" }}>
             Nenhuma análise disponível. Explora concursos para criar a primeira análise.
@@ -112,30 +148,55 @@ export default function AnalisesDashboard() {
         </section>
       ) : (
         <section className="analises-card">
-          <h2>Análises disponíveis</h2>
-          {analises.map((analise) => (
-            <div key={analise.id} className="analise-item">
-              <div>
-                <div className="analise-title">
-                  <CheckCircle2 size={20} />
-                  <h3>{analise.titulo}</h3>
+          <h2>Histórico de análises geradas</h2>
+          {analises.map((analise) => {
+            const st = statusLabel(analise.estado);
+            return (
+              <div key={`${analise.tipo ?? "job"}-${analise.id}`} className="analise-item">
+                <div>
+                  <div className="analise-title">
+                    <span className={`analise-status-badge ${st.classe}`}>
+                      {st.icone}
+                    </span>
+                    <h3>{analise.titulo}</h3>
+                  </div>
+                  <p>{analise.entidade}</p>
+                  <p className="analise-date">
+                    {analise.estado === "concluida" ? "Análise de " : "Pedido em "}
+                    {new Date(analise.created_at).toLocaleString("pt-PT")}
+                  </p>
                 </div>
-                <p>{analise.entidade}</p>
-              </div>
 
-              {analise.score && (
+                <div className="analise-status-info">
+                  <span className={`analise-status-label ${st.classe}`}>
+                    {st.texto}
+                  </span>
+                </div>
+
                 <div className="score-box">
-                  <strong>Score IA</strong>
+                  <strong>
+                    {analise.estado === "concluida" && analise.score != null
+                      ? "Score CNLL"
+                      : "Progresso"}
+                  </strong>
                   <br />
-                  {analise.score} / 100
+                  {analise.estado === "concluida" && analise.score != null
+                    ? `${analise.score}/100`
+                    : `${analise.progresso}%`}
                 </div>
-              )}
 
-              <Link href={`/analise/${analise.id}`}>
-                {analise.estado === "concluida" ? "Ver análise" : "Acompanhar"}
-              </Link>
-            </div>
-          ))}
+                {analise.estado === "concluida" ? (
+                  <Link href={`/analise/${analise.concurso_id}`} className="analise-view-btn">
+                    Ver análise
+                  </Link>
+                ) : (
+                  <span className="analise-view-btn is-disabled">
+                    Acompanhar aqui
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </section>
       )}
 

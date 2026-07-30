@@ -1,8 +1,31 @@
+import json
+import re
 import sqlite3
+from contextlib import closing
 from datetime import date, datetime
+from pathlib import Path
 
 
-DB_NAME = "concursos.db"
+BASE_DIR = Path(__file__).resolve().parent.parent
+DB_PATH = BASE_DIR / "concursos.db"
+
+ESTADOS_ANALISE = (
+    "aguarda",
+    "extracao",
+    "processamento",
+    "geracao",
+    "concluida",
+    "erro",
+)
+
+COLUNAS_ANALISE = {
+    "estado": "TEXT NOT NULL DEFAULT 'concluida'",
+    "progresso": "INTEGER NOT NULL DEFAULT 100",
+    "score": "INTEGER",
+    "ficheiro_ficha": "TEXT",
+    # O SQLite não aceita CURRENT_TIMESTAMP ao acrescentar uma coluna.
+    "updated_at": "TEXT",
+}
 
 
 COLUNAS_ADICIONAIS = {
@@ -11,8 +34,22 @@ COLUNAS_ADICIONAIS = {
     "preco_base": "TEXT",
     "cpv": "TEXT",
     "tipo_procedimento": "TEXT",
-        "link_anuncio_dr": "TEXT",
+    "criterio_tipo": "TEXT",
+    "criterio_resumo": "TEXT",
+    "criterio_detalhe": "TEXT",
+    "entregaveis": "TEXT",
+    "link_anuncio_dr": "TEXT",
+    "data_entrega_propostas": "TEXT",
 }
+
+
+def abrir_conexao() -> sqlite3.Connection:
+    """Abre a base principal com as garantias usadas pela API."""
+    conexao = sqlite3.connect(DB_PATH, timeout=5)
+    conexao.row_factory = sqlite3.Row
+    conexao.execute("PRAGMA foreign_keys = ON")
+    conexao.execute("PRAGMA busy_timeout = 5000")
+    return conexao
 
 
 def _adicionar_colunas_em_falta(cursor):
@@ -45,6 +82,109 @@ def _adicionar_colunas_em_falta(cursor):
         )
 
 
+def _adicionar_colunas_analise_em_falta(cursor):
+    """Migra o registo legado de análises sem perder fichas existentes."""
+    cursor.execute("PRAGMA table_info(analises)")
+    colunas_existentes = {linha[1] for linha in cursor.fetchall()}
+
+    for nome_coluna, definicao in COLUNAS_ANALISE.items():
+        if nome_coluna not in colunas_existentes:
+            cursor.execute(
+                f"ALTER TABLE analises ADD COLUMN {nome_coluna} {definicao}"
+            )
+
+
+def _id_portal_base(link: str | None):
+    if not link:
+        return None
+
+    correspondencia = re.search(r"[?&]id=(\d+)", link)
+    return correspondencia.group(1) if correspondencia else None
+
+
+def _extrair_score(ficha: dict):
+    candidatos = (
+        ficha.get("analise_ai", {}).get("score"),
+        ficha.get("decisao", {}).get("score"),
+        ficha.get("score"),
+    )
+
+    for candidato in candidatos:
+        if isinstance(candidato, dict):
+            candidato = candidato.get("valor")
+        try:
+            return max(0, min(100, int(float(candidato))))
+        except (TypeError, ValueError):
+            continue
+    return None
+
+
+def _sincronizar_fichas_existentes(cursor):
+    """Regista as fichas reais do repositório no histórico durável."""
+    raiz_fichas = BASE_DIR / "analise_documentos"
+    if not raiz_fichas.is_dir():
+        return
+
+    concursos = cursor.execute(
+        "SELECT id, titulo, link FROM concursos"
+    ).fetchall()
+    concursos_por_portal = {
+        portal_id: concurso
+        for concurso in concursos
+        if (portal_id := _id_portal_base(concurso["link"]))
+    }
+
+    for caminho_ficha in raiz_fichas.glob("*/ficha.json"):
+        concurso = concursos_por_portal.get(caminho_ficha.parent.name)
+        if concurso is None:
+            continue
+
+        try:
+            ficha = json.loads(caminho_ficha.read_text(encoding="utf-8-sig"))
+        except (OSError, UnicodeError, json.JSONDecodeError):
+            continue
+
+        caminho_relativo = caminho_ficha.relative_to(BASE_DIR).as_posix()
+        score = _extrair_score(ficha)
+        resumo = (
+            ficha.get("analise_ai", {}).get("recomendacao")
+            or ficha.get("decisao", {}).get("classificacao")
+            or concurso["titulo"]
+        )
+
+        cursor.execute(
+            """
+            INSERT INTO analises (
+                concurso_id,
+                nivel,
+                resumo,
+                dados_json,
+                estado,
+                progresso,
+                score,
+                ficheiro_ficha
+            )
+            VALUES (?, 'AI', ?, ?, 'concluida', 100, ?, ?)
+            ON CONFLICT(concurso_id) DO UPDATE SET
+                nivel = excluded.nivel,
+                resumo = excluded.resumo,
+                dados_json = excluded.dados_json,
+                estado = 'concluida',
+                progresso = 100,
+                score = excluded.score,
+                ficheiro_ficha = excluded.ficheiro_ficha,
+                updated_at = CURRENT_TIMESTAMP
+            """,
+            (
+                concurso["id"],
+                resumo,
+                json.dumps(ficha, ensure_ascii=False),
+                score,
+                caminho_relativo,
+            ),
+        )
+
+
 def criar_base_dados():
     """
     Cria a base de dados e a tabela de concursos.
@@ -52,7 +192,7 @@ def criar_base_dados():
     Se a tabela já existir, acrescenta automaticamente
     as colunas novas sem apagar os dados existentes.
     """
-    conn = sqlite3.connect(DB_NAME)
+    conn = abrir_conexao()
     cursor = conn.cursor()
 
     cursor.execute(
@@ -89,11 +229,468 @@ def criar_base_dados():
         """
     )
 
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS analises (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            concurso_id INTEGER UNIQUE,
+            nivel TEXT,
+            resumo TEXT,
+            dados_json TEXT,
+            criado_em TEXT DEFAULT CURRENT_TIMESTAMP,
+            estado TEXT NOT NULL DEFAULT 'concluida',
+            progresso INTEGER NOT NULL DEFAULT 100,
+            score INTEGER,
+            ficheiro_ficha TEXT,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY(concurso_id)
+            REFERENCES concursos(id)
+        )
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS favoritos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL,
+            concurso_id INTEGER NOT NULL,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+            UNIQUE(user_id, concurso_id),
+            FOREIGN KEY(concurso_id)
+            REFERENCES concursos(id)
+            ON DELETE CASCADE
+        )
+        """
+    )
+
+    estados_sql = ", ".join(
+        f"'{estado}'"
+        for estado in ESTADOS_ANALISE
+    )
+
+    cursor.execute(
+        f"""
+        CREATE TABLE IF NOT EXISTS analise_jobs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL,
+            concurso_id INTEGER NOT NULL,
+            estado TEXT NOT NULL DEFAULT 'aguarda'
+                CHECK (estado IN ({estados_sql})),
+            progresso INTEGER NOT NULL DEFAULT 0
+                CHECK (progresso BETWEEN 0 AND 100),
+            erro TEXT,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+            UNIQUE(user_id, concurso_id),
+            FOREIGN KEY(concurso_id)
+            REFERENCES concursos(id)
+            ON DELETE CASCADE
+        )
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_favoritos_user_id
+        ON favoritos(user_id)
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_analise_jobs_user_id
+        ON analise_jobs(user_id)
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_analise_jobs_estado
+        ON analise_jobs(estado, created_at)
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE TRIGGER IF NOT EXISTS analise_jobs_updated_at
+        AFTER UPDATE ON analise_jobs
+        FOR EACH ROW
+        WHEN NEW.updated_at = OLD.updated_at
+        BEGIN
+            UPDATE analise_jobs
+            SET updated_at = CURRENT_TIMESTAMP
+            WHERE id = NEW.id;
+        END
+        """
+    )
+
 
     _adicionar_colunas_em_falta(cursor)
+    _adicionar_colunas_analise_em_falta(cursor)
+    cursor.execute(
+        """
+        UPDATE analises
+        SET updated_at = COALESCE(updated_at, criado_em, CURRENT_TIMESTAMP)
+        WHERE updated_at IS NULL
+        """
+    )
+
+    cursor.execute(
+        """
+        UPDATE analise_jobs
+        SET estado = 'aguarda', progresso = 0
+        WHERE estado IN ('extracao', 'processamento', 'geracao')
+          AND id NOT IN (
+              SELECT id
+              FROM analise_jobs
+              WHERE estado IN ('extracao', 'processamento', 'geracao')
+              ORDER BY updated_at ASC, id ASC
+              LIMIT 1
+          )
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_analise_jobs_um_ativo
+        ON analise_jobs((1))
+        WHERE estado IN ('extracao', 'processamento', 'geracao')
+        """
+    )
+
+    _sincronizar_fichas_existentes(cursor)
 
     conn.commit()
     conn.close()
+
+
+def concurso_por_id(concurso_id: int):
+    """Obtém um concurso pelo identificador canónico da BD."""
+    with closing(abrir_conexao()) as conexao:
+        linha = conexao.execute(
+            """
+            SELECT *
+            FROM concursos
+            WHERE id = ?
+            """,
+            (concurso_id,),
+        ).fetchone()
+
+    return dict(linha) if linha else None
+
+
+def listar_favoritos_utilizador(user_id: str):
+    with closing(abrir_conexao()) as conexao:
+        linhas = conexao.execute(
+            """
+            SELECT
+                f.id,
+                f.user_id,
+                f.concurso_id,
+                f.created_at,
+                c.titulo,
+                c.entidade,
+                c.link,
+                c.data,
+                c.preco_base,
+                c.data_limite,
+                c.tipo_procedimento
+            FROM favoritos AS f
+            JOIN concursos AS c
+              ON c.id = f.concurso_id
+            WHERE f.user_id = ?
+            ORDER BY f.created_at DESC, f.id DESC
+            """,
+            (user_id,),
+        ).fetchall()
+
+    return [dict(linha) for linha in linhas]
+
+
+def criar_ou_obter_favorito(
+    user_id: str,
+    concurso_id: int,
+):
+    with closing(abrir_conexao()) as conexao:
+        cursor = conexao.execute(
+            """
+            INSERT OR IGNORE INTO favoritos (
+                user_id,
+                concurso_id
+            )
+            VALUES (?, ?)
+            """,
+            (user_id, concurso_id),
+        )
+        criado = cursor.rowcount == 1
+
+        linha = conexao.execute(
+            """
+            SELECT
+                f.id,
+                f.user_id,
+                f.concurso_id,
+                f.created_at,
+                c.titulo,
+                c.entidade,
+                c.link,
+                c.data,
+                c.preco_base,
+                c.data_limite,
+                c.tipo_procedimento
+            FROM favoritos AS f
+            JOIN concursos AS c
+              ON c.id = f.concurso_id
+            WHERE f.user_id = ?
+              AND f.concurso_id = ?
+            """,
+            (user_id, concurso_id),
+        ).fetchone()
+
+        conexao.commit()
+
+    return dict(linha), criado
+
+
+def remover_favorito(
+    user_id: str,
+    concurso_id: int,
+) -> bool:
+    with closing(abrir_conexao()) as conexao:
+        cursor = conexao.execute(
+            """
+            DELETE FROM favoritos
+            WHERE user_id = ?
+              AND concurso_id = ?
+            """,
+            (user_id, concurso_id),
+        )
+        conexao.commit()
+        return cursor.rowcount > 0
+
+
+def listar_analises_utilizador(user_id: str):
+    with closing(abrir_conexao()) as conexao:
+        fichas = conexao.execute(
+            """
+            SELECT
+                a.id,
+                'analise' AS tipo,
+                NULL AS user_id,
+                a.concurso_id,
+                a.estado,
+                a.progresso,
+                NULL AS erro,
+                a.score,
+                a.criado_em AS created_at,
+                a.updated_at,
+                c.titulo,
+                c.entidade,
+                c.link,
+                c.data,
+                c.tipo_procedimento
+            FROM analises AS a
+            JOIN concursos AS c
+              ON c.id = a.concurso_id
+            WHERE a.estado = 'concluida'
+            """
+        ).fetchall()
+
+        jobs = conexao.execute(
+            """
+            SELECT
+                j.id,
+                'job' AS tipo,
+                j.user_id,
+                j.concurso_id,
+                j.estado,
+                j.progresso,
+                j.erro,
+                NULL AS score,
+                j.created_at,
+                j.updated_at,
+                c.titulo,
+                c.entidade,
+                c.link,
+                c.data,
+                c.tipo_procedimento
+            FROM analise_jobs AS j
+            JOIN concursos AS c
+              ON c.id = j.concurso_id
+            WHERE j.user_id = ?
+            ORDER BY j.updated_at DESC, j.id DESC
+            """,
+            (user_id,),
+        ).fetchall()
+
+    concursos_concluidos = {linha["concurso_id"] for linha in fichas}
+    resultados = [dict(linha) for linha in fichas]
+    resultados.extend(
+        dict(linha)
+        for linha in jobs
+        if linha["concurso_id"] not in concursos_concluidos
+    )
+    resultados.sort(
+        key=lambda linha: (linha.get("updated_at") or "", linha["id"]),
+        reverse=True,
+    )
+    return resultados
+
+
+def analise_concluida_por_concurso(concurso_id: int):
+    with closing(abrir_conexao()) as conexao:
+        linha = conexao.execute(
+            """
+            SELECT
+                a.id,
+                'analise' AS tipo,
+                NULL AS user_id,
+                a.concurso_id,
+                a.estado,
+                a.progresso,
+                NULL AS erro,
+                a.score,
+                a.criado_em AS created_at,
+                a.updated_at,
+                c.titulo,
+                c.entidade,
+                c.link,
+                c.data,
+                c.tipo_procedimento
+            FROM analises AS a
+            JOIN concursos AS c ON c.id = a.concurso_id
+            WHERE a.concurso_id = ? AND a.estado = 'concluida'
+            """,
+            (concurso_id,),
+        ).fetchone()
+    return dict(linha) if linha else None
+
+
+def reivindicar_proximo_analise_job():
+    """Reserva atomicamente o job mais antigo para um futuro worker."""
+    with closing(abrir_conexao()) as conexao:
+        conexao.execute("BEGIN IMMEDIATE")
+
+        ativo = conexao.execute(
+            """
+            SELECT 1
+            FROM analise_jobs
+            WHERE estado IN ('extracao', 'processamento', 'geracao')
+            LIMIT 1
+            """
+        ).fetchone()
+        if ativo:
+            conexao.rollback()
+            return None
+
+        job = conexao.execute(
+            """
+            SELECT id
+            FROM analise_jobs
+            WHERE estado = 'aguarda'
+            ORDER BY created_at ASC, id ASC
+            LIMIT 1
+            """
+        ).fetchone()
+        if job is None:
+            conexao.rollback()
+            return None
+
+        conexao.execute(
+            """
+            UPDATE analise_jobs
+            SET estado = 'extracao', progresso = 5, erro = NULL
+            WHERE id = ? AND estado = 'aguarda'
+            """,
+            (job["id"],),
+        )
+        linha = conexao.execute(
+            "SELECT * FROM analise_jobs WHERE id = ?",
+            (job["id"],),
+        ).fetchone()
+        conexao.commit()
+        return dict(linha) if linha else None
+
+
+def atualizar_analise_job(
+    job_id: int,
+    estado: str,
+    progresso: int,
+    erro: str | None = None,
+):
+    """Atualiza um job; é a fronteira de integração do futuro worker."""
+    if estado not in ESTADOS_ANALISE:
+        raise ValueError(f"Estado de análise inválido: {estado}")
+    if not 0 <= progresso <= 100:
+        raise ValueError("O progresso tem de estar entre 0 e 100.")
+    if estado == "concluida":
+        progresso = 100
+
+    with closing(abrir_conexao()) as conexao:
+        cursor = conexao.execute(
+            """
+            UPDATE analise_jobs
+            SET estado = ?, progresso = ?, erro = ?
+            WHERE id = ?
+            """,
+            (estado, progresso, erro, job_id),
+        )
+        conexao.commit()
+        return cursor.rowcount == 1
+
+
+def criar_ou_obter_analise_job(
+    user_id: str,
+    concurso_id: int,
+):
+    """Cria um job idempotente sem iniciar o processamento."""
+    with closing(abrir_conexao()) as conexao:
+        cursor = conexao.execute(
+            """
+            INSERT OR IGNORE INTO analise_jobs (
+                user_id,
+                concurso_id,
+                estado,
+                progresso
+            )
+            VALUES (?, ?, 'aguarda', 0)
+            """,
+            (user_id, concurso_id),
+        )
+        criado = cursor.rowcount == 1
+
+        linha = conexao.execute(
+            """
+            SELECT
+                j.id,
+                j.user_id,
+                j.concurso_id,
+                j.estado,
+                j.progresso,
+                j.erro,
+                j.created_at,
+                j.updated_at,
+                c.titulo,
+                c.entidade,
+                c.link,
+                c.data,
+                c.tipo_procedimento
+            FROM analise_jobs AS j
+            JOIN concursos AS c
+              ON c.id = j.concurso_id
+            WHERE j.user_id = ?
+              AND j.concurso_id = ?
+            """,
+            (user_id, concurso_id),
+        ).fetchone()
+
+        conexao.commit()
+
+    return dict(linha), criado
 
 
 def _texto_ou_none(valor):
@@ -131,7 +728,7 @@ def guardar_concurso(
         ID do concurso -> concurso novo guardado
         False -> concurso já existia
     """
-    conn = sqlite3.connect(DB_NAME)
+    conn = abrir_conexao()
     cursor = conn.cursor()
 
     try:
@@ -227,7 +824,7 @@ def atualizar_dados_concurso(
         criterio_detalhe
     )
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = abrir_conexao()
     cursor = conn.cursor()
 
     cursor.execute(
@@ -299,7 +896,7 @@ def concurso_existe(link):
     if not link:
         return False
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = abrir_conexao()
     cursor = conn.cursor()
 
     cursor.execute(
@@ -323,7 +920,7 @@ def contar_concursos():
     """
     Devolve o número total de concursos guardados.
     """
-    conn = sqlite3.connect(DB_NAME)
+    conn = abrir_conexao()
     cursor = conn.cursor()
 
     cursor.execute(
@@ -401,7 +998,7 @@ def listar_concursos_periodo(
             "data_fim deve ser uma data."
         )
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = abrir_conexao()
     cursor = conn.cursor()
 
     cursor.execute(
@@ -495,7 +1092,7 @@ def guardar_analise(
     de um concurso.
     """
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = abrir_conexao()
     cursor = conn.cursor()
 
     cursor.execute(
@@ -513,7 +1110,10 @@ def guardar_analise(
         DO UPDATE SET
             nivel = excluded.nivel,
             resumo = excluded.resumo,
-            dados_json = excluded.dados_json
+            dados_json = excluded.dados_json,
+            estado = 'concluida',
+            progresso = 100,
+            updated_at = CURRENT_TIMESTAMP
         """,
         (
             concurso_id,
@@ -532,7 +1132,7 @@ def obter_analise(concurso_id):
     Obtém a análise guardada.
     """
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = abrir_conexao()
     conn.row_factory = sqlite3.Row
 
     cursor = conn.cursor()
@@ -570,7 +1170,7 @@ def guardar_evento_timeline(
     Guarda um evento na timeline de um concurso.
     """
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = abrir_conexao()
     cursor = conn.cursor()
 
     cursor.execute(
@@ -606,7 +1206,7 @@ def obter_timeline(concurso_id):
     Devolve os eventos de timeline de um concurso.
     """
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = abrir_conexao()
     conn.row_factory = sqlite3.Row
 
     cursor = conn.cursor()
@@ -645,7 +1245,7 @@ def gerar_timeline(concurso):
         return
 
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = abrir_conexao()
     cursor = conn.cursor()
 
 

@@ -1,12 +1,9 @@
 import CompetitionsDashboard from "@/components/CompetitionsDashboard";
 import PublicLayout from "@/components/layout/PublicLayout";
 import type { Concurso } from "@/components/competition-types";
+import { API_URL } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
-
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "https://concursos-arquitetura.onrender.com";
 
 async function getConcursos(): Promise<Concurso[]> {
   try {

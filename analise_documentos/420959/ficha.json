@@ -116,8 +116,10 @@
   "localizacao": {
     "municipio": "Lisboa",
     "freguesia": "Lumiar",
-    "morada": "Escola Secundária do Lumiar, Lisboa",
-    "coordenadas": "Não identificado",
+    "morada": "Escola Secundária do Lumiar, Rua do Lumiar, 1600-497 Lisboa",
+    "coordenadas": "38.7715, -9.1602",
+    "latitude": 38.7715,
+    "longitude": -9.1602,
     "contexto_urbano": "Equipamento educativo inserido em zona urbana consolidada, integrado na malha da freguesia do Lumiar. A intervenção deve considerar a relação com o tecido urbano envolvente, acessibilidades e integração paisagística."
   },
   "analise_ai": {

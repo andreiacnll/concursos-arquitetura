@@ -19,7 +19,7 @@ const items = [
   },
   {
     nome:"Análises",
-    href:"/analise",
+    href:"/analises",
     icon:ChartNoAxesColumn,
   },
   {

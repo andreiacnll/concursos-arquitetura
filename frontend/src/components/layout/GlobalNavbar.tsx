@@ -11,7 +11,7 @@ type Theme = "light" | "dark";
 const navItems = [
   { nome: "Pesquisa", href: "/" },
   { nome: "Favoritos", href: "/favoritos" },
-  { nome: "Análises", href: "/analise" },
+  { nome: "Análises", href: "/analises" },
   { nome: "Alertas", href: "/alertas" },
   { nome: "Perfil", href: "/perfil" },
 ];

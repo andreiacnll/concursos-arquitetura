@@ -31,13 +31,22 @@ export default function ProjectInfoPanel({
 
   const latitude = ficha?.localizacao?.latitude;
   const longitude = ficha?.localizacao?.longitude;
+  const nomeLocal =
+    ficha?.localizacao?.morada ||
+    ficha?.localizacao?.municipio ||
+    ficha?.localizacao?.cidade ||
+    ficha?.identificacao?.localizacao ||
+    ficha?.identificacao?.local ||
+    "Portugal";
+  const temCoordenadas =
+    typeof latitude === "number" && typeof longitude === "number";
 
 
   const mapaUrl =
-    latitude && longitude
+    temCoordenadas
       ? `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`
       : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-          ficha?.localizacao?.cidade || "Portugal"
+          nomeLocal
         )}`;
 
 
@@ -128,7 +137,7 @@ export default function ProjectInfoPanel({
         </p>
 
 
-        {latitude && longitude && (
+        {temCoordenadas && (
 
           <ProjectMap
             latitude={latitude}
@@ -140,7 +149,7 @@ export default function ProjectInfoPanel({
 
         <span className="project-location">
 
-          📍 {ficha?.localizacao?.cidade || "Localização disponível"}
+          📍 {nomeLocal}
 
         </span>
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
-from contextlib import closing
+from contextlib import asynccontextmanager, closing
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any, Literal
@@ -11,10 +11,23 @@ from typing import Any, Literal
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
+from .database import (
+    DB_PATH,
+    abrir_conexao,
+    criar_base_dados,
+)
+from .routes.analises import router as analises_router
+from .routes.favoritos import router as favoritos_router
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DB_PATH = BASE_DIR / "concursos.db"
 CHECKPOINT_PATH = BASE_DIR / "concursos_recolhidos.json"
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    criar_base_dados()
+    yield
 
 
 app = FastAPI(
@@ -24,6 +37,7 @@ app = FastAPI(
         "relacionados com arquitetura."
     ),
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 
@@ -31,9 +45,12 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=False,
-    allow_methods=["GET"],
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
+
+app.include_router(favoritos_router)
+app.include_router(analises_router)
 
 
 def obter_conexao() -> sqlite3.Connection:
@@ -42,16 +59,46 @@ def obter_conexao() -> sqlite3.Connection:
             f"Base de dados não encontrada: {DB_PATH}"
         )
 
-    conexao = sqlite3.connect(DB_PATH)
-    conexao.row_factory = sqlite3.Row
-
-    return conexao
+    return abrir_conexao()
 
 
 def linha_para_dicionario(
     linha: sqlite3.Row,
 ) -> dict[str, Any]:
     return dict(linha)
+
+
+def extrair_id_portal_base(link: Any) -> str | None:
+    if not link:
+        return None
+
+    correspondencia = re.search(
+        r"[?&]id=(\d+)",
+        str(link),
+    )
+    return correspondencia.group(1) if correspondencia else None
+
+
+def procurar_concurso_por_identificador(
+    conexao: sqlite3.Connection,
+    concurso_id: int,
+) -> sqlite3.Row | None:
+    """Aceita o ID canónico e mantém os IDs BASE como alias."""
+    return conexao.execute(
+        """
+        SELECT *
+        FROM concursos
+        WHERE id = ?
+           OR link LIKE ?
+        ORDER BY CASE WHEN id = ? THEN 0 ELSE 1 END
+        LIMIT 1
+        """,
+        (
+            concurso_id,
+            f"%id={concurso_id}%",
+            concurso_id,
+        ),
+    ).fetchone()
 
 
 @app.get("/")
@@ -72,6 +119,17 @@ def obter_timeline_concurso(
 
     with closing(obter_conexao()) as conexao:
 
+        concurso = procurar_concurso_por_identificador(
+            conexao,
+            concurso_id,
+        )
+
+        if concurso is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Concurso não encontrado.",
+            )
+
         eventos = conexao.execute(
             """
             SELECT
@@ -83,7 +141,7 @@ def obter_timeline_concurso(
             WHERE concurso_id = ?
             ORDER BY data
             """,
-            (concurso_id,),
+            (concurso["id"],),
         ).fetchall()
 
     return [
@@ -303,7 +361,7 @@ def juntar_valores(valor: Any) -> str | None:
 
 def normalizar_concurso_json(
     item: dict[str, Any],
-    indice: int,
+    _indice: int,
 ) -> dict[str, Any]:
     data_publicacao = converter_data(item.get("data"))
 
@@ -322,15 +380,23 @@ def normalizar_concurso_json(
         or item.get("tipo_procedimento")
     )
 
-    identificador = (
+    id_portal_base = (
         item.get("id_portal_base")
-        or item.get("id_procedimento")
-        or item.get("numero_anuncio")
-        or indice
+        or extrair_id_portal_base(item.get("link"))
     )
 
+    identificador = (
+        item.get("id")
+        or id_portal_base
+        or item.get("id_procedimento")
+        or item.get("numero_anuncio")
+    )
+
+    if identificador is None:
+        raise ValueError("Concurso sem identificador estável.")
+
     return {
-        "id": str(identificador),
+        "id": identificador,
         "titulo": item.get("titulo") or "Concurso sem título",
         "entidade": item.get("entidade") or "Entidade não indicada",
         "link": (
@@ -351,7 +417,7 @@ def normalizar_concurso_json(
         "numero_anuncio": item.get("numero_anuncio"),
         "link_anuncio_dr": item.get("link_anuncio_dr"),
         "link_pecas": item.get("link_pecas"),
-        "id_portal_base": item.get("id_portal_base"),
+        "id_portal_base": id_portal_base,
         "id_procedimento": item.get("id_procedimento"),
         "texto": item.get("texto"),
         "data_publicacao_iso": (
@@ -492,12 +558,41 @@ def executar_listagem(
 ANALISE_DIR = BASE_DIR / "analise_documentos"
 
 
+def resolver_pasta_analise(id_concurso: str) -> Path:
+    """Resolve fichas antigas pelo ID BASE a partir do ID canónico."""
+    pasta_direta = ANALISE_DIR / id_concurso
+
+    if (pasta_direta / "ficha.json").exists():
+        return pasta_direta
+
+    try:
+        identificador = int(id_concurso)
+    except ValueError:
+        return pasta_direta
+
+    with closing(obter_conexao()) as conexao:
+        concurso = procurar_concurso_por_identificador(
+            conexao,
+            identificador,
+        )
+
+    if concurso is None:
+        return pasta_direta
+
+    id_portal_base = extrair_id_portal_base(concurso["link"])
+
+    if id_portal_base:
+        return ANALISE_DIR / id_portal_base
+
+    return pasta_direta
+
+
 @app.get("/analise/{id_concurso}")
 def obter_analise(
     id_concurso: str,
 ) -> dict[str, Any]:
 
-    pasta = ANALISE_DIR / id_concurso
+    pasta = resolver_pasta_analise(id_concurso)
 
     ficha = pasta / "ficha.json"
     analise_ai = pasta / "analise_ai.json"
@@ -642,28 +737,10 @@ def obter_concurso(
     concurso_id: int,
 ) -> dict[str, Any]:
     with closing(obter_conexao()) as conexao:
-        linha = conexao.execute(
-            """
-            SELECT
-                id,
-                titulo,
-                entidade,
-                link,
-                data,
-                relevante,
-                data_limite,
-                preco_base,
-                cpv,
-                tipo_procedimento
-            FROM concursos
-            WHERE id = ?
-               OR link LIKE ?
-            """,
-            (
-                concurso_id,
-                f"%id={concurso_id}%",
-            ),
-        ).fetchone()
+        linha = procurar_concurso_por_identificador(
+            conexao,
+            concurso_id,
+        )
 
     if linha is None:
         raise HTTPException(
@@ -671,7 +748,11 @@ def obter_concurso(
             detail="Concurso não encontrado.",
         )
 
-    return linha_para_dicionario(linha)
+    concurso = linha_para_dicionario(linha)
+    concurso["id_portal_base"] = extrair_id_portal_base(
+        concurso.get("link")
+    )
+    return concurso
 
 
 @app.get("/estatisticas")

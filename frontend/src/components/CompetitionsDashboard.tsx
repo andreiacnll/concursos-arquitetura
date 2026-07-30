@@ -15,6 +15,14 @@ import {
 } from "lucide-react";
 import CompetitionCard from "./CompetitionCard";
 import type { Concurso } from "./competition-types";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+import { API_URL } from "@/lib/api";
+import {
+  compareCompetitions,
+  matchesAdvancedFilters,
+  type CompetitionSort,
+} from "./competition-filters";
 
 const categories = [
   "Todos",
@@ -32,6 +40,11 @@ const moreCategories = [
   "Mobilidade",
   "Outros",
 ];
+
+type AnaliseResumo = {
+  concurso_id: number;
+  estado: string;
+};
 
 function parseDataEntrega(valor?: string | null) {
   if (!valor) return null;
@@ -289,7 +302,7 @@ export default function CompetitionsDashboard({
   const [category, setCategory] = useState("Todos");
   const [moreCategoriesOpen, setMoreCategoriesOpen] = useState(false);
   const [district, setDistrict] = useState("Todos os distritos");
-  const [sort, setSort] = useState("recentes");
+  const [sort, setSort] = useState<CompetitionSort>("recentes");
   const [selectedProcedures, setSelectedProcedures] = useState<string[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [view, setView] = useState<"grid" | "list">("grid");
@@ -298,40 +311,91 @@ export default function CompetitionsDashboard({
     "todos" | "ativos" | "novos" | "terminam" | "entidades"
   >("todos");
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
-  const [favoritesLoaded, setFavoritesLoaded] = useState(false);
+  const [analisesMap, setAnalisesMap] = useState<Record<string, { tem_analise: boolean; estado: string }>>({});
+  const { user, session } = useAuth();
+  const router = useRouter();
+
+  // Filtros adicionais
+  const [precoMin, setPrecoMin] = useState("");
+  const [precoMax, setPrecoMax] = useState("");
+  const [entidadeQuery, setEntidadeQuery] = useState("");
+  const [prazoFilter, setPrazoFilter] = useState<"todos" | "7" | "15" | "30">("todos");
 
   useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem("concursos-favoritos");
-      const parsed = stored ? JSON.parse(stored) : [];
+    const token = session?.access_token;
+    if (!token) return;
 
-      if (Array.isArray(parsed)) {
-        setFavoriteIds(parsed.map(String));
-      }
-    } catch {
-      setFavoriteIds([]);
-    } finally {
-      setFavoritesLoaded(true);
-    }
-  }, []);
+    fetch(`${API_URL}/analises`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Não foi possível carregar as análises.");
+        return res.json();
+      })
+      .then((dados: unknown) => {
+        let lista: AnaliseResumo[] = [];
+        if (Array.isArray(dados)) lista = dados as AnaliseResumo[];
+        else if (dados && typeof dados === 'object') {
+          const obj = dados as Record<string, unknown>;
+          lista = (obj.analises || obj.items || obj.resultados || []) as AnaliseResumo[];
+        }
+        const map: Record<string, { tem_analise: boolean; estado: string }> = {};
+        lista.forEach((a) => {
+          map[String(a.concurso_id)] = { tem_analise: true, estado: a.estado || "aguarda" };
+        });
+        setAnalisesMap(map);
+      })
+      .catch(() => {});
+  }, [session?.access_token]);
 
   useEffect(() => {
-    if (!favoritesLoaded) return;
+    const token = session?.access_token;
+    if (!token) return;
 
-    window.localStorage.setItem(
-      "concursos-favoritos",
-      JSON.stringify(favoriteIds),
-    );
-  }, [favoriteIds, favoritesLoaded]);
+    fetch(`${API_URL}/favoritos`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Não foi possível carregar os favoritos.");
+        return res.json();
+      })
+      .then((dados: { favoritos?: Array<{ concurso_id: number }> }) => {
+        setFavoriteIds(
+          (dados.favoritos ?? []).map((favorito) =>
+            String(favorito.concurso_id),
+          ),
+        );
+      })
+      .catch(() => {});
+  }, [session?.access_token]);
 
   function toggleFavorite(id: Concurso["id"]) {
+    const token = session?.access_token;
+    if (!user || !token) return;
+
     const favoriteId = String(id);
+    const isAdding = !favoriteIds.includes(favoriteId);
 
     setFavoriteIds((current) =>
-      current.includes(favoriteId)
-        ? current.filter((item) => item !== favoriteId)
-        : [...current, favoriteId],
+      isAdding
+        ? [...current, favoriteId]
+        : current.filter((item) => item !== favoriteId),
     );
+
+    fetch(`${API_URL}/favoritos/${favoriteId}`, {
+      method: isAdding ? "POST" : "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Não foi possível atualizar o favorito.");
+      })
+      .catch(() => {
+        setFavoriteIds((current) =>
+          isAdding
+            ? current.filter((item) => item !== favoriteId)
+            : [...current, favoriteId],
+        );
+      });
   }
 
   function toggleProcedure(procedure: string) {
@@ -350,12 +414,45 @@ export default function CompetitionsDashboard({
     );
   }
 
+  async function criarAnalise(id: string) {
+    const token = session?.access_token;
+    if (!token) {
+      throw new Error("A sessão terminou. Volta a iniciar sessão.");
+    }
+
+    const response = await fetch(`${API_URL}/analises/criar`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ concurso_id: Number(id) }),
+    });
+
+    if (!response.ok) {
+      const dados = await response.json().catch(() => null);
+      throw new Error(
+        dados?.detail || "Não foi possível colocar a análise na fila.",
+      );
+    }
+
+    setAnalisesMap((current) => ({
+      ...current,
+      [id]: { tem_analise: true, estado: "aguarda" },
+    }));
+    router.push("/analises");
+  }
+
   function clearFilters() {
     setQuery("");
     setCategory("Todos");
     setDistrict("Todos os distritos");
     setSelectedProcedures([]);
     setSelectedServices([]);
+    setPrecoMin("");
+    setPrecoMax("");
+    setEntidadeQuery("");
+    setPrazoFilter("todos");
   }
 
   const districts = useMemo(
@@ -398,6 +495,12 @@ export default function CompetitionsDashboard({
         selectedProcedures,
       );
       const matchesSelectedService = matchesService(item, selectedServices);
+      const matchesAdditional = matchesAdvancedFilters(item, {
+        precoMin,
+        precoMax,
+        entidadeQuery,
+        prazoFilter,
+      });
 
       const deadlineDate = parseDataEntrega(
         item.data_fim_calculada,
@@ -428,23 +531,12 @@ export default function CompetitionsDashboard({
         matchesDistrict &&
         matchesSelectedProcedure &&
         matchesSelectedService &&
+        matchesAdditional &&
         matchesStatFilter
       );
     });
 
-    return [...items].sort((a, b) => {
-      const parsedDateA = parseCompetitionDate(
-        a.data_publicacao_iso ?? a.data,
-      );
-      const parsedDateB = parseCompetitionDate(
-        b.data_publicacao_iso ?? b.data,
-      );
-
-      const dateA = parsedDateA?.getTime() ?? 0;
-      const dateB = parsedDateB?.getTime() ?? 0;
-
-      return sort === "antigos" ? dateA - dateB : dateB - dateA;
-    });
+    return [...items].sort((a, b) => compareCompetitions(a, b, sort));
   }, [
     concursos,
     query,
@@ -456,6 +548,10 @@ export default function CompetitionsDashboard({
     activeTab,
     favoriteIds,
     statFilter,
+    precoMin,
+    precoMax,
+    entidadeQuery,
+    prazoFilter,
   ]);
 
   const newThisWeek = concursos.filter((item) =>
@@ -514,6 +610,10 @@ export default function CompetitionsDashboard({
     setDistrict("Todos os distritos");
     setSelectedProcedures([]);
     setSelectedServices([]);
+    setPrecoMin("");
+    setPrecoMax("");
+    setEntidadeQuery("");
+    setPrazoFilter("todos");
 
     window.requestAnimationFrame(() => {
       window.setTimeout(() => {
@@ -711,6 +811,61 @@ export default function CompetitionsDashboard({
             </div>
 
             <div className="filter-group">
+              <p>Valor do procedimento</p>
+              <div className="price-range">
+                <label>
+                  <span>Mínimo</span>
+                  <input
+                    className="filter-text-input"
+                    inputMode="decimal"
+                    value={precoMin}
+                    onChange={(event) => setPrecoMin(event.target.value)}
+                    placeholder="0 €"
+                  />
+                </label>
+                <label>
+                  <span>Máximo</span>
+                  <input
+                    className="filter-text-input"
+                    inputMode="decimal"
+                    value={precoMax}
+                    onChange={(event) => setPrecoMax(event.target.value)}
+                    placeholder="Sem limite"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div className="filter-group">
+              <label htmlFor="entity-filter">Entidade promotora</label>
+              <input
+                id="entity-filter"
+                className="filter-text-input"
+                value={entidadeQuery}
+                onChange={(event) => setEntidadeQuery(event.target.value)}
+                placeholder="Pesquisar entidade"
+              />
+            </div>
+
+            <div className="filter-group">
+              <label htmlFor="deadline-filter">Prazo de entrega</label>
+              <select
+                id="deadline-filter"
+                value={prazoFilter}
+                onChange={(event) =>
+                  setPrazoFilter(
+                    event.target.value as "todos" | "7" | "15" | "30",
+                  )
+                }
+              >
+                <option value="todos">Todos os prazos</option>
+                <option value="7">Próximos 7 dias</option>
+                <option value="15">Próximos 15 dias</option>
+                <option value="30">Próximos 30 dias</option>
+              </select>
+            </div>
+
+            <div className="filter-group">
               <p>Tipo de procedimento</p>
               {procedureOptions.map((label) => (
                 <label className="check-row" key={label}>
@@ -785,9 +940,15 @@ export default function CompetitionsDashboard({
 
               <div className="toolbar-actions">
                 <span>Ordenar por</span>
-                <select value={sort} onChange={(e) => setSort(e.target.value)}>
+                <select
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value as CompetitionSort)}
+                >
                   <option value="recentes">Mais recentes</option>
                   <option value="antigos">Mais antigos</option>
+                  <option value="prazo">Prazo mais próximo</option>
+                  <option value="valor_desc">Valor mais elevado</option>
+                  <option value="valor_asc">Valor mais baixo</option>
                 </select>
                 <div className="view-toggle">
                   <button
@@ -825,6 +986,9 @@ export default function CompetitionsDashboard({
                     index={index}
                     isFavorite={favoriteIds.includes(String(concurso.id))}
                     onToggleFavorite={() => toggleFavorite(concurso.id)}
+                    temAnalise={analisesMap[String(concurso.id)]?.tem_analise}
+                    analiseEstado={analisesMap[String(concurso.id)]?.estado}
+                    onCriarAnalise={() => criarAnalise(String(concurso.id))}
                   />
                 ))}
               </div>

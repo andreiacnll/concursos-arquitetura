@@ -2,64 +2,151 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import PrivateLayout from "@/components/layout/PrivateLayout";
-import { Heart, Star, Archive, ExternalLink } from "lucide-react";
-
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://127.0.0.1:8000";
+import { Heart, Star, Sparkles, Loader2 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import AnalysisConfirmationModal from "@/components/analises/AnalysisConfirmationModal";
+import { API_URL } from "@/lib/api";
 
 type Favorito = {
-  id: string;
+  id: number;
+  concurso_id: number;
   titulo: string;
   entidade: string;
-  valor?: string;
-  prazo?: string;
+  preco_base?: string;
+  data_limite?: string;
+  localizacao?: string;
   score?: number;
-  estado: "favorito" | "analisado" | "arquivado";
+  tem_analise?: boolean;
+  analise_estado?: string;
+};
+
+type AnaliseJob = {
+  concurso_id: number;
+  estado: string;
 };
 
 export default function FavoritosPage() {
 
+  const { user, session, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [favoritos, setFavoritos] = useState<Favorito[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtro, setFiltro] = useState<string>("todos");
+  const [confirmacao, setConfirmacao] = useState<Favorito | null>(null);
+
+  // Redirecionar se não autenticado
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/auth/login");
+    }
+  }, [user, authLoading, router]);
 
   useEffect(() => {
-    fetch(`${API_URL}/favoritos`)
-      .then(res => res.json())
-      .then((dados: Favorito[]) => {
-        setFavoritos(dados);
+    const token = session?.access_token;
+    if (!token) return;
+
+    Promise.all([
+      fetch(`${API_URL}/favoritos`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      fetch(`${API_URL}/analises`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+    ])
+      .then(async ([favoritosResponse, analisesResponse]) => {
+        if (!favoritosResponse.ok || !analisesResponse.ok) {
+          throw new Error("Não foi possível carregar os favoritos.");
+        }
+
+        return Promise.all([
+          favoritosResponse.json(),
+          analisesResponse.json(),
+        ]);
+      })
+      .then(([favoritosData, analisesData]) => {
+        const jobs = (analisesData.analises ?? []) as AnaliseJob[];
+        const jobsMap = new Map(
+          jobs.map((job) => [job.concurso_id, job.estado]),
+        );
+        const lista = (favoritosData.favoritos ?? []) as Favorito[];
+
+        setFavoritos(
+          lista.map((favorito) => ({
+            ...favorito,
+            tem_analise: jobsMap.has(favorito.concurso_id),
+            analise_estado: jobsMap.get(favorito.concurso_id),
+          })),
+        );
         setLoading(false);
       })
       .catch(() => {
-        // Fallback: concursos conhecidos como exemplo
-        setFavoritos([
-          {
-            id: "450837",
-            titulo: "Requalificação do Mercado Municipal de Castelo Branco",
-            entidade: "Município de Castelo Branco",
-            valor: "8.600.000 €",
-            prazo: "180 dias",
-            score: 86,
-            estado: "analisado",
-          },
-          {
-            id: "420959",
-            titulo: "Reabilitação da Escola Secundária do Lumiar",
-            entidade: "Município de Lisboa",
-            valor: "26.000 €",
-            score: 85,
-            estado: "analisado",
-          },
-        ]);
+        setFavoritos([]);
         setLoading(false);
       });
-  }, []);
+  }, [session?.access_token]);
+
+  async function removerFavorito(favorito: Favorito) {
+    const token = session?.access_token;
+    if (!token) return;
+
+    const response = await fetch(
+      `${API_URL}/favoritos/${favorito.concurso_id}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+
+    if (response.ok) {
+      setFavoritos((current) =>
+        current.filter((item) => item.id !== favorito.id),
+      );
+    }
+  }
+
+  async function criarAnalise(favorito: Favorito) {
+    const token = session?.access_token;
+    if (!token) {
+      throw new Error("A sessão terminou. Volta a iniciar sessão.");
+    }
+
+    const response = await fetch(`${API_URL}/analises/criar`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ concurso_id: favorito.concurso_id }),
+    });
+
+    if (!response.ok) {
+      const dados = await response.json().catch(() => null);
+      throw new Error(
+        dados?.detail || "Não foi possível colocar a análise na fila.",
+      );
+    }
+
+    router.push("/analises");
+  }
+
+  if (authLoading || !user) {
+    return (
+      <PrivateLayout>
+        <main className="site-container" style={{ paddingTop: "32px", textAlign: "center", padding: "60px" }}>
+          <Loader2 size={32} className="spin" style={{ animation: "spin 1s linear infinite" }} />
+          <p style={{ color: "#777", marginTop: "16px" }}>A verificar sessão...</p>
+        </main>
+      </PrivateLayout>
+    );
+  }
 
   const filtrados = filtro === "todos"
     ? favoritos
-    : favoritos.filter(f => f.estado === filtro);
+    : filtro === "analisado"
+      ? favoritos.filter(f => f.tem_analise)
+      : favoritos;
 
   return (
     <PrivateLayout>
@@ -76,7 +163,7 @@ export default function FavoritosPage() {
         </header>
 
         <div style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
-          {["todos", "favorito", "analisado", "arquivado"].map((tipo) => (
+          {["todos", "favorito", "analisado"].map((tipo) => (
             <button
               key={tipo}
               onClick={() => setFiltro(tipo)}
@@ -91,7 +178,7 @@ export default function FavoritosPage() {
                 color: filtro === tipo ? "#607b43" : "#555",
               }}
             >
-              {tipo === "todos" ? "Todos" : tipo === "favorito" ? "Favoritos" : tipo === "analisado" ? "Com análise" : "Arquivados"}
+              {tipo === "todos" ? "Todos" : tipo === "favorito" ? "Favoritos" : "Com análise"}
             </button>
           ))}
         </div>
@@ -139,13 +226,13 @@ export default function FavoritosPage() {
               }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
-                    <Star size={16} style={{ color: fav.estado === "analisado" ? "#607b43" : "#ccc" }} />
+                    <Star size={16} style={{ color: fav.tem_analise ? "#607b43" : "#ccc" }} />
                     <h3 style={{ fontSize: "16px", fontWeight: 600, margin: 0 }}>{fav.titulo}</h3>
                   </div>
                   <p style={{ fontSize: "13px", color: "#777", margin: 0 }}>{fav.entidade}</p>
                   <div style={{ display: "flex", gap: "16px", marginTop: "8px", fontSize: "12px", color: "#999" }}>
-                    {fav.valor && <span>💰 {fav.valor}</span>}
-                    {fav.prazo && <span>📅 {fav.prazo}</span>}
+                    {fav.preco_base && <span>💰 {fav.preco_base}</span>}
+                    {fav.data_limite && <span>📅 {fav.data_limite}</span>}
                   </div>
                 </div>
 
@@ -161,27 +248,88 @@ export default function FavoritosPage() {
                   </div>
                 )}
 
-                <Link href={`/analise/${fav.id}`} style={{
-                  padding: "10px 20px",
-                  background: fav.estado === "analisado" ? "#111" : "white",
-                  color: fav.estado === "analisado" ? "white" : "#111",
-                  border: fav.estado === "analisado" ? "none" : "1px solid #ddd",
-                  borderRadius: "10px",
-                  textDecoration: "none",
-                  fontSize: "13px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                }}>
-                  {fav.estado === "analisado" ? "Ver análise" : "Ver concurso"}
-                  <ExternalLink size={14} />
-                </Link>
+                <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                  {/* Botão "Criar análise AI" ou "Ver análise" */}
+                  {fav.tem_analise && fav.analise_estado === "concluida" ? (
+                    <Link href={`/analise/${fav.concurso_id}`} style={{
+                      padding: "10px 20px",
+                      background: "#111",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "10px",
+                      textDecoration: "none",
+                      fontSize: "13px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}>
+                      Ver análise AI
+                    </Link>
+                  ) : fav.tem_analise ? (
+                    <Link href="/analises" style={{
+                      padding: "10px 20px",
+                      background: "#111",
+                      color: "white",
+                      borderRadius: "10px",
+                      textDecoration: "none",
+                      fontSize: "13px",
+                    }}>
+                      {fav.analise_estado === "aguarda" ? "⏳ Em fila" : "⚙ Em processamento"}
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmacao(fav)}
+                      style={{
+                        padding: "10px 20px",
+                        background: "#f0f4ea",
+                        color: "#607b43",
+                        border: "1px solid #607b43",
+                        borderRadius: "10px",
+                        cursor: "pointer",
+                        fontSize: "13px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      <><Sparkles size={14} /> Criar análise AI</>
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => removerFavorito(fav)}
+                    style={{
+                      padding: "10px",
+                      background: "white",
+                      border: "1px solid #ddd",
+                      borderRadius: "10px",
+                      cursor: "pointer",
+                      fontSize: "13px",
+                      color: "#999",
+                    }}
+                    title="Remover favorito"
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         )}
 
       </main>
+
+      <AnalysisConfirmationModal
+        open={confirmacao !== null}
+        titulo={confirmacao?.titulo ?? ""}
+        entidade={confirmacao?.entidade ?? ""}
+        localizacao={confirmacao?.localizacao}
+        onClose={() => setConfirmacao(null)}
+        onConfirm={async () => {
+          if (!confirmacao) return;
+          await criarAnalise(confirmacao);
+        }}
+      />
     </PrivateLayout>
   );
 }
