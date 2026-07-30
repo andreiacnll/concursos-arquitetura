@@ -21,6 +21,7 @@ from pypdf import PdfReader
 
 from app.analise.classificador import classificar_documento
 from app.analise.criterios import analisar_criterios
+from app.analise.document_ai import analisar_documentos_ai
 from app.analise.equipa import analisar_equipa
 from app.analise.gerador import gerar_perfil_concurso
 from app.analise.normalizador_equipa import normalizar_subfatores
@@ -447,6 +448,115 @@ def _extrair_requisitos(texto: str) -> dict:
     }
 
 
+def _lista_texto(valor: object, limite: int = 14) -> list[str]:
+    if valor is None:
+        return []
+    if isinstance(valor, str):
+        candidatos = re.split(r";|\n|,|\u2022", valor)
+    elif isinstance(valor, list):
+        candidatos = valor
+    else:
+        return []
+
+    resultado: list[str] = []
+    vistos: set[str] = set()
+    for item in candidatos:
+        texto = _texto_limpo(item).strip(" -\u2022;")
+        if len(texto) < 3:
+            continue
+        chave = _sem_acentos(texto.lower())[:160]
+        if chave in vistos:
+            continue
+        vistos.add(chave)
+        resultado.append(texto)
+        if len(resultado) >= limite:
+            break
+    return resultado
+
+
+def _juntar_listas(*listas: list[str], limite: int = 18) -> list[str]:
+    resultado: list[str] = []
+    vistos: set[str] = set()
+    for lista in listas:
+        for item in lista:
+            texto = _texto_limpo(item).strip(" -\u2022;")
+            if len(texto) < 3:
+                continue
+            chave = _sem_acentos(texto.lower())[:160]
+            if chave in vistos:
+                continue
+            vistos.add(chave)
+            resultado.append(texto)
+            if len(resultado) >= limite:
+                return resultado
+    return resultado
+
+
+def _areas_para_programa(
+    areas_regex: dict[str, str],
+    areas_ai: list[str],
+) -> dict[str, str]:
+    if areas_regex:
+        return areas_regex
+    return {
+        f"area_{indice}": area
+        for indice, area in enumerate(areas_ai[:12], start=1)
+    }
+
+
+def _enriquecer_requisitos(
+    requisitos: dict,
+    programa_funcional: dict,
+    equipa_ai: dict,
+) -> dict:
+    obrigatorios = _juntar_listas(
+        requisitos.get("obrigatorios", []),
+        _lista_texto(programa_funcional.get("requisitos")),
+        _lista_texto(equipa_ai.get("tecnicos_exigidos")),
+        limite=18,
+    )
+    riscos = _juntar_listas(
+        requisitos.get("riscos_participacao", []),
+        _lista_texto(programa_funcional.get("condicionantes")),
+        limite=14,
+    )
+    return {
+        "obrigatorios": obrigatorios,
+        "riscos_participacao": riscos,
+    }
+
+
+def _observacoes_programa(programa_funcional: dict) -> str:
+    partes = []
+    relacoes = _lista_texto(programa_funcional.get("relacoes_funcionais"))
+    requisitos = _lista_texto(programa_funcional.get("requisitos"))
+    condicionantes = _lista_texto(programa_funcional.get("condicionantes"))
+
+    if relacoes:
+        partes.append(
+            "Relações funcionais identificadas: "
+            + "; ".join(relacoes[:4])
+        )
+    if requisitos:
+        partes.append(
+            "Requisitos programáticos/técnicos: "
+            + "; ".join(requisitos[:4])
+        )
+    if condicionantes:
+        partes.append(
+            "Condicionantes com impacto arquitetónico: "
+            + "; ".join(condicionantes[:4])
+        )
+
+    if partes:
+        return " ".join(partes)
+    return (
+        "Análise gerada automaticamente pelo worker CNLL com base nos "
+        "documentos extraídos, dados do concurso e localização identificada "
+        "quando disponível."
+    )
+
+
 def _sintese_programa(texto: str, titulo: str, funcoes: list[str]) -> str:
     frases = _frases_com_termos(
         texto,
@@ -534,8 +644,21 @@ def _gerar_ficha(
     textos: dict[str, str],
     documentos: list[dict],
     resumo_documentos: dict,
+    analise_documental: dict,
 ) -> tuple[dict, int]:
     texto_total = "\n".join(textos.values())
+    if not isinstance(analise_documental, dict):
+        analise_documental = {}
+    programa_funcional = (
+        analise_documental.get("programa_funcional", {})
+        if isinstance(analise_documental.get("programa_funcional"), dict)
+        else {}
+    )
+    equipa_ai = (
+        analise_documental.get("equipa", {})
+        if isinstance(analise_documental.get("equipa"), dict)
+        else {}
+    )
     criterios = _criterios_do_concurso(concurso, texto_total)
     equipa_bruta = analisar_equipa(texto_total)
     equipa = normalizar_subfatores(
@@ -568,12 +691,49 @@ def _gerar_ficha(
         _texto_limpo(concurso.get("data_entrega_propostas"))
         or _texto_limpo(concurso.get("data_limite"))
     )
-    funcoes = _extrair_funcoes(texto_total, titulo)
-    areas = _extrair_areas(texto_total)
-    entregaveis = _extrair_entregaveis(texto_total, concurso)
-    especialidades = _extrair_especialidades(texto_total)
-    requisitos = _extrair_requisitos(texto_total)
-    sintese_programa = _sintese_programa(texto_total, titulo, funcoes)
+    espacos_ai = _lista_texto(
+        programa_funcional.get("espacos_principais")
+    )
+    funcoes = _juntar_listas(
+        _extrair_funcoes(texto_total, titulo),
+        espacos_ai,
+        limite=16,
+    )
+    areas_ai = _lista_texto(programa_funcional.get("areas"))
+    areas = _areas_para_programa(_extrair_areas(texto_total), areas_ai)
+    entregaveis = _juntar_listas(
+        _lista_texto(analise_documental.get("entregaveis")),
+        _extrair_entregaveis(texto_total, concurso),
+        limite=18,
+    )
+    especialidades = _juntar_listas(
+        _extrair_especialidades(texto_total),
+        _lista_texto(equipa_ai.get("especialidades")),
+        limite=18,
+    )
+    requisitos = _enriquecer_requisitos(
+        _extrair_requisitos(texto_total),
+        programa_funcional,
+        equipa_ai,
+    )
+    sintese_programa = (
+        _texto_limpo(programa_funcional.get("sintese"))
+        or _sintese_programa(texto_total, titulo, funcoes)
+    )
+    if len(sintese_programa) < 220:
+        sintese_programa = _sintese_programa(texto_total, titulo, funcoes)
+    programa_funcional = {
+        "sintese": sintese_programa,
+        "espacos_principais": espacos_ai or funcoes,
+        "areas": areas_ai or list(areas.values()),
+        "relacoes_funcionais": _lista_texto(
+            programa_funcional.get("relacoes_funcionais")
+        ),
+        "requisitos": _lista_texto(programa_funcional.get("requisitos")),
+        "condicionantes": _lista_texto(
+            programa_funcional.get("condicionantes")
+        ),
+    }
 
     ficha = {
         "identificacao": {
@@ -597,19 +757,22 @@ def _gerar_ficha(
             "job_id": job.get("id"),
         },
         "programa": {
+            "descricao": sintese_programa,
             "resumo": sintese_programa,
             "sintese_programa_preliminar": sintese_programa,
             "tipo": _extrair_tipo_intervencao(texto_total, titulo),
             "funcoes": funcoes,
             "usos": funcoes,
-            "espacos_principais": funcoes,
+            "espacos_principais": programa_funcional["espacos_principais"],
+            "relacoes_funcionais": programa_funcional[
+                "relacoes_funcionais"
+            ],
+            "requisitos": programa_funcional["requisitos"],
+            "condicionantes": programa_funcional["condicionantes"],
             "areas": areas,
-            "observacoes_ai": (
-                "Analise gerada automaticamente pelo worker CNLL "
-                "com base nos dados do concurso, documentos extraidos "
-                "e localizacao identificada quando disponivel."
-            ),
+            "observacoes_ai": _observacoes_programa(programa_funcional),
         },
+        "programa_funcional": programa_funcional,
         "localizacao": localizacao,
         "investimento": {
             "valor_obra": valor,
@@ -697,6 +860,7 @@ def _gerar_ficha(
             "score": score,
             "gerada_em": datetime.utcnow().isoformat() + "Z",
             "origem": "worker_backend_cnll",
+            "interpretacao_documental": analise_documental.get("origem"),
         },
     }
 
@@ -843,6 +1007,13 @@ def processar_job(job: dict) -> bool:
             job,
             pasta_extraida,
         )
+        _verificar_cancelamento(job_id)
+        analise_documental = analisar_documentos_ai(
+            textos=textos,
+            documentos=documentos,
+            titulo=_texto_limpo(concurso.get("titulo"))
+            or "Concurso sem titulo",
+        )
 
         atualizar_analise_job(job_id, "geracao", 75)
         _verificar_cancelamento(job_id)
@@ -852,6 +1023,7 @@ def processar_job(job: dict) -> bool:
             textos=textos,
             documentos=documentos,
             resumo_documentos=resumo_documentos,
+            analise_documental=analise_documental,
         )
         atualizar_localizacao_concurso(
             concurso_id,
