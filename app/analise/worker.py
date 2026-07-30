@@ -323,6 +323,159 @@ def _extrair_funcoes(texto: str, titulo: str) -> list[str]:
     return funcoes
 
 
+def _frases_com_termos(
+    texto: str,
+    termos: tuple[str, ...],
+    limite: int = 8,
+) -> list[str]:
+    encontrados: list[str] = []
+    vistos: set[str] = set()
+    frases = re.split(r"(?<=[.;:])\s+|\n+", texto)
+    termos_normais = tuple(_sem_acentos(termo.lower()) for termo in termos)
+
+    for frase in frases:
+        limpa = _texto_limpo(frase)
+        if len(limpa) < 18 or len(limpa) > 260:
+            continue
+        base = _sem_acentos(limpa.lower())
+        if not any(termo in base for termo in termos_normais):
+            continue
+        chave = base[:120]
+        if chave in vistos:
+            continue
+        vistos.add(chave)
+        encontrados.append(limpa)
+        if len(encontrados) >= limite:
+            break
+
+    return encontrados
+
+
+def _extrair_entregaveis(texto: str, concurso: dict) -> list[str]:
+    entregaveis_db = _texto_limpo(concurso.get("entregaveis"))
+    if entregaveis_db:
+        return [
+            item.strip(" -•;")
+            for item in re.split(r";|\n|,", entregaveis_db)
+            if item.strip(" -•;")
+        ][:12]
+
+    termos = (
+        "projeto de arquitetura",
+        "projeto do espaço exterior",
+        "estudo prévio",
+        "projeto de execução",
+        "memória descritiva",
+        "mapa de quantidades",
+        "estimativa orçamental",
+        "peças desenhadas",
+        "plano de acessibilidades",
+        "plano de segurança",
+        "telas finais",
+    )
+    return _frases_com_termos(texto, termos, limite=12)
+
+
+def _extrair_especialidades(texto: str) -> list[str]:
+    regras = (
+        ("arquitetura paisagista", "Arquitetura paisagista"),
+        ("arquitetura", "Arquitetura"),
+        ("estabilidade", "Estabilidade / estruturas"),
+        ("engenharia civil", "Engenharia civil"),
+        ("instalações elétricas", "Instalações elétricas"),
+        ("instalacoes eletricas", "Instalações elétricas"),
+        ("telecomunicações", "Telecomunicações"),
+        ("avac", "AVAC"),
+        ("climatização", "Climatização"),
+        ("comportamento térmico", "Comportamento térmico"),
+        ("comportamento termico", "Comportamento térmico"),
+        ("acústico", "Acústica"),
+        ("acustico", "Acústica"),
+        ("segurança contra incêndios", "Segurança contra incêndios"),
+        ("seguranca contra incendios", "Segurança contra incêndios"),
+        ("águas residuais", "Águas e águas residuais"),
+        ("aguas residuais", "Águas e águas residuais"),
+        ("rede de abastecimento", "Redes de água"),
+        ("gás", "Gás"),
+        ("gas", "Gás"),
+        ("sinalética", "Sinalética"),
+        ("sinaletica", "Sinalética"),
+    )
+    base = _sem_acentos(texto.lower())
+    especialidades: list[str] = []
+    for termo, nome in regras:
+        if _sem_acentos(termo) in base and nome not in especialidades:
+            especialidades.append(nome)
+    return especialidades
+
+
+def _extrair_requisitos(texto: str) -> dict:
+    obrigatorios = _frases_com_termos(
+        texto,
+        (
+            "obrigatório",
+            "obrigatoria",
+            "habilitação",
+            "habilitacao",
+            "termo de responsabilidade",
+            "inscrição válida",
+            "inscricao valida",
+            "certificação",
+            "certificacao",
+            "experiência comprovada",
+            "experiencia comprovada",
+        ),
+        limite=10,
+    )
+    riscos = _frases_com_termos(
+        texto,
+        (
+            "exclusão",
+            "exclusao",
+            "caducidade",
+            "não apresentação",
+            "nao apresentacao",
+            "falta",
+            "insuficiência",
+            "insuficiencia",
+        ),
+        limite=8,
+    )
+    return {
+        "obrigatorios": obrigatorios,
+        "riscos_participacao": riscos,
+    }
+
+
+def _sintese_programa(texto: str, titulo: str, funcoes: list[str]) -> str:
+    frases = _frases_com_termos(
+        texto,
+        (
+            "objeto",
+            "âmbito",
+            "ambito",
+            "elaboração do projeto",
+            "elaboracao do projeto",
+            "intervenção",
+            "intervencao",
+            "reabilitação",
+            "reabilitacao",
+            "execução de arquitetura",
+            "execucao de arquitetura",
+        ),
+        limite=2,
+    )
+    if frases:
+        return " ".join(frases)
+
+    if funcoes:
+        return (
+            f"Análise do programa associado a {', '.join(funcoes).lower()} "
+            f"no âmbito do concurso {titulo}."
+        )
+    return f"Análise do programa preliminar e técnico do concurso {titulo}."
+
+
 def _criterios_do_concurso(concurso: dict, texto: str) -> dict:
     resumo = _texto_limpo(concurso.get("criterio_resumo"))
     detalhe = _texto_limpo(concurso.get("criterio_detalhe"))
@@ -415,6 +568,12 @@ def _gerar_ficha(
         _texto_limpo(concurso.get("data_entrega_propostas"))
         or _texto_limpo(concurso.get("data_limite"))
     )
+    funcoes = _extrair_funcoes(texto_total, titulo)
+    areas = _extrair_areas(texto_total)
+    entregaveis = _extrair_entregaveis(texto_total, concurso)
+    especialidades = _extrair_especialidades(texto_total)
+    requisitos = _extrair_requisitos(texto_total)
+    sintese_programa = _sintese_programa(texto_total, titulo, funcoes)
 
     ficha = {
         "identificacao": {
@@ -438,14 +597,13 @@ def _gerar_ficha(
             "job_id": job.get("id"),
         },
         "programa": {
-            "resumo": (
-                _texto_limpo(concurso.get("entregaveis"))
-                or "Resumo gerado a partir dos documentos oficiais recolhidos."
-            ),
+            "resumo": sintese_programa,
+            "sintese_programa_preliminar": sintese_programa,
             "tipo": _extrair_tipo_intervencao(texto_total, titulo),
-            "funcoes": _extrair_funcoes(texto_total, titulo),
-            "usos": _extrair_funcoes(texto_total, titulo),
-            "areas": _extrair_areas(texto_total),
+            "funcoes": funcoes,
+            "usos": funcoes,
+            "espacos_principais": funcoes,
+            "areas": areas,
             "observacoes_ai": (
                 "Analise gerada automaticamente pelo worker CNLL "
                 "com base nos dados do concurso, documentos extraidos "
@@ -491,6 +649,13 @@ def _gerar_ficha(
             **resumo_documentos,
             "lista": documentos,
         },
+        "entregaveis": {
+            "principais": entregaveis,
+        },
+        "especialidades": {
+            "lista": especialidades,
+        },
+        "requisitos": requisitos,
         "equipa": equipa,
         "estrategia": estrategia,
         "decisao": {

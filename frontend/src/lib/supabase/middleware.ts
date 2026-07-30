@@ -1,12 +1,45 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const protectedRoutes = [
+  "/perfil",
+  "/favoritos",
+  "/analises",
+  "/alertas",
+];
+
+function isProtectedPath(pathname: string) {
+  return protectedRoutes.some((route) =>
+    pathname === route || pathname.startsWith(`${route}/`),
+  );
+}
+
+function redirectToLogin(request: NextRequest) {
+  const url = request.nextUrl.clone();
+  url.pathname = "/auth/login";
+  url.searchParams.set("redirect", request.nextUrl.pathname);
+  return NextResponse.redirect(url);
+}
+
 export async function updateSession(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+  const isProtected = isProtectedPath(pathname);
+  const isAuthRoute = pathname === "/auth" || pathname.startsWith("/auth/");
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    if (isProtected) {
+      return redirectToLogin(request);
+    }
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll() {
@@ -26,32 +59,14 @@ export async function updateSession(request: NextRequest) {
   );
 
   // Refresh session
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const protectedRoutes = [
-    "/perfil",
-    "/favoritos",
-    "/alertas",
-    "/analise",
-    "/analises",
-    "/historico",
-    "/entidades",
-  ];
-
-  const isProtected = protectedRoutes.some((route) =>
-    request.nextUrl.pathname.startsWith(route),
-  );
-
-  const isAuthRoute = request.nextUrl.pathname.startsWith("/auth");
+  const user = await supabase.auth
+    .getUser()
+    .then(({ data }) => data.user)
+    .catch(() => null);
 
   // Redirect unauthenticated users to login
   if (isProtected && !user) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
-    url.searchParams.set("redirect", request.nextUrl.pathname);
-    return NextResponse.redirect(url);
+    return redirectToLogin(request);
   }
 
   // Redirect authenticated users away from auth pages

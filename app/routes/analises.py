@@ -10,9 +10,12 @@ from ..database import (
     cancelar_analise_job,
     concurso_por_id,
     criar_ou_obter_analise_job,
+    criar_ou_reiniciar_analise_job,
     listar_analises_utilizador,
     obter_analise_job_utilizador,
+    remover_analise_job_utilizador,
     remover_analise_utilizador,
+    repetir_analise_job,
 )
 
 
@@ -81,6 +84,31 @@ def _remover_temporarios_job(job_id: int) -> bool:
     return True
 
 
+def _id_portal_base(link: str | None) -> str | None:
+    if not link:
+        return None
+    import re
+
+    resultado = re.search(r"[?&]id=(\d+)", link)
+    return resultado.group(1) if resultado else None
+
+
+def _remover_temporarios_concurso(concurso: dict | None) -> list[str]:
+    removidos: list[str] = []
+    if not concurso:
+        return removidos
+
+    identificador = _id_portal_base(concurso.get("link")) or str(concurso["id"])
+    candidatos = [
+        (ANALISES_DIR / identificador / "temp").resolve(),
+    ]
+    for pasta in candidatos:
+        if ANALISES_DIR in pasta.parents and pasta.exists():
+            shutil.rmtree(pasta)
+            removidos.append(pasta.relative_to(BASE_DIR).as_posix())
+    return removidos
+
+
 def _remover_ficha_especifica(caminho_relativo: str | None) -> bool:
     if not caminho_relativo:
         return False
@@ -129,6 +157,112 @@ def cancelar_analise(
     return {
         **cancelado,
         "temporarios_removidos": temporarios_removidos,
+    }
+
+
+@router.post("/{job_id}/repetir")
+def repetir_analise(
+    job_id: int,
+    utilizador: UtilizadorAutenticado = Depends(
+        obter_utilizador_atual
+    ),
+):
+    job = obter_analise_job_utilizador(utilizador.id, job_id)
+    if job is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Análise não encontrada.",
+        )
+    if job["estado"] != "erro":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Só é possível repetir análises em erro.",
+        )
+
+    repetido = repetir_analise_job(utilizador.id, job_id)
+    if repetido is None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="O estado da análise foi alterado. Atualiza a página.",
+        )
+
+    concurso = concurso_por_id(repetido["concurso_id"])
+    temporarios = []
+    if _remover_temporarios_job(job_id):
+        temporarios.append(f"analise_documentos/.jobs/{job_id}")
+    temporarios.extend(_remover_temporarios_concurso(concurso))
+    return {
+        **repetido,
+        "temporarios_removidos": temporarios,
+    }
+
+
+@router.post("/concurso/{concurso_id}/atualizar")
+def atualizar_analise_concurso(
+    concurso_id: int,
+    response: Response,
+    utilizador: UtilizadorAutenticado = Depends(
+        obter_utilizador_atual
+    ),
+):
+    concurso = concurso_por_id(concurso_id)
+    if concurso is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Concurso não encontrado.",
+        )
+
+    job, criado = criar_ou_reiniciar_analise_job(
+        utilizador.id,
+        concurso_id,
+    )
+    response.status_code = (
+        status.HTTP_201_CREATED if criado else status.HTTP_200_OK
+    )
+    return {
+        **job,
+        "mensagem": "Análise colocada na fila de atualização.",
+    }
+
+
+@router.delete("/jobs/{job_id}")
+def apagar_analise_job(
+    job_id: int,
+    utilizador: UtilizadorAutenticado = Depends(
+        obter_utilizador_atual
+    ),
+):
+    job = obter_analise_job_utilizador(utilizador.id, job_id)
+    if job is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Análise não encontrada.",
+        )
+    if job["estado"] not in {"erro", "cancelada"}:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Só é possível apagar jobs em erro ou cancelados.",
+        )
+
+    removido = remover_analise_job_utilizador(utilizador.id, job_id)
+    if removido is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Análise não encontrada ou não pertence ao utilizador atual.",
+        )
+
+    concurso = concurso_por_id(removido["concurso_id"])
+    temporarios = []
+    if _remover_temporarios_job(job_id):
+        temporarios.append(f"analise_documentos/.jobs/{job_id}")
+    temporarios.extend(_remover_temporarios_concurso(concurso))
+
+    return {
+        "apagada": True,
+        "tipo": "job",
+        "job_id": job_id,
+        "concurso_id": removido["concurso_id"],
+        "temporarios_removidos": temporarios,
     }
 
 

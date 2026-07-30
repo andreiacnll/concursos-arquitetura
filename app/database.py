@@ -46,6 +46,17 @@ COLUNAS_ALERTA = {
     "hash_novo": "TEXT",
 }
 
+COLUNAS_ANALISE_VERSAO = {
+    "id": "INTEGER PRIMARY KEY AUTOINCREMENT",
+    "analise_id": "INTEGER NOT NULL",
+    "user_id": "TEXT",
+    "concurso_id": "INTEGER NOT NULL",
+    "dados_json": "TEXT",
+    "score": "INTEGER",
+    "ficheiro_ficha": "TEXT",
+    "created_at": "TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP",
+}
+
 TIPOS_ALERTA_RELEVANTES = {
     "novo_documento",
     "alteracao_economica",
@@ -138,6 +149,28 @@ def _adicionar_colunas_alertas_em_falta(cursor):
             cursor.execute(
                 f"ALTER TABLE alertas ADD COLUMN {nome_coluna} {definicao}"
             )
+
+
+def _criar_tabela_versoes_analise(cursor):
+    """Histórico simples das fichas substituídas por atualizações do utilizador."""
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS analise_versoes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            analise_id INTEGER NOT NULL,
+            user_id TEXT,
+            concurso_id INTEGER NOT NULL,
+            dados_json TEXT,
+            score INTEGER,
+            ficheiro_ficha TEXT,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY(analise_id)
+            REFERENCES analises(id)
+            ON DELETE CASCADE
+        )
+        """
+    )
 
 
 def _migrar_tabela_analises(cursor):
@@ -496,6 +529,7 @@ def criar_base_dados():
     _adicionar_colunas_analise_em_falta(cursor)
     _migrar_tabela_analises(cursor)
     _adicionar_colunas_alertas_em_falta(cursor)
+    _criar_tabela_versoes_analise(cursor)
 
     cursor.execute(
         """
@@ -567,6 +601,13 @@ def criar_base_dados():
         CREATE UNIQUE INDEX IF NOT EXISTS idx_analises_job_id
         ON analises(job_id)
         WHERE job_id IS NOT NULL
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_analise_versoes_analise_id
+        ON analise_versoes(analise_id, created_at)
         """
     )
 
@@ -1553,6 +1594,8 @@ def listar_analises_utilizador(user_id: str):
                 a.updated_at,
                 CASE WHEN a.user_id = ? THEN 1 ELSE 0 END AS pode_apagar,
                 0 AS pode_cancelar,
+                0 AS pode_repetir,
+                1 AS pode_atualizar,
                 c.titulo,
                 c.entidade,
                 c.link,
@@ -1580,12 +1623,21 @@ def listar_analises_utilizador(user_id: str):
                 NULL AS score,
                 j.created_at,
                 j.updated_at,
-                0 AS pode_apagar,
+                CASE
+                    WHEN j.estado IN ('erro', 'cancelada') THEN 1 ELSE 0
+                END AS pode_apagar,
                 CASE
                     WHEN j.estado IN (
                         'aguarda', 'extracao', 'processamento', 'geracao'
                     ) THEN 1 ELSE 0
                 END AS pode_cancelar,
+                CASE
+                    WHEN j.estado = 'erro' THEN 1 ELSE 0
+                END AS pode_repetir,
+                CASE
+                    WHEN j.estado IN ('erro', 'cancelada', 'concluida') THEN 1
+                    ELSE 0
+                END AS pode_atualizar,
                 c.titulo,
                 c.entidade,
                 c.link,
@@ -1605,7 +1657,10 @@ def listar_analises_utilizador(user_id: str):
     resultados.extend(
         dict(linha)
         for linha in jobs
-        if linha["concurso_id"] not in concursos_concluidos
+        if (
+            linha["concurso_id"] not in concursos_concluidos
+            or linha["estado"] != "concluida"
+        )
     )
     resultados.sort(
         key=lambda linha: (linha.get("updated_at") or "", linha["id"]),
@@ -1634,6 +1689,8 @@ def analise_concluida_por_concurso(
                 a.updated_at,
                 CASE WHEN a.user_id = ? THEN 1 ELSE 0 END AS pode_apagar,
                 0 AS pode_cancelar,
+                0 AS pode_repetir,
+                1 AS pode_atualizar,
                 c.titulo,
                 c.entidade,
                 c.link,
@@ -1776,6 +1833,155 @@ def criar_ou_obter_analise_job(
     return dict(linha), criado
 
 
+def criar_ou_reiniciar_analise_job(
+    user_id: str,
+    concurso_id: int,
+):
+    """Cria ou volta a colocar uma análise do utilizador na fila normal."""
+    estados_ativos_sql = ", ".join(
+        f"'{estado}'" for estado in ESTADOS_ANALISE_ATIVOS
+    )
+    with closing(abrir_conexao()) as conexao:
+        conexao.execute("BEGIN IMMEDIATE")
+        linha = conexao.execute(
+            """
+            SELECT *
+            FROM analise_jobs
+            WHERE user_id = ? AND concurso_id = ?
+            """,
+            (user_id, concurso_id),
+        ).fetchone()
+
+        criado = False
+        if linha is None:
+            cursor = conexao.execute(
+                """
+                INSERT INTO analise_jobs (
+                    user_id, concurso_id, estado, progresso, erro
+                )
+                VALUES (?, ?, 'aguarda', 0, NULL)
+                """,
+                (user_id, concurso_id),
+            )
+            job_id = cursor.lastrowid
+            criado = True
+        elif linha["estado"] in ESTADOS_ANALISE_ATIVOS:
+            job_id = linha["id"]
+        else:
+            job_id = linha["id"]
+            conexao.execute(
+                f"""
+                UPDATE analise_jobs
+                SET estado = 'aguarda',
+                    progresso = 0,
+                    erro = NULL,
+                    created_at = CURRENT_TIMESTAMP,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                  AND estado NOT IN ({estados_ativos_sql})
+                """,
+                (job_id,),
+            )
+
+        atualizado = conexao.execute(
+            """
+            SELECT
+                j.id,
+                'job' AS tipo,
+                j.user_id,
+                j.concurso_id,
+                j.estado,
+                j.progresso,
+                j.erro,
+                j.created_at,
+                j.updated_at,
+                CASE
+                    WHEN j.estado IN ('erro', 'cancelada') THEN 1 ELSE 0
+                END AS pode_apagar,
+                CASE
+                    WHEN j.estado IN (
+                        'aguarda', 'extracao', 'processamento', 'geracao'
+                    ) THEN 1 ELSE 0
+                END AS pode_cancelar,
+                CASE WHEN j.estado = 'erro' THEN 1 ELSE 0 END AS pode_repetir,
+                CASE
+                    WHEN j.estado IN ('erro', 'cancelada', 'concluida') THEN 1
+                    ELSE 0
+                END AS pode_atualizar,
+                c.titulo,
+                c.entidade,
+                c.link,
+                c.data,
+                c.tipo_procedimento
+            FROM analise_jobs AS j
+            JOIN concursos AS c
+              ON c.id = j.concurso_id
+            WHERE j.id = ?
+            """,
+            (job_id,),
+        ).fetchone()
+        conexao.commit()
+
+    return dict(atualizado), criado
+
+
+def repetir_analise_job(
+    user_id: str,
+    job_id: int,
+):
+    """Repõe um job em erro na fila sem criar concurso nem pipeline nova."""
+    with closing(abrir_conexao()) as conexao:
+        conexao.execute("BEGIN IMMEDIATE")
+        cursor = conexao.execute(
+            """
+            UPDATE analise_jobs
+            SET estado = 'aguarda',
+                progresso = 0,
+                erro = NULL,
+                created_at = CURRENT_TIMESTAMP,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+              AND user_id = ?
+              AND estado = 'erro'
+            """,
+            (job_id, user_id),
+        )
+        if cursor.rowcount != 1:
+            conexao.rollback()
+            return None
+
+        linha = conexao.execute(
+            """
+            SELECT
+                j.id,
+                'job' AS tipo,
+                j.user_id,
+                j.concurso_id,
+                j.estado,
+                j.progresso,
+                j.erro,
+                j.created_at,
+                j.updated_at,
+                0 AS pode_apagar,
+                1 AS pode_cancelar,
+                0 AS pode_repetir,
+                0 AS pode_atualizar,
+                c.titulo,
+                c.entidade,
+                c.link,
+                c.data,
+                c.tipo_procedimento
+            FROM analise_jobs AS j
+            JOIN concursos AS c
+              ON c.id = j.concurso_id
+            WHERE j.id = ?
+            """,
+            (job_id,),
+        ).fetchone()
+        conexao.commit()
+    return dict(linha) if linha else None
+
+
 def obter_analise_job_utilizador(
     user_id: str,
     job_id: int,
@@ -1819,6 +2025,36 @@ def cancelar_analise_job(
         ).fetchone()
         conexao.commit()
     return dict(linha)
+
+
+def remover_analise_job_utilizador(
+    user_id: str,
+    job_id: int,
+):
+    """Remove apenas jobs falhados/cancelados do utilizador."""
+    with closing(abrir_conexao()) as conexao:
+        conexao.execute("BEGIN IMMEDIATE")
+        linha = conexao.execute(
+            """
+            SELECT id, user_id, concurso_id, estado
+            FROM analise_jobs
+            WHERE id = ?
+              AND user_id = ?
+              AND estado IN ('erro', 'cancelada')
+            """,
+            (job_id, user_id),
+        ).fetchone()
+        if linha is None:
+            conexao.rollback()
+            return None
+
+        dados = dict(linha)
+        conexao.execute(
+            "DELETE FROM analise_jobs WHERE id = ? AND user_id = ?",
+            (job_id, user_id),
+        )
+        conexao.commit()
+    return dados
 
 
 def analise_job_esta_cancelado(job_id: int) -> bool:
@@ -2492,6 +2728,38 @@ def guardar_analise(
         )
         if existente:
             analise_id = existente["id"]
+            anterior = conexao.execute(
+                """
+                SELECT
+                    id, user_id, concurso_id, dados_json,
+                    score, ficheiro_ficha
+                FROM analises
+                WHERE id = ?
+                """,
+                (analise_id,),
+            ).fetchone()
+            if anterior and anterior["dados_json"]:
+                conexao.execute(
+                    """
+                    INSERT INTO analise_versoes (
+                        analise_id,
+                        user_id,
+                        concurso_id,
+                        dados_json,
+                        score,
+                        ficheiro_ficha
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        anterior["id"],
+                        anterior["user_id"],
+                        anterior["concurso_id"],
+                        anterior["dados_json"],
+                        anterior["score"],
+                        anterior["ficheiro_ficha"],
+                    ),
+                )
             conexao.execute(
                 """
                 UPDATE analises

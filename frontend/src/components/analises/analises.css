@@ -390,6 +390,26 @@ font-size:13px;
   background: #fff9ec;
 }
 
+.analise-lifecycle-btn.is-update {
+  border: 1px solid #c8d5b5;
+  color: #506c37;
+}
+
+.analise-lifecycle-btn.is-update:hover {
+  border-color: #607b43;
+  background: #f0f4ea;
+}
+
+.analise-lifecycle-btn.is-retry {
+  border: 1px solid #c8d3df;
+  color: #355f7f;
+}
+
+.analise-lifecycle-btn.is-retry:hover {
+  border-color: #557fa0;
+  background: #f1f7fb;
+}
+
 .analise-lifecycle-btn.is-delete {
   border: 1px solid #e2c1bd;
   color: #9b3b32;
@@ -408,6 +428,14 @@ font-size:13px;
   background: #fff7f6;
   color: #9b3028;
   font-size: 13px;
+}
+
+.analise-error-detail {
+  margin-top: 8px;
+  max-width: 560px;
+  color: #9b3b32;
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .analise-confirm-overlay {
