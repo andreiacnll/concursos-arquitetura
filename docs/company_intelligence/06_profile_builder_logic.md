@@ -1,4 +1,6 @@
-\# CNLL Company Profile Builder Logic
+\# CNLL Company Intelligence
+
+\# Profile Builder Logic
 
 
 
@@ -8,33 +10,45 @@
 
 
 
-Construir o perfil final da empresa combinando:
 
 
-
-\- informação extraída automaticamente;
-
-\- respostas dadas pelo utilizador;
-
-\- validações feitas durante o processo de entrevista.
+O Profile Builder é responsável por construir a primeira versão da inteligência de uma empresa através de informação existente.
 
 
 
 
 
-O perfil final será utilizado por:
+Fontes possíveis:
 
 
 
-\- pesquisa personalizada;
 
-\- alertas;
 
-\- análise de concursos;
+\- website institucional;
 
-\- scoring;
+\- portfolio;
 
-\- geração de respostas.
+\- documentos;
+
+\- projetos;
+
+\- informação fornecida pelos utilizadores.
+
+
+
+
+
+
+
+O objetivo não é criar um perfil definitivo.
+
+
+
+
+
+O objetivo é criar uma primeira representação que será posteriormente validada pelo Interviewer.
+
+
 
 
 
@@ -48,83 +62,37 @@ O perfil final será utilizado por:
 
 
 
-O sistema deve distinguir sempre:
 
 
-
-1\. Informação encontrada
-
-
-
-Obtida através de:
-
-\- website;
-
-\- portfolio;
-
-\- documentos.
+O Profile Builder não assume.
 
 
 
 
 
-2\. Informação confirmada
-
-
-
-Validada pelo utilizador.
+Toda a informação criada deve manter:
 
 
 
 
 
-3\. Informação estratégica
+\- origem;
 
+\- confiança;
 
+\- estado;
 
-Preferências e objetivos indicados pela empresa.
-
-
-
-
-
-Nunca transformar informação encontrada automaticamente em preferência estratégica.
+\- necessidade de validação.
 
 
 
 
 
-Exemplo:
 
 
+Nenhuma inferência deve ser transformada em facto.
 
 
-
-Encontrado:
-
-
-
-"A empresa realizou projetos escolares."
-
-
-
-
-
-Não assumir:
-
-
-
-"A empresa quer todos os concursos escolares."
-
-
-
-
-
-Perguntar:
-
-
-
-"Os equipamentos educativos representam uma área estratégica para a empresa?"
 
 
 
@@ -134,29 +102,187 @@ Perguntar:
 
 
 
-\# Estrutura do perfil final
+\# Fluxo geral
 
 
 
 
 
-\## 1. Identidade pública
+\## Entrada
 
 
 
 
 
-Fonte:
-
-
-
-Extractor + validação
+Fontes:
 
 
 
 
 
-Inclui:
+Website
+
+
+
+\+
+
+
+
+Portfolio PDF
+
+
+
+\+
+
+
+
+Documentos adicionais
+
+
+
+
+
+
+
+↓
+
+
+
+\## Extração
+
+
+
+
+
+Identificação de:
+
+
+
+
+
+\- identidade da empresa;
+
+\- serviços;
+
+\- projetos;
+
+\- competências;
+
+\- linguagem institucional;
+
+\- membros identificados;
+
+\- áreas de experiência.
+
+
+
+
+
+
+
+↓
+
+
+
+\## Estruturação
+
+
+
+
+
+Separação em:
+
+
+
+
+
+
+
+Company Information
+
+
+
+
+
+\+
+
+
+
+Member Information
+
+
+
+
+
+\+
+
+
+
+Project Knowledge
+
+
+
+
+
+\+
+
+
+
+Initial Intelligence
+
+
+
+
+
+
+
+↓
+
+
+
+\## Validação
+
+
+
+
+
+O Interviewer analisa:
+
+
+
+
+
+\- informação incompleta;
+
+\- informação incerta;
+
+\- informação estratégica em falta.
+
+
+
+
+
+
+
+\---
+
+
+
+\# Estrutura criada
+
+
+
+
+
+\## Company Information
+
+
+
+
+
+Informação institucional:
+
+
 
 
 
@@ -166,71 +292,37 @@ Inclui:
 
 \- localização;
 
-\- história;
+\- serviços;
 
-\- serviços.
+\- metodologia;
 
+\- valores;
 
-
-
-
-\---
-
-
-
-\## 2. Competências
+\- posicionamento.
 
 
 
 
 
-Combinar:
 
 
-
-Experiência detectada
-
-
-
-\+
-
-
-
-Confirmação do utilizador
+Estado:
 
 
 
 
 
-Cada competência deve ter:
+CONFIRMADO
 
 
 
-
-
-{
-
-"area": "reabilitação",
+EXTRAÍDO
 
 
 
-"experiencia": 5,
+VALIDAR
 
 
-
-"interesse\_futuro": 4,
-
-
-
-"fonte": "portfolio",
-
-
-
-"validado": true
-
-
-
-}
 
 
 
@@ -240,75 +332,19 @@ Cada competência deve ter:
 
 
 
-\## 3. Projetos de referência
+\# Member Information
 
 
 
 
 
-Cada projeto deve guardar:
+Quando existirem dados identificáveis:
 
 
 
 
 
-{
-
-"nome": "",
-
-
-
-"tipologia": "",
-
-
-
-"localizacao": "",
-
-
-
-"competencias": \[],
-
-
-
-"fonte": "",
-
-
-
-"confirmado": true
-
-
-
-}
-
-
-
-
-
-Projetos serão usados futuramente para:
-
-
-
-\- recomendações;
-
-\- respostas;
-
-\- seleção automática de referências.
-
-
-
-
-
-\---
-
-
-
-\## 4. Preferências estratégicas
-
-
-
-
-
-Criadas apenas através de entrevista.
+Criar possíveis Member Profiles.
 
 
 
@@ -320,57 +356,29 @@ Exemplo:
 
 
 
-{
-
-"tipologias": {
+Nome:
 
 
 
-"equipamentos\_publicos": 5,
+Função:
 
 
 
-"habitacao": 3,
+Experiência:
 
 
 
-"turismo": 2
-
-
-
-},
+Competências:
 
 
 
 
 
-"procedimentos": {
 
 
-
-"concurso\_concecao": 5,
-
+A informação individual deve sempre ser validada antes de ser associada a um utilizador.
 
 
-"publico": 4
-
-
-
-}
-
-
-
-}
-
-
-
-
-
-Escala:
-
-
-
-0-5
 
 
 
@@ -380,91 +388,53 @@ Escala:
 
 
 
-\## 5. Estratégia futura
+\# Project Knowledge
 
 
 
 
 
-Guardar:
+Extrair projetos:
 
 
 
-\- áreas que pretende desenvolver;
 
-\- mercados pretendidos;
 
-\- áreas a evitar;
+\- nome;
 
-\- posicionamento.
+\- localização;
 
+\- ano;
 
+\- tipologia;
 
+\- descrição;
 
+\- competências demonstradas;
 
-\---
+\- fonte.
 
 
 
-\# Sistema de confiança
 
 
 
 
+Cada projeto deve manter:
 
-Cada informação deve ter:
 
 
 
 
+source
 
-{
 
-"valor": "",
 
+confidence
 
 
-"origem": "",
 
-
-
-"confidence": 0.0,
-
-
-
-"status": ""
-
-
-
-}
-
-
-
-
-
-Status possíveis:
-
-
-
-
-
-CONFIRMED
-
-
-
-VALIDATED
-
-
-
-DETECTED
-
-
-
-INFERRED
-
-
-
-UNKNOWN
+status
 
 
 
@@ -476,35 +446,19 @@ UNKNOWN
 
 
 
-\# Atualização do perfil
+\# Initial Company Intelligence
 
 
 
 
 
-O perfil deve evoluir.
+Construída através de:
 
 
 
 
 
-Quando o utilizador responde:
-
-
-
-Não substituir informação anterior sem guardar histórico.
-
-
-
-
-
-Guardar:
-
-
-
-
-
-valor anterior
+Company Information
 
 
 
@@ -512,7 +466,7 @@ valor anterior
 
 
 
-nova resposta
+Member Profiles
 
 
 
@@ -520,7 +474,29 @@ nova resposta
 
 
 
-data
+Projects
+
+
+
+
+
+
+
+Inclui:
+
+
+
+
+
+\- competências agregadas;
+
+\- áreas de experiência;
+
+\- padrões identificados;
+
+\- possíveis especializações.
+
+
 
 
 
@@ -530,83 +506,75 @@ data
 
 
 
-\# Memória AI
+\# Estados da informação
 
 
 
 
 
-Criar uma camada específica:
+Toda a informação deve possuir:
 
 
 
 
 
-{
-
-"empresa":
-
-
-
-"CNLL",
+\## CONFIRMADO
 
 
 
 
 
-"como\_apresentar":
-
-
-
-\[],
+Validada pelo utilizador ou fonte oficial.
 
 
 
 
 
-"argumentos\_fortes":
-
-
-
-\[],
+\## EXTRAÍDO
 
 
 
 
 
-"referencias\_preferidas":
-
-
-
-\[],
+Encontrada automaticamente.
 
 
 
 
 
-"estrategia\_concursos":
-
-
-
-\[]
-
-
-
-}
+\## VALIDAR
 
 
 
 
 
-Esta memória será usada quando a AI:
+Necessita confirmação.
 
 
 
-\- analisar concursos;
 
-\- criar recomendações;
 
-\- preparar respostas.
+\## PROPOSTA
+
+
+
+
+
+Possível interpretação estratégica.
+
+
+
+
+
+\## CONTRADITÓRIO
+
+
+
+
+
+Existem fontes incompatíveis.
+
+
 
 
 
@@ -616,37 +584,287 @@ Esta memória será usada quando a AI:
 
 
 
-\# Resultado final esperado
+\# Relação com Interviewer
 
 
 
 
 
-O sistema deve conseguir responder:
+O Profile Builder não faz perguntas.
 
 
 
 
 
-"Que tipo de empresa é esta?"
+Responsabilidade:
 
 
 
 
 
-"Que concursos fazem sentido?"
+Extrair
+
+
+
+↓
+
+
+
+Estruturar
+
+
+
+↓
+
+
+
+Sinalizar lacunas
 
 
 
 
 
-"Que projetos devem ser usados como referência?"
+
+
+O Interviewer:
 
 
 
 
 
-"Que argumentos representam melhor esta empresa?"
+Analisa lacunas
 
 
+
+↓
+
+
+
+Cria perguntas
+
+
+
+↓
+
+
+
+Melhora o perfil
+
+
+
+
+
+
+
+\---
+
+
+
+\# Relação com Member Identity
+
+
+
+
+
+O sistema deve distinguir:
+
+
+
+
+
+Empresa:
+
+
+
+
+
+"O gabinete trabalha em equipamentos públicos."
+
+
+
+
+
+Pessoa:
+
+
+
+
+
+"Arquitecto X possui experiência em equipamentos públicos."
+
+
+
+
+
+
+
+Nunca misturar capacidades institucionais com capacidades individuais.
+
+
+
+
+
+
+
+\---
+
+
+
+\# Relação com Matching Engine
+
+
+
+
+
+O Profile Builder cria a base para:
+
+
+
+
+
+Concurso
+
+
+
+\+
+
+
+
+Company Intelligence
+
+
+
+\+
+
+
+
+Member Profiles
+
+
+
+
+
+
+
+Resultado:
+
+
+
+
+
+Score inicial de compatibilidade.
+
+
+
+
+
+
+
+\---
+
+
+
+\# Relação com Response Generator
+
+
+
+
+
+A informação estruturada permite gerar respostas baseadas em:
+
+
+
+
+
+\- projetos reais;
+
+\- competências comprovadas;
+
+\- equipa disponível;
+
+\- posicionamento estratégico.
+
+
+
+
+
+
+
+\---
+
+
+
+\# Regras
+
+
+
+
+
+Nunca:
+
+
+
+
+
+\- inventar experiência;
+
+\- atribuir autoria sem confirmação;
+
+\- transformar presença num portfolio em preferência estratégica;
+
+\- assumir competências individuais.
+
+
+
+
+
+
+
+Sempre:
+
+
+
+
+
+\- guardar fonte;
+
+\- guardar confiança;
+
+\- permitir validação;
+
+\- manter histórico.
+
+
+
+
+
+
+
+\---
+
+
+
+\# Evolução futura
+
+
+
+
+
+Preparado para:
+
+
+
+
+
+\- extração multimodal;
+
+\- análise de imagens de portfolio;
+
+\- leitura de CVs;
+
+\- identificação automática de equipas;
+
+\- aprendizagem através de validações;
+
+\- criação de knowledge base empresarial.
 

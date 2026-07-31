@@ -1,57 +1,145 @@
 {
-  "identity": {
-    "company_name": "",
-    "description": "",
-    "location": "",
-    "website": ""
+  "company_intelligence_schema": {
+    "version": "2.0",
+
+    "description": "Estrutura de inteligência empresarial baseada em empresa, membros individuais e conhecimento agregado."
   },
 
-  "services": [],
-
-  "competences": [],
-
-  "project_experience": [
-    {
+  "company": {
+    "identity": {
       "name": "",
-      "typology": "",
-      "location": "",
-      "skills_demonstrated": []
+      "website": "",
+      "description": "",
+      "location": ""
+    },
+
+    "services": [],
+
+    "competences": [],
+
+    "values": [],
+
+    "methodology": {},
+
+    "public_information": {}
+  },
+
+
+  "members": [
+    {
+      "identity": {
+        "name": "",
+        "role": "",
+        "specialization": ""
+      },
+
+      "experience": {
+        "projects": [],
+        "typologies": [],
+        "sectors": [],
+        "responsibilities": []
+      },
+
+      "competences": {
+        "technical": [],
+        "software": [],
+        "methodologies": []
+      },
+
+      "preferences": {
+        "preferred_typologies": [],
+        "preferred_sectors": [],
+        "preferred_locations": []
+      },
+
+      "goals": {
+        "career_goals": [],
+        "development_areas": []
+      },
+
+      "visibility": {
+        "company_visible": [],
+        "private": []
+      }
     }
   ],
 
-  "preferences": {
 
-    "typologies": [],
+  "company_intelligence": {
 
-    "procedures": [],
+    "strategic_profile": {
 
-    "locations": [],
+      "priority_areas": [],
 
-    "project_scale": []
+      "preferred_typologies": [],
 
+      "preferred_locations": [],
+
+      "preferred_scales": [],
+
+      "avoid_areas": []
+    },
+
+
+    "ai_memory": {
+
+      "confirmed_facts": [],
+
+      "validated_preferences": [],
+
+      "open_questions": [],
+
+      "contradictions": [],
+
+      "learning_history": []
+    },
+
+
+    "aggregated_competences": [],
+
+    "aggregated_experience": [],
+
+    "team_strengths": []
   },
 
-  "strategy": {
 
-    "priority_areas": [],
+  "projects": [
 
-    "secondary_areas": [],
+    {
+      "name": "",
+      "year": "",
+      "location": "",
+      "typology": "",
+      "description": "",
+      "competences_demonstrated": [],
+      "source": "",
+      "confidence": ""
+    }
 
-    "avoid_areas": [],
+  ],
 
-    "future_goals": []
 
-  },
+  "decisions": [
 
-  "ai_memory": {
+    {
+      "competition_id": "",
+      "recommendation_score": 0,
+      "decision": "",
+      "reason": "",
+      "date": ""
+    }
 
-    "confirmed_facts": [],
+  ],
 
-    "assumptions": [],
 
-    "validated_preferences": [],
+  "information_status": {
 
-    "open_questions": []
+    "confirmed": [],
 
+    "validate": [],
+
+    "proposal": [],
+
+    "contradictions": []
   }
 }

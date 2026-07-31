@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Moon, Sun, Menu, X, LogOut, UserRound } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
+import { LogOut, Menu, Moon, Sun, UserRound, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 
 type Theme = "light" | "dark";
@@ -11,7 +11,7 @@ type Theme = "light" | "dark";
 const navItems = [
   { nome: "Pesquisa", href: "/" },
   { nome: "Favoritos", href: "/favoritos" },
-  { nome: "Análises", href: "/analises" },
+  { nome: "Analises", href: "/analises" },
   { nome: "Alertas", href: "/alertas" },
   { nome: "Perfil", href: "/perfil" },
 ];
@@ -88,7 +88,7 @@ export default function GlobalNavbar() {
           <span>PORTAL CONCURSOS</span>
         </Link>
 
-        <nav className="desktop-nav" aria-label="Navegação principal">
+        <nav className="desktop-nav" aria-label="Navegacao principal">
           {navItems.map((item) => (
             <Link
               key={item.nome}
@@ -140,7 +140,8 @@ export default function GlobalNavbar() {
                     onClick={async () => {
                       setUserMenuOpen(false);
                       await signOut();
-                      router.push("/");
+                      router.replace("/");
+                      router.refresh();
                     }}
                   >
                     <LogOut size={15} />
@@ -167,7 +168,7 @@ export default function GlobalNavbar() {
       </div>
 
       {mobileOpen && (
-        <nav className="mobile-nav" aria-label="Navegação móvel">
+        <nav className="mobile-nav" aria-label="Navegacao movel">
           {navItems.map((item) => (
             <Link
               key={item.nome}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import {
   Bookmark,
   CalendarDays,
@@ -29,13 +29,11 @@ function formatDataEntrega(valor?: string | null) {
   }`;
 }
 
-
 function diasRestantes(valor?: string | null) {
   if (!valor) return null;
 
   let entrega: Date;
 
-  // formato API: YYYY-MM-DD
   if (/^\d{4}-\d{2}-\d{2}/.test(valor)) {
     const [ano, mes, dia] = valor.split("-").map(Number);
 
@@ -46,10 +44,7 @@ function diasRestantes(valor?: string | null) {
       23,
       59,
     );
-  }
-
-  // formato antigo: DD-MM-YYYY
-  else {
+  } else {
     const match = valor.match(
       /^(\d{2})-(\d{2})-(\d{4})(?:\s+(\d{2}):(\d{2}))?/
     );
@@ -78,31 +73,31 @@ function diasRestantes(valor?: string | null) {
 }
 
 const categoryImages = {
-  "Saúde": [
+  Saude: [
     "/categories/saude.svg",
   ],
 
-  "Habitação": [
+  Habitacao: [
     "/categories/habitacao.svg",
   ],
 
-  "Escolas": [
+  Escolas: [
     "/categories/escolas.svg",
   ],
 
-  "Paisagismo": [
+  Paisagismo: [
     "/categories/paisagismo.svg",
   ],
 
-  "Espaço público": [
+  "Espaco publico": [
     "/categories/espaco-publico.svg",
   ],
 
-  "Património": [
+  Patrimonio: [
     "/categories/patrimonio.svg",
   ],
 
-  "Arquitetura": [
+  Arquitetura: [
     "/categories/arquitetura.svg",
   ],
 };
@@ -123,12 +118,12 @@ function getCategory(title: string) {
   const text = title.toLowerCase();
 
   if (text.includes("escola") || text.includes("educa")) return "Escolas";
-  if (text.includes("habita") || text.includes("resid")) return "Habitação";
+  if (text.includes("habita") || text.includes("resid")) return "Habitacao";
   if (text.includes("jardim") || text.includes("paisag")) return "Paisagismo";
-  if (text.includes("praça") || text.includes("largo") || text.includes("rua"))
-    return "Espaço público";
-  if (text.includes("saúde") || text.includes("hospital")) return "Saúde";
-  if (text.includes("patrim") || text.includes("museu")) return "Património";
+  if (text.includes("praca") || text.includes("largo") || text.includes("rua"))
+    return "Espaco publico";
+  if (text.includes("saude") || text.includes("hospital")) return "Saude";
+  if (text.includes("patrim") || text.includes("museu")) return "Patrimonio";
 
   return "Arquitetura";
 }
@@ -148,48 +143,42 @@ function getFreshness(dateValue: string) {
   return null;
 }
 
-export default function CompetitionCard({
+export function CompetitionCardBase({
   concurso,
   index,
   isFavorite,
   onToggleFavorite,
-  temAnalise,
-  analiseEstado,
-  onCriarAnalise,
+  showFavoriteButton,
+  badge,
+  children,
+  actions,
+  className = "",
 }: {
   concurso: Concurso;
   index: number;
   isFavorite: boolean;
   onToggleFavorite: () => void;
-  temAnalise?: boolean;
-  analiseEstado?: string;
-  onCriarAnalise?: () => Promise<void>;
+  showFavoriteButton: boolean;
+  badge?: ReactNode;
+  children?: ReactNode;
+  actions: ReactNode;
+  className?: string;
 }) {
   const [tituloExpandido, setTituloExpandido] = useState(false);
-  const [showConfirmacao, setShowConfirmacao] = useState(false);
-  const { user } = useAuth();
   const tituloLongo = concurso.titulo.length > 75;
 
   const category = concurso.categoria || getCategory(concurso.titulo);
-
   const images =
     categoryImages[category as keyof typeof categoryImages] ??
-    categoryImages["Arquitetura"];
-
+    categoryImages.Arquitetura;
   const image = images[index % images.length];
-
   const freshness = getFreshness(concurso.data);
   const location =
     concurso.municipio || concurso.distrito || concurso.entidade || "Portugal";
 
-  function handleCriarAnalise() {
-    setShowConfirmacao(true);
-  }
-
   return (
-    <article className="competition-card">
+    <article className={`competition-card ${className}`.trim()}>
       <div className="card-image">
-
         <img
           src={image}
           alt={category}
@@ -206,6 +195,7 @@ export default function CompetitionCard({
           </span>
         )}
 
+        {badge}
       </div>
 
       <div className="competition-card-body">
@@ -228,13 +218,12 @@ export default function CompetitionCard({
                 aria-expanded={tituloExpandido}
                 onClick={() => setTituloExpandido((valor) => !valor)}
               >
-                {tituloExpandido ? "Ver menos −" : "Ver mais +"}
+                {tituloExpandido ? "Ver menos -" : "Ver mais +"}
               </button>
             )}
           </div>
 
-          {/* Bookmark apenas para utilizadores autenticados */}
-          {user && (
+          {showFavoriteButton && (
             <button
               type="button"
               className={`bookmark-button ${isFavorite ? "is-favorite" : ""}`}
@@ -269,14 +258,14 @@ export default function CompetitionCard({
           </span>
 
           <span>
-            📅 Entrega {formatDataEntrega(
+            Entrega {formatDataEntrega(
               concurso.data_fim_calculada
             )}
           </span>
 
           {diasRestantes(concurso.data_fim_calculada) !== null && (
             <span>
-              ⏳ {
+              {
                 diasRestantes(concurso.data_fim_calculada)! > 0
                   ? `Faltam ${diasRestantes(concurso.data_fim_calculada)} dias`
                   : "Prazo terminado"
@@ -288,7 +277,7 @@ export default function CompetitionCard({
         {concurso.criterio_tipo && (
           <div className="award-criteria">
             <span className="award-label">
-              Critério de adjudicação
+              Criterio de adjudicacao
             </span>
 
             <strong>
@@ -303,7 +292,7 @@ export default function CompetitionCard({
 
         <div className="procedure-info">
           <div className="procedure-type">
-            {(concurso.tipo_procedimento || "Concurso público")
+            {(concurso.tipo_procedimento || "Concurso publico")
               .split(",")
               .map((item, i) => (
                 <span key={i}>{item.trim()}</span>
@@ -311,61 +300,102 @@ export default function CompetitionCard({
           </div>
 
           <strong className="price">
-            {concurso.preco_base || "Valor não indicado"}
+            {concurso.preco_base || "Valor nao indicado"}
           </strong>
         </div>
 
-        {/* Grupo de botões: Base.gov sempre visível + Análise AI (se autenticado) */}
-        <div className="card-actions">
-          {/* Link Base.gov - SEMPRE visível para todos os utilizadores */}
-          <a
-            className="card-link card-link-basegov"
-            href={concurso.link}
-            target="_blank"
-            rel="noreferrer"
-            aria-label={`Abrir concurso na Base.gov: ${concurso.titulo}`}
-          >
-            Ver concurso Base.gov
-            <ExternalLink size={15} />
-          </a>
+        {children}
 
-          {/* Botão de análise AI - apenas para utilizadores autenticados */}
-          {user && (
-            temAnalise && analiseEstado === "concluida" ? (
-              <Link
-                href={`/analise/${concurso.id}`}
-                className="card-link card-link-analise"
-                style={{ background: "#111", color: "white", border: "none" }}
-              >
-                ✓ Ver análise AI
-              </Link>
-            ) : temAnalise ? (
-              <Link
-                href="/analises"
-                className="card-link card-link-analise"
-                style={{ background: "#111", color: "white", border: "none" }}
-              >
-                {analiseEstado === "aguarda"
-                  ? "⏳ Em fila"
-                  : analiseEstado === "cancelada"
-                    ? "× Análise cancelada"
-                    : analiseEstado === "erro"
-                      ? "⚠ Erro na análise"
-                      : "⚙ Em processamento"}
-              </Link>
-            ) : (
-              <button
-                type="button"
-                className="card-link card-link-analise"
-                style={{ background: "#f0f4ea", color: "#607b43", border: "1px solid #607b43", cursor: "pointer" }}
-                onClick={handleCriarAnalise}
-              >
-                <Sparkles size={14} /> ✨ Criar análise AI
-              </button>
-            )
-          )}
+        <div className="card-actions">
+          {actions}
         </div>
       </div>
+    </article>
+  );
+}
+
+export default function CompetitionCard({
+  concurso,
+  index,
+  isFavorite,
+  onToggleFavorite,
+  temAnalise,
+  analiseEstado,
+  onCriarAnalise,
+}: {
+  concurso: Concurso;
+  index: number;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
+  temAnalise?: boolean;
+  analiseEstado?: string;
+  onCriarAnalise?: () => Promise<void>;
+}) {
+  const [showConfirmacao, setShowConfirmacao] = useState(false);
+  const { user } = useAuth();
+
+  function handleCriarAnalise() {
+    setShowConfirmacao(true);
+  }
+
+  return (
+    <>
+      <CompetitionCardBase
+        concurso={concurso}
+        index={index}
+        isFavorite={isFavorite}
+        onToggleFavorite={onToggleFavorite}
+        showFavoriteButton={Boolean(user)}
+        actions={
+          <>
+            <a
+              className="card-link card-link-basegov"
+              href={concurso.link}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`Abrir concurso na Base.gov: ${concurso.titulo}`}
+            >
+              Ver concurso Base.gov
+              <ExternalLink size={15} />
+            </a>
+
+            {user && (
+              temAnalise && analiseEstado === "concluida" ? (
+                <Link
+                  href={`/analise/${concurso.id}`}
+                  className="card-link card-link-analise"
+                  style={{ background: "#111", color: "white", border: "none" }}
+                >
+                  Ver analise AI
+                </Link>
+              ) : temAnalise ? (
+                <Link
+                  href="/analises"
+                  className="card-link card-link-analise"
+                  style={{ background: "#111", color: "white", border: "none" }}
+                >
+                  {analiseEstado === "aguarda"
+                    ? "Em fila"
+                    : analiseEstado === "cancelada"
+                      ? "Analise cancelada"
+                      : analiseEstado === "erro"
+                        ? "Erro na analise"
+                        : "Em processamento"}
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  className="card-link card-link-analise"
+                  style={{ background: "#f0f4ea", color: "#607b43", border: "1px solid #607b43", cursor: "pointer" }}
+                  onClick={handleCriarAnalise}
+                >
+                  <Sparkles size={14} /> Criar analise AI
+                </button>
+              )
+            )}
+          </>
+        }
+      />
 
       <AnalysisConfirmationModal
         open={showConfirmacao}
@@ -375,11 +405,11 @@ export default function CompetitionCard({
         onClose={() => setShowConfirmacao(false)}
         onConfirm={async () => {
           if (!onCriarAnalise) {
-            throw new Error("Não foi possível iniciar a análise.");
+            throw new Error("Nao foi possivel iniciar a analise.");
           }
           await onCriarAnalise();
         }}
       />
-    </article>
+    </>
   );
 }

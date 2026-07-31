@@ -1,0 +1,185 @@
+"use client";
+
+import { ExternalLink, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { CompetitionCardBase } from "@/components/CompetitionCard";
+import type { Concurso } from "@/components/competition-types";
+import type { RecommendationCard as RecommendationCardType } from "./recommendation-types";
+
+/**
+ * Translates internal technical keys to human-readable labels.
+ * Keys like "competition.competences" become "Competências por validar".
+ */
+function translateKey(key: string): string {
+  const known: Record<string, string> = {
+    "competition.competences": "Competências por validar",
+    "competition.preferences.typologies": "Tipologia não confirmada",
+    "competition.project_experience.typologies": "Experiência semelhante em falta",
+    "competition.location": "Localização por validar",
+  };
+
+  if (known[key]) return known[key];
+
+  // Fallback: convert dot notation / snake_case to readable text
+  const lastPart = key.split(".").pop() ?? key;
+  return lastPart
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function recommendationToConcurso(recommendation: RecommendationCardType): Concurso {
+  return {
+    id: recommendation.competition_id,
+    titulo: recommendation.title,
+    entidade: recommendation.entity || "Entidade nao indicada",
+    link: recommendation.link || `/concursos/${recommendation.competition_id}`,
+    data: recommendation.published_at || "",
+    relevante: 1,
+    data_limite: recommendation.deadline || null,
+    data_fim_calculada: recommendation.deadline || undefined,
+    preco_base: recommendation.base_price || null,
+    estado: "aberto",
+    distrito: recommendation.location || null,
+    municipio: recommendation.location || null,
+    tipo_procedimento: recommendation.procedure_type || null,
+    criterio_tipo: recommendation.award_criteria_type || null,
+    criterio_resumo: recommendation.award_criteria_summary || null,
+  };
+}
+
+function shortList<T>(items: T[], max: number): T[] {
+  return items.slice(0, max).filter(Boolean);
+}
+
+/**
+ * Cleans up the summary by removing the competition title from the beginning
+ * if it appears there, to avoid repetition.
+ */
+function cleanSummary(summary: string, title: string): string {
+  const trimmed = summary.trim();
+  // If summary starts with the title, remove it
+  if (trimmed.startsWith(title)) {
+    const rest = trimmed.slice(title.length).replace(/^[\s,.:;!?-]+/, "");
+    if (rest.length > 10) return rest;
+  }
+  return trimmed;
+}
+
+function scoreLabel(score: number): string {
+  if (score >= 80) return "Alta";
+  if (score >= 60) return "Boa";
+  if (score >= 40) return "Moderada";
+  if (score >= 20) return "Baixa";
+  return "Muito baixa";
+}
+
+export default function RecommendationCompetitionCard({
+  recommendation,
+  index,
+  isFavorite,
+  onToggleFavorite,
+}: {
+  recommendation: RecommendationCardType;
+  index: number;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
+}) {
+  const concurso = recommendationToConcurso(recommendation);
+  const score = recommendation.compatibility_score;
+  const hasScore = typeof score === "number";
+  const strengths = shortList(recommendation.strengths, 3);
+  const attention = shortList(recommendation.attention_points, 2);
+  const missing = recommendation.missing_information;
+  const totalAttention = recommendation.attention_points.length + missing.length;
+  const visibleAttention = shortList(
+    [...recommendation.attention_points, ...missing.map(translateKey)],
+    2,
+  );
+  const overflowCount = totalAttention - visibleAttention.length;
+
+  return (
+    <CompetitionCardBase
+      concurso={concurso}
+      index={index}
+      isFavorite={isFavorite}
+      onToggleFavorite={onToggleFavorite}
+      showFavoriteButton
+      className="recommendation-competition-card"
+      badge={
+        <span className="recommendation-competition-badge">
+          Recomendado
+        </span>
+      }
+      actions={
+        <>
+          <a
+            href={concurso.link}
+            className="card-link card-link-basegov"
+            target={recommendation.link ? "_blank" : undefined}
+            rel={recommendation.link ? "noreferrer" : undefined}
+          >
+            Ver concurso
+            <ExternalLink size={13} />
+          </a>
+          <Link
+            href={`/analise/${recommendation.competition_id}`}
+            className="card-link card-link-analise"
+            style={{ background: "#111", color: "white", border: "none" }}
+          >
+            <Sparkles size={14} />
+            {recommendation.action_label}
+          </Link>
+        </>
+      }
+    >
+      {/* Compact Score Block */}
+      {hasScore && (
+        <div className="recommendation-score-block">
+          <span className="recommendation-score-label">
+            Score de Compatibilidade
+          </span>
+          <div className="recommendation-score-value">
+            <strong>{score}</strong>
+            <span>/ 100</span>
+          </div>
+          <span className="recommendation-score-level">
+            {scoreLabel(score)}
+          </span>
+        </div>
+      )}
+
+      {/* Summary — never repeats the title */}
+      <p className="recommendation-summary-compact">
+        {cleanSummary(recommendation.summary, recommendation.title)}
+      </p>
+
+      {/* Reasons / Positive factors */}
+      {strengths.length > 0 && (
+        <div className="recommendation-reasons">
+          <span className="recommendation-reasons-label">Porque foi recomendado</span>
+          <ul className="recommendation-reasons-list">
+            {strengths.map((reason, i) => (
+              <li key={i}>{reason}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Attention points as readable chips */}
+      {visibleAttention.length > 0 && (
+        <div className="recommendation-attention">
+          {visibleAttention.map((point, i) => (
+            <span key={i} className="recommendation-attention-chip">
+              {translateKey(point)}
+            </span>
+          ))}
+          {overflowCount > 0 && (
+            <span className="recommendation-attention-overflow">
+              +{overflowCount}
+            </span>
+          )}
+        </div>
+      )}
+    </CompetitionCardBase>
+  );
+}

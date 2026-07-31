@@ -7,6 +7,7 @@ import PrivateLayout from "@/components/layout/PrivateLayout";
 import { Bell, Heart, Star, Sparkles, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import AnalysisConfirmationModal from "@/components/analises/AnalysisConfirmationModal";
+import RecommendationList from "@/components/recommendations/RecommendationList";
 import { API_URL } from "@/lib/api";
 
 type Favorito = {
@@ -206,6 +207,10 @@ export default function FavoritosPage() {
           </p>
         </header>
 
+        <h2 style={{ fontSize: "22px", fontWeight: 550, marginBottom: "16px" }}>
+          Os meus Favoritos
+        </h2>
+
         <div style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
           {["todos", "favorito", "analisado"].map((tipo) => (
             <button
@@ -380,6 +385,8 @@ export default function FavoritosPage() {
             ))}
           </div>
         )}
+
+        <RecommendationList />
 
       </main>
 

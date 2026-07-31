@@ -146,3 +146,16 @@ class CompanyProfile(BaseModel):
 
 CompanyProfilePayload = CompanyProfile
 CompanyProfileData = dict[str, Any]
+
+
+class KnowledgeFact(BaseModel):
+    id: int | None = None
+    field: str
+    value: Any
+    source: str = ""
+    source_type: str = ""
+    url: str = ""
+    section: str = ""
+    evidence_text: str = ""
+    confidence: float = 0.0
+    status: str = "unknown"

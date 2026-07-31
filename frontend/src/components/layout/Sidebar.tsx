@@ -8,6 +8,7 @@ import {
   ChartNoAxesColumn,
   Bell,
   UserRound,
+  Building2,
 } from "lucide-react";
 
 
@@ -31,6 +32,11 @@ const items = [
     nome:"Perfil",
     href:"/perfil",
     icon:UserRound,
+  },
+  {
+    nome:"Minha Empresa",
+    href:"/empresa",
+    icon:Building2,
   },
 ];
 

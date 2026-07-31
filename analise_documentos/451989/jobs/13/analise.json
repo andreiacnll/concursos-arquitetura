@@ -1,0 +1,34 @@
+{
+  "preparacao": {
+    "score": 45,
+    "classificacao": "A avaliar",
+    "elegibilidade": {
+      "estado": "Sem barreiras criticas identificadas",
+      "motivos": []
+    },
+    "oportunidades": [
+      "Documentos oficiais recolhidos",
+      "Localizacao do concurso contextualizada",
+      "Criterios de adjudicacao identificados"
+    ],
+    "riscos": []
+  },
+  "resumo": {
+    "total_documentos": 1,
+    "programa_procedimento": false,
+    "caderno_encargos": false,
+    "programa_preliminar": false,
+    "levantamento": false,
+    "pecas_desenhadas": false,
+    "cartografia": false,
+    "mapa_quantidades": false,
+    "elementos_prediais": false,
+    "condicoes_tecnicas": false
+  },
+  "documentos": [
+    {
+      "nome": "textos.json",
+      "tipos": []
+    }
+  ]
+}

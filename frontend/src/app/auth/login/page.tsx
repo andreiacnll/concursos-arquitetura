@@ -10,24 +10,34 @@ import { LogIn } from "lucide-react";
 function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [rememberSession, setRememberSession] = useState(false);
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/";
+  const [error, setError] = useState<string | null>(
+    searchParams.get("error") === "confirmation_failed"
+      ? "Não foi possível confirmar o email. O link pode ter expirado."
+      : null,
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(email, password, rememberSession);
     if (error) {
       setError(error);
       setLoading(false);
     } else {
-      router.push(redirect);
+      router.replace(
+        redirect.startsWith("/") && !redirect.startsWith("//")
+          ? redirect
+          : "/",
+      );
+      router.refresh();
     }
   };
 
@@ -66,6 +76,17 @@ function LoginForm() {
                 required
               />
             </div>
+
+            <label className="check-row">
+              <input
+                type="checkbox"
+                checked={rememberSession}
+                onChange={(event) =>
+                  setRememberSession(event.target.checked)
+                }
+              />
+              <span>Manter sessão iniciada</span>
+            </label>
 
             <button
               type="submit"

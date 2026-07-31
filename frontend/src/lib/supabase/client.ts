@@ -1,4 +1,12 @@
-import { createBrowserClient } from "@supabase/ssr";
+import {
+  createBrowserClient,
+  parseCookieHeader,
+  serializeCookieHeader,
+} from "@supabase/ssr";
+import {
+  getSessionCookieOptions,
+  shouldPersistBrowserSession,
+} from "./session-persistence";
 
 export function createClient() {
   const supabaseKey =
@@ -8,5 +16,23 @@ export function createClient() {
   return createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     supabaseKey!,
+    {
+      cookies: {
+        getAll() {
+          return parseCookieHeader(document.cookie);
+        },
+        setAll(cookiesToSet) {
+          const persistent = shouldPersistBrowserSession();
+
+          cookiesToSet.forEach(({ name, value, options }) => {
+            document.cookie = serializeCookieHeader(
+              name,
+              value,
+              getSessionCookieOptions(options, persistent),
+            );
+          });
+        },
+      },
+    },
   );
 }

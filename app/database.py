@@ -201,6 +201,7 @@ def _criar_tabelas_company_ai(cursor):
             UNIQUE(company_id, user_id),
             FOREIGN KEY(company_id)
             REFERENCES companies(id)
+            ON DELETE CASCADE
         )
         """
     )
@@ -232,6 +233,92 @@ def _criar_tabelas_company_ai(cursor):
         ON company_members(user_id)
         """
     )
+
+
+def _migrar_tabela_company_members(cursor):
+    """Garante cascade entre companies e company_members sem perder dados."""
+    definicao = cursor.execute(
+        """
+        SELECT sql
+        FROM sqlite_master
+        WHERE type = 'table'
+          AND name = 'company_members'
+        """
+    ).fetchone()
+
+    if not definicao:
+        return
+
+    sql_tabela = definicao[0] or ""
+    if "ON DELETE CASCADE" in sql_tabela:
+        return
+
+    cursor.execute("PRAGMA foreign_keys = OFF")
+
+    try:
+        cursor.execute("DROP TABLE IF EXISTS company_members_migrada")
+        cursor.execute(
+            """
+            CREATE TABLE company_members_migrada (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                company_id INTEGER NOT NULL,
+                user_id TEXT NOT NULL,
+                role TEXT NOT NULL DEFAULT 'member',
+                status TEXT NOT NULL DEFAULT 'active',
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+
+                UNIQUE(company_id, user_id),
+                FOREIGN KEY(company_id)
+                REFERENCES companies(id)
+                ON DELETE CASCADE
+            )
+            """
+        )
+
+        cursor.execute(
+            """
+            INSERT INTO company_members_migrada (
+                id,
+                company_id,
+                user_id,
+                role,
+                status,
+                created_at
+            )
+            SELECT
+                id,
+                company_id,
+                user_id,
+                role,
+                status,
+                created_at
+            FROM company_members
+            """
+        )
+
+        cursor.execute("DROP TABLE company_members")
+        cursor.execute(
+            """
+            ALTER TABLE company_members_migrada
+            RENAME TO company_members
+            """
+        )
+
+        cursor.execute(
+            """
+            CREATE INDEX IF NOT EXISTS idx_company_members_company_id
+            ON company_members(company_id)
+            """
+        )
+
+        cursor.execute(
+            """
+            CREATE INDEX IF NOT EXISTS idx_company_members_user_id
+            ON company_members(user_id)
+            """
+        )
+    finally:
+        cursor.execute("PRAGMA foreign_keys = ON")
 
 
 def _criar_tabela_company_profiles(cursor):
@@ -318,6 +405,273 @@ def _criar_tabela_member_profiles(cursor):
         """
         CREATE INDEX IF NOT EXISTS idx_member_profiles_member_id
         ON member_profiles(member_id)
+        """
+    )
+
+
+def _criar_tabelas_company_interview(cursor):
+    """Persiste sessões, perguntas e respostas da entrevista da empresa."""
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS company_interview_sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            company_id INTEGER NOT NULL,
+            status TEXT NOT NULL DEFAULT 'active'
+                CHECK (status IN ('active', 'completed', 'archived')),
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY(company_id)
+            REFERENCES companies(id)
+            ON DELETE CASCADE
+        )
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE TRIGGER IF NOT EXISTS company_interview_sessions_updated_at
+        AFTER UPDATE ON company_interview_sessions
+        FOR EACH ROW
+        WHEN NEW.updated_at = OLD.updated_at
+        BEGIN
+            UPDATE company_interview_sessions
+            SET updated_at = CURRENT_TIMESTAMP
+            WHERE id = NEW.id;
+        END
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_company_interview_sessions_company_id
+        ON company_interview_sessions(company_id)
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_company_interview_sessions_status
+        ON company_interview_sessions(status)
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS company_interview_questions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id INTEGER NOT NULL,
+            field TEXT NOT NULL,
+            question TEXT NOT NULL,
+            question_type TEXT,
+            priority TEXT,
+            options_json TEXT,
+            question_source TEXT NOT NULL DEFAULT 'discovery',
+            knowledge_fact_id INTEGER,
+            source TEXT,
+            evidence TEXT,
+            confidence REAL DEFAULT 0,
+            suggested_answer_json TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY(session_id)
+            REFERENCES company_interview_sessions(id)
+            ON DELETE CASCADE
+        )
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_company_interview_questions_session_id
+        ON company_interview_questions(session_id)
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_company_interview_questions_field
+        ON company_interview_questions(field)
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS company_interview_answers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            question_id INTEGER NOT NULL UNIQUE,
+            answer_json TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY(question_id)
+            REFERENCES company_interview_questions(id)
+            ON DELETE CASCADE
+        )
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_company_interview_answers_question_id
+        ON company_interview_answers(question_id)
+        """
+    )
+
+
+def _migrar_tabela_company_interview_questions(cursor):
+    """Garante compatibilidade da tabela de perguntas com novas colunas."""
+    cursor.execute("PRAGMA table_info(company_interview_questions)")
+    colunas_existentes = {linha[1] for linha in cursor.fetchall()}
+
+    if "question_source" not in colunas_existentes:
+        cursor.execute(
+            """
+            ALTER TABLE company_interview_questions
+            ADD COLUMN question_source TEXT NOT NULL DEFAULT 'discovery'
+            """
+        )
+
+    if "knowledge_fact_id" not in colunas_existentes:
+        cursor.execute(
+            """
+            ALTER TABLE company_interview_questions
+            ADD COLUMN knowledge_fact_id INTEGER
+            """
+        )
+
+    if "source" not in colunas_existentes:
+        cursor.execute(
+            """
+            ALTER TABLE company_interview_questions
+            ADD COLUMN source TEXT
+            """
+        )
+
+    if "evidence" not in colunas_existentes:
+        cursor.execute(
+            """
+            ALTER TABLE company_interview_questions
+            ADD COLUMN evidence TEXT
+            """
+        )
+
+    if "confidence" not in colunas_existentes:
+        cursor.execute(
+            """
+            ALTER TABLE company_interview_questions
+            ADD COLUMN confidence REAL DEFAULT 0
+            """
+        )
+
+    if "suggested_answer_json" not in colunas_existentes:
+        cursor.execute(
+            """
+            ALTER TABLE company_interview_questions
+            ADD COLUMN suggested_answer_json TEXT
+            """
+        )
+
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_company_interview_questions_source
+        ON company_interview_questions(question_source)
+        """
+    )
+
+
+def _criar_tabela_company_knowledge_memory(cursor):
+    """Guarda factos empresariais com origem, confiança e estado."""
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS company_knowledge_memory (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            company_id INTEGER NOT NULL,
+            field TEXT NOT NULL,
+            value_json TEXT NOT NULL,
+            source TEXT,
+            source_type TEXT,
+            url TEXT,
+            section TEXT,
+            evidence_text TEXT,
+            confidence REAL DEFAULT 0,
+            status TEXT DEFAULT 'unknown',
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY(company_id)
+            REFERENCES companies(id)
+            ON DELETE CASCADE
+        )
+        """
+    )
+
+    colunas = {
+        linha[1]
+        for linha in cursor.execute(
+            "PRAGMA table_info(company_knowledge_memory)"
+        ).fetchall()
+    }
+    if "url" not in colunas:
+        cursor.execute("ALTER TABLE company_knowledge_memory ADD COLUMN url TEXT")
+    if "section" not in colunas:
+        cursor.execute("ALTER TABLE company_knowledge_memory ADD COLUMN section TEXT")
+    if "evidence_text" not in colunas:
+        cursor.execute(
+            "ALTER TABLE company_knowledge_memory ADD COLUMN evidence_text TEXT"
+        )
+
+    cursor.execute(
+        """
+        CREATE TRIGGER IF NOT EXISTS company_knowledge_memory_updated_at
+        AFTER UPDATE ON company_knowledge_memory
+        FOR EACH ROW
+        WHEN NEW.updated_at = OLD.updated_at
+        BEGIN
+            UPDATE company_knowledge_memory
+            SET updated_at = CURRENT_TIMESTAMP
+            WHERE id = NEW.id;
+        END
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_company_knowledge_memory_company_id
+        ON company_knowledge_memory(company_id)
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_company_knowledge_memory_field
+        ON company_knowledge_memory(company_id, field)
+        """
+    )
+
+
+def _criar_tabela_company_source_raw_texts(cursor):
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS company_source_raw_texts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            company_id INTEGER NOT NULL,
+            source TEXT NOT NULL,
+            source_type TEXT,
+            url TEXT,
+            raw_text TEXT NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY(company_id)
+            REFERENCES companies(id)
+            ON DELETE CASCADE
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_company_source_raw_unique
+        ON company_source_raw_texts(company_id, source)
         """
     )
 
@@ -700,8 +1054,13 @@ def criar_base_dados():
     _adicionar_colunas_alertas_em_falta(cursor)
     _criar_tabela_versoes_analise(cursor)
     _criar_tabelas_company_ai(cursor)
+    _migrar_tabela_company_members(cursor)
     _criar_tabela_company_profiles(cursor)
     _criar_tabela_member_profiles(cursor)
+    _criar_tabelas_company_interview(cursor)
+    _migrar_tabela_company_interview_questions(cursor)
+    _criar_tabela_company_knowledge_memory(cursor)
+    _criar_tabela_company_source_raw_texts(cursor)
 
     cursor.execute(
         """

@@ -8,19 +8,27 @@ import {
   ReactNode,
 } from "react";
 import { createClient } from "@/lib/supabase/client";
+import {
+  clearBrowserSessionPersistence,
+  setBrowserSessionPersistence,
+} from "@/lib/supabase/session-persistence";
 import type { User, Session } from "@supabase/supabase-js";
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: string | null }>;
+  signIn: (
+    email: string,
+    password: string,
+    rememberSession: boolean,
+  ) => Promise<{ error: string | null }>;
   signUp: (
     email: string,
     password: string,
     metadata?: { nome?: string },
   ) => Promise<{ error: string | null }>;
-  signOut: () => Promise<void>;
+  signOut: () => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -34,11 +42,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const supabase = createClient();
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+      })
+      .catch(() => {
+        setSession(null);
+        setUser(null);
+      })
+      .finally(() => setLoading(false));
 
     // Listen for auth changes
     const {
@@ -52,8 +66,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (
+    email: string,
+    password: string,
+    rememberSession: boolean,
+  ) => {
     const supabase = createClient();
+    setBrowserSessionPersistence(rememberSession);
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -72,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
       options: {
         data: metadata,
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
     return { error: error?.message ?? null };
@@ -79,7 +99,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     const supabase = createClient();
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut({ scope: "local" });
+
+    clearBrowserSessionPersistence();
+    setSession(null);
+    setUser(null);
+
+    return { error: error?.message ?? null };
   };
 
   return (

@@ -1,0 +1,224 @@
+{
+  "identificacao": {
+    "titulo": "Aquisição de serviços de elaboração de projetos de execução de arquitetura e de todas as especialidades da Escola Básica Quinta da Charnequinha",
+    "entidade": "Município do Seixal",
+    "local": "Escola Básica Quinta da Charnequinha, Amora, Seixal",
+    "localizacao": "Escola Básica Quinta da Charnequinha, Amora, Seixal",
+    "tipo_procedimento": "Aquisição de serviços; Concurso público; Anúncio de procedimento",
+    "url_base": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=452500",
+    "concurso_id": 436,
+    "job_id": 18
+  },
+  "programa": {
+    "descricao": "O programa preliminar associado a Aquisição de serviços de elaboração de projetos de execução de arquitetura e de todas as especialidades da Escola Básica Quinta da Charnequinha define uma base de trabalho para o desenvolvimento arquitetónico a partir das peças oficiais analisadas, articulando objetivos funcionais, requisitos técnicos e condicionantes de implementação. O programa identifica como componentes funcionais principais receção / atendimento, cozinha / copa, espaço exterior. Entre os requisitos relevantes contam-se A entrega da proposta e dos documentos que a acompanham deverá ser realizada c) Documento comprovativo da situação perante a Segurança Social;",
+    "resumo": "O programa preliminar associado a Aquisição de serviços de elaboração de projetos de execução de arquitetura e de todas as especialidades da Escola Básica Quinta da Charnequinha define uma base de trabalho para o desenvolvimento arquitetónico a partir das peças oficiais analisadas, articulando objetivos funcionais, requisitos técnicos e condicionantes de implementação. O programa identifica como componentes funcionais principais receção / atendimento, cozinha / copa, espaço exterior. Entre os requisitos relevantes contam-se A entrega da proposta e dos documentos que a acompanham deverá ser realizada c) Documento comprovativo da situação perante a Segurança Social;",
+    "sintese_programa_preliminar": "O programa preliminar associado a Aquisição de serviços de elaboração de projetos de execução de arquitetura e de todas as especialidades da Escola Básica Quinta da Charnequinha define uma base de trabalho para o desenvolvimento arquitetónico a partir das peças oficiais analisadas, articulando objetivos funcionais, requisitos técnicos e condicionantes de implementação. O programa identifica como componentes funcionais principais receção / atendimento, cozinha / copa, espaço exterior. Entre os requisitos relevantes contam-se A entrega da proposta e dos documentos que a acompanham deverá ser realizada c) Documento comprovativo da situação perante a Segurança Social;",
+    "tipo": [
+      "Construcao"
+    ],
+    "funcoes": [
+      "Equipamento educativo",
+      "Edificio",
+      "Receção / atendimento",
+      "Cozinha / copa",
+      "Espaço exterior"
+    ],
+    "usos": [
+      "Equipamento educativo",
+      "Edificio",
+      "Receção / atendimento",
+      "Cozinha / copa",
+      "Espaço exterior"
+    ],
+    "espacos_principais": [
+      "Receção / atendimento",
+      "Cozinha / copa",
+      "Espaço exterior"
+    ],
+    "relacoes_funcionais": [],
+    "requisitos": [
+      "A entrega da proposta e dos documentos que a acompanham deverá ser realizada",
+      "c) Documento comprovativo da situação perante a Segurança Social",
+      "4 – Juntamente com os documentos de habilitação deverá ser fornecida a identificação completa",
+      "2.ª série - N.º 3 - 6 de janeiro de 2016) e toda a legislação específica , e deverá incluir uma",
+      "O projeto deverá englobar as seguintes fases:",
+      "Para além de outras especialidades que se revelem necessárias esta fase deverá incluir:",
+      " Projeto de arquitetura incluindo Plano de Acessibilidades",
+      " Projeto de Segurança contra Incêndios (SADI)",
+      " Plano de Segurança e Saúde Fase Projecto",
+      " Arranjos exteriores para a acessibilidade à escola"
+    ],
+    "condicionantes": [],
+    "areas": {},
+    "observacoes_ai": "Requisitos programáticos/técnicos: A entrega da proposta e dos documentos que a acompanham deverá ser realizada; c) Documento comprovativo da situação perante a Segurança Social; 4 – Juntamente com os documentos de habilitação deverá ser fornecida a identificação completa; 2.ª série - N.º 3 - 6 de janeiro de 2016) e toda a legislação específica , e deverá incluir uma"
+  },
+  "programa_funcional": {
+    "sintese": "O programa preliminar associado a Aquisição de serviços de elaboração de projetos de execução de arquitetura e de todas as especialidades da Escola Básica Quinta da Charnequinha define uma base de trabalho para o desenvolvimento arquitetónico a partir das peças oficiais analisadas, articulando objetivos funcionais, requisitos técnicos e condicionantes de implementação. O programa identifica como componentes funcionais principais receção / atendimento, cozinha / copa, espaço exterior. Entre os requisitos relevantes contam-se A entrega da proposta e dos documentos que a acompanham deverá ser realizada c) Documento comprovativo da situação perante a Segurança Social;",
+    "espacos_principais": [
+      "Receção / atendimento",
+      "Cozinha / copa",
+      "Espaço exterior"
+    ],
+    "areas": [],
+    "relacoes_funcionais": [],
+    "requisitos": [
+      "A entrega da proposta e dos documentos que a acompanham deverá ser realizada",
+      "c) Documento comprovativo da situação perante a Segurança Social",
+      "4 – Juntamente com os documentos de habilitação deverá ser fornecida a identificação completa",
+      "2.ª série - N.º 3 - 6 de janeiro de 2016) e toda a legislação específica , e deverá incluir uma",
+      "O projeto deverá englobar as seguintes fases:",
+      "Para além de outras especialidades que se revelem necessárias esta fase deverá incluir:",
+      " Projeto de arquitetura incluindo Plano de Acessibilidades",
+      " Projeto de Segurança contra Incêndios (SADI)",
+      " Plano de Segurança e Saúde Fase Projecto",
+      " Arranjos exteriores para a acessibilidade à escola"
+    ],
+    "condicionantes": []
+  },
+  "localizacao": {
+    "municipio": "Seixal",
+    "freguesia": "Amora",
+    "morada": "Escola Básica Quinta da Charnequinha, Amora, Seixal",
+    "codigo_postal": "2840-748",
+    "latitude": 38.60726,
+    "longitude": -9.1346,
+    "coordenadas": "38.60726, -9.13460",
+    "contexto_urbano": "Equipamento educativo localizado na Quinta da Charnequinha, na freguesia de Amora, Seixal, numa área urbana residencial. O projeto deve articular a intervenção escolar com acessos, espaço exterior, continuidade de funcionamento e necessidades da comunidade educativa.",
+    "fonte": "dados_documentos"
+  },
+  "investimento": {
+    "valor_obra": "72.500,00 €",
+    "prazo_projeto": "13-08-2026 23:59"
+  },
+  "economia": {
+    "valor_procedimento": "72.500,00 €",
+    "valor_estimado_obra": "72.500,00 €"
+  },
+  "criterios": {
+    "criterio_adjudicacao": "Nao identificado",
+    "resumo": "",
+    "detalhe": "",
+    "percentagens": [
+      {
+        "criterio": "Qualidade",
+        "percentagem": null
+      },
+      {
+        "criterio": "Preco",
+        "percentagem": null
+      }
+    ]
+  },
+  "documentos": {
+    "total_documentos": 1,
+    "programa_procedimento": false,
+    "caderno_encargos": false,
+    "programa_preliminar": false,
+    "levantamento": false,
+    "pecas_desenhadas": false,
+    "cartografia": false,
+    "mapa_quantidades": false,
+    "elementos_prediais": false,
+    "condicoes_tecnicas": false,
+    "lista": [
+      {
+        "nome": "textos.json",
+        "tipos": []
+      }
+    ]
+  },
+  "entregaveis": {
+    "principais": [
+      "Elaboração do Projeto de Arquitetura e todas as Especialidades da Escola Básica Quinta",
+      "Fase II- Estudo Prévio",
+      " Projeto de arquitetura incluindo Plano de Acessibilidades",
+      " Projeto do Espaço Exterior",
+      " Plano de Segurança e Saúde Fase Projecto",
+      " Estimativa Orçamental- mapa de medições e quantidades",
+      "Fase III- Projeto de execução",
+      " Mapa de Quantidades de trabalhos por especialidade",
+      " Estimativa Orçamental- mapa de medições e quantidades.",
+      "Fase III- Telas Finais e Assistência Técnica à Execução da Empreitada",
+      "ponderação, incluindo a apreciação de compatibilidade com o projeto de execução,",
+      "c) Proceder, concluída a execução da obra, à elaboração das telas finais a ela"
+    ]
+  },
+  "especialidades": {
+    "lista": [
+      "Arquitetura paisagista",
+      "Arquitetura",
+      "Estabilidade / estruturas",
+      "Engenharia civil",
+      "Instalações elétricas",
+      "Telecomunicações",
+      "AVAC",
+      "Comportamento térmico",
+      "Acústica",
+      "Segurança contra incêndios",
+      "Águas e águas residuais",
+      "Redes de água",
+      "Gás",
+      "Sinalética"
+    ]
+  },
+  "requisitos": {
+    "obrigatorios": [
+      "12 - DOCUMENTOS DE HABILITAÇÃO",
+      "Habilitação para o exercício da atividade profissional:",
+      " Verificação do cumprimento do Sistema de Certificação Energética (S.C.E.) – Projeto",
+      "Térmica, a certificação relativa à situação existente e ao pré certificado energético deverão ser",
+      "objeto de certificação pela ADENE.",
+      "certificação energética).",
+      "1 - Os documentos que constituem a Proposta são obrigatoriamente redigidos em língua portu",
+      "Documentos de Habilitação",
+      "habilitação referidos no artigo 81º do Código dos Contratos Públicos,",
+      "Prazo para apresentação dos documentos de habilitação pelo adjudicatário",
+      "A entrega da proposta e dos documentos que a acompanham deverá ser realizada",
+      "c) Documento comprovativo da situação perante a Segurança Social",
+      "4 – Juntamente com os documentos de habilitação deverá ser fornecida a identificação completa",
+      "2.ª série - N.º 3 - 6 de janeiro de 2016) e toda a legislação específica , e deverá incluir uma",
+      "O projeto deverá englobar as seguintes fases:",
+      "Para além de outras especialidades que se revelem necessárias esta fase deverá incluir:",
+      " Projeto de arquitetura incluindo Plano de Acessibilidades",
+      " Projeto de Segurança contra Incêndios (SADI)"
+    ],
+    "riscos_participacao": [
+      "3 - A não apresentação dos documentos referidos nos números anteriores constitui uma",
+      "possam levar à caducidade da adjudicação nos termos do disposto no artigo 86º é de 5 dias",
+      "possam levar à caducidade da adjudicação nos termos do disposto no artigo 86.º do CCP é de",
+      "contratar por um período de 5 (cinco) dias, sob pena de caducidade da adjudicação.",
+      "4 – A falta de apresentação do comprovativo do RCBE atualizado determina a caducidade da"
+    ]
+  },
+  "equipa": [],
+  "estrategia": {
+    "nivel": "Baixa",
+    "resumo": "Equipamento educativo localizado na Quinta da Charnequinha, na freguesia de Amora, Seixal, numa área urbana residencial. O projeto deve articular a intervenção escolar com acessos, espaço exterior, continuidade de funcionamento e necessidades da comunidade educativa.",
+    "pontos_decisivos": [
+      "Experiência específica da equipa técnica",
+      "Projetos similares",
+      "Capacidade multidisciplinar",
+      "Enquadramento urbano e condicionantes do local"
+    ],
+    "perfil_recomendado": "Ateliers com experiência em equipamentos públicos complexos e equipas multidisciplinares."
+  },
+  "decisao": {
+    "score": 45,
+    "classificacao": "A avaliar",
+    "elegibilidade": {
+      "estado": "Sem barreiras criticas identificadas",
+      "motivos": []
+    },
+    "oportunidades": [
+      "Documentos oficiais recolhidos",
+      "Localizacao do concurso contextualizada"
+    ],
+    "riscos": []
+  },
+  "analise_ai": {
+    "score": 45,
+    "gerada_em": "2026-07-31T16:02:21.396298Z",
+    "origem": "worker_backend_cnll",
+    "interpretacao_documental": "extracao_documental_local"
+  }
+}

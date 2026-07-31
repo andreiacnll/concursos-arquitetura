@@ -1,14 +1,26 @@
+\# CNLL Company Intelligence
+
 \# AI Interviewer Logic
 
 
 
 
 
-\## Princípio
+\## Objetivo
 
 
 
-O interviewer não começa por perguntar.
+
+
+O AI Interviewer é o sistema responsável por completar e validar a inteligência da empresa através de perguntas adaptativas.
+
+
+
+
+
+Não funciona como um formulário fixo.
+
+
 
 
 
@@ -16,15 +28,195 @@ Primeiro analisa a informação existente.
 
 
 
-
-
-\## Processo
-
+Depois identifica lacunas.
 
 
 
+Finalmente cria perguntas com maior impacto para melhorar a qualidade do perfil.
 
-1\. Extrair informação
+
+
+
+
+
+
+\---
+
+
+
+\# Princípio fundamental
+
+
+
+
+
+O interviewer nunca começa por perguntar.
+
+
+
+
+
+Antes de criar perguntas analisa:
+
+
+
+
+
+\- informação existente;
+
+\- fonte da informação;
+
+\- confiança;
+
+\- impacto no matching;
+
+\- importância estratégica.
+
+
+
+
+
+
+
+Uma pergunta só deve existir quando a resposta pode melhorar a inteligência da empresa ou dos membros.
+
+
+
+
+
+
+
+\---
+
+
+
+\# Arquitetura de entrevista
+
+
+
+
+
+Existem dois níveis de entrevista:
+
+
+
+
+
+\## 1. Company Interviewer
+
+
+
+
+
+Focado na identidade institucional.
+
+
+
+
+
+Analisa:
+
+
+
+
+
+\- posicionamento;
+
+\- serviços;
+
+\- metodologia;
+
+\- valores;
+
+\- estratégia;
+
+\- áreas prioritárias.
+
+
+
+
+
+
+
+Exemplo:
+
+
+
+
+
+"Quais são as áreas onde a empresa pretende concentrar novos concursos?"
+
+
+
+
+
+
+
+\---
+
+
+
+\## 2. Member Interviewer
+
+
+
+
+
+Focado na identidade profissional individual.
+
+
+
+
+
+Analisa:
+
+
+
+
+
+\- experiência;
+
+\- competências;
+
+\- especializações;
+
+\- interesses;
+
+\- objetivos profissionais.
+
+
+
+
+
+
+
+Exemplo:
+
+
+
+
+
+"Que tipologias de projeto representam maior interesse profissional?"
+
+
+
+
+
+
+
+\---
+
+
+
+\# Processo
+
+
+
+
+
+\## 1. Recolha de informação
+
+
 
 
 
@@ -32,29 +224,73 @@ Fontes:
 
 
 
-\- website
-
-\- portfolio
-
-\- documentos
 
 
+\- website;
 
+\- portfolio;
 
+\- documentos;
 
-2\. Criar perfil inicial
+\- projetos;
 
-
-
-
-
-3\. Avaliar confiança
+\- respostas dos utilizadores.
 
 
 
 
 
-Cada informação deve ter:
+
+
+
+
+
+
+
+
+\---
+
+
+
+\## 2. Construção inicial
+
+
+
+
+
+O sistema cria:
+
+
+
+
+
+Company Information
+
+
+
+\+
+
+
+
+Member Profiles
+
+
+
+\+
+
+
+
+Company Intelligence inicial
+
+
+
+
+
+
+
+Cada informação deve possuir:
+
+
 
 
 
@@ -62,81 +298,629 @@ Cada informação deve ter:
 
 \- fonte;
 
-\- confiança.
+\- confiança;
+
+\- estado.
 
 
 
 
 
-4\. Identificar lacunas
+
+
+\---
+
+
+
+\# Estados da informação
 
 
 
 
 
-Só criar perguntas quando:
+Cada elemento deve ser classificado:
+
+
+
+
+
+\## CONFIRMADO
+
+
+
+
+
+Informação validada pelo utilizador ou fonte segura.
+
+
+
+
+
+
+
+\## EXTRAÍDO
+
+
+
+
+
+Informação encontrada automaticamente.
+
+
+
+
+
+
+
+\## VALIDAR
+
+
+
+
+
+Informação encontrada mas necessita confirmação.
+
+
+
+
+
+
+
+\## DESCONHECIDO
+
+
+
+
+
+Informação inexistente.
+
+
+
+
+
+
+
+\## CONTRADITÓRIO
+
+
+
+
+
+Existem fontes incompatíveis.
+
+
+
+
+
+
+
+\---
+
+
+
+\# Identificação de lacunas
+
+
+
+
+
+O sistema cria perguntas apenas quando:
+
+
 
 
 
 \- falta informação importante;
 
-\- a confiança é baixa;
+\- confiança é baixa;
 
-\- a resposta altera recomendações.
+\- informação influencia recomendações;
 
+\- existe contradição;
 
-
-
-
-\## Tipos de perguntas
+\- existe oportunidade estratégica.
 
 
 
 
 
-\### Validação
+
+
+\---
 
 
 
-Confirmar informação encontrada.
-
-
-
-
-
-\### Escala
-
-
-
-Medir interesse de 0-5.
+\# Priorização das perguntas
 
 
 
 
 
-\### Prioridade
-
-
-
-Ordenar áreas importantes.
+Cada pergunta recebe um valor:
 
 
 
 
 
-\### Estratégia
+importance
 
 
 
-Perceber objetivos futuros.
+\+
+
+
+
+uncertainty
+
+
+
+\+
+
+
+
+matching\_impact
 
 
 
 
 
-\## Regra
+
+
+Perguntas com maior impacto são apresentadas primeiro.
 
 
 
-Nunca perguntar algo que já está confirmado.
+
+
+
+
+\---
+
+
+
+\# Tipos de perguntas
+
+
+
+
+
+\## Validação
+
+
+
+
+
+Confirmar informação extraída.
+
+
+
+
+
+Exemplo:
+
+
+
+
+
+"Identificámos experiência em equipamentos públicos. Esta informação está correta?"
+
+
+
+
+
+Respostas:
+
+
+
+
+
+\- Sim
+
+\- Não
+
+\- Corrigir
+
+
+
+
+
+
+
+\---
+
+
+
+\## Escala
+
+
+
+
+
+Avaliar intensidade de interesse.
+
+
+
+
+
+Exemplo:
+
+
+
+
+
+"Qual o interesse da empresa nesta área?"
+
+
+
+
+
+Escala:
+
+
+
+
+
+0 - Sem interesse
+
+
+
+1 - Baixo
+
+
+
+2 - Interesse futuro
+
+
+
+3 - Relevante
+
+
+
+4 - Prioritário
+
+
+
+5 - Estratégico
+
+
+
+
+
+
+
+\---
+
+
+
+\## Seleção múltipla
+
+
+
+
+
+Escolher várias áreas.
+
+
+
+
+
+Exemplo:
+
+
+
+
+
+"Que tipologias são prioritárias?"
+
+
+
+
+
+\- Cultura
+
+\- Educação
+
+\- Saúde
+
+\- Habitação
+
+\- Espaço público
+
+
+
+
+
+
+
+\---
+
+
+
+\## Ordenação
+
+
+
+
+
+Definir prioridades.
+
+
+
+
+
+Exemplo:
+
+
+
+
+
+"Ordene as áreas estratégicas para os próximos anos."
+
+
+
+
+
+
+
+\---
+
+
+
+\## Texto livre
+
+
+
+
+
+Usado quando é necessária informação única.
+
+
+
+
+
+Exemplo:
+
+
+
+
+
+"Como descrevem a abordagem diferenciadora da empresa?"
+
+
+
+
+
+
+
+\---
+
+
+
+\# Atualização da inteligência
+
+
+
+
+
+Uma resposta nunca deve substituir informação existente sem validação.
+
+
+
+
+
+Fluxo:
+
+
+
+
+
+Pergunta
+
+
+
+↓
+
+
+
+Resposta
+
+
+
+↓
+
+
+
+Validação
+
+
+
+↓
+
+
+
+Atualização do perfil
+
+
+
+↓
+
+
+
+Nova análise de lacunas
+
+
+
+
+
+
+
+\---
+
+
+
+\# Relação com Matching Engine
+
+
+
+
+
+O objetivo do interviewer é melhorar:
+
+
+
+
+
+Company Intelligence
+
+
+
+\+
+
+
+
+Member Profiles
+
+
+
+
+
+que alimentam:
+
+
+
+
+
+Concurso
+
+
+
+↓
+
+
+
+Matching
+
+
+
+↓
+
+
+
+Score
+
+
+
+
+
+
+
+\---
+
+
+
+\# Relação com Response Generator
+
+
+
+
+
+Informação recolhida permite criar respostas baseadas em:
+
+
+
+
+
+\- experiência real;
+
+\- competências existentes;
+
+\- equipa disponível;
+
+\- estratégia definida.
+
+
+
+
+
+
+
+\---
+
+
+
+\# Regras fundamentais
+
+
+
+
+
+Nunca inventar competências.
+
+
+
+
+
+Nunca transformar intenção em facto.
+
+
+
+
+
+Nunca assumir que a empresa quer determinada área apenas porque possui experiência.
+
+
+
+
+
+Separar sempre:
+
+
+
+
+
+Factos
+
+
+
+Preferências
+
+
+
+Objetivos
+
+
+
+Possibilidades
+
+
+
+
+
+
+
+\---
+
+
+
+\# Evolução futura
+
+
+
+
+
+Preparado para:
+
+
+
+
+
+\- LLM question planner;
+
+\- aprendizagem com respostas;
+
+\- perguntas personalizadas por empresa;
+
+\- perguntas personalizadas por membro;
+
+\- atualização contínua da inteligência empresarial.
 

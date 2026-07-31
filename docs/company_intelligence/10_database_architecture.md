@@ -1,4 +1,6 @@
-\# CNLL Company Intelligence Database Architecture
+\# CNLL Company Intelligence
+
+\# Database Architecture
 
 
 
@@ -12,17 +14,19 @@ Definir a estrutura de dados necessária para suportar:
 
 
 
+\- empresas;
+
+\- equipas;
+
+\- identidades profissionais individuais;
+
 \- perfis empresariais;
 
-\- entrevistas AI;
+\- memória AI;
 
-\- conhecimento da empresa;
+\- análise de concursos;
 
-\- matching de concursos;
-
-\- respostas personalizadas;
-
-\- aprendizagem futura.
+\- aprendizagem através de decisões.
 
 
 
@@ -32,47 +36,127 @@ Definir a estrutura de dados necessária para suportar:
 
 
 
-\# Princípios
+\# Princípio fundamental
 
 
 
 
 
-\## Separação de dados
+A empresa não é uma identidade única.
 
 
 
-Existem três tipos de informação:
-
-
-
-
-
-1\. Dados públicos
-
-
-
-Podem aparecer no perfil institucional.
+A inteligência da empresa resulta da combinação de:
 
 
 
 
 
-2\. Dados estratégicos privados
+Company Information
 
 
 
-Usados apenas para recomendações e análise.
+\+
+
+
+
+Member Profiles
+
+
+
+\+
+
+
+
+Project Knowledge
+
+
+
+\+
+
+
+
+Decision Learning
 
 
 
 
 
-3\. Memória AI
+A empresa é uma rede de conhecimento composta por pessoas.
 
 
 
-Contexto interno usado pelos agentes AI.
+
+
+
+
+\---
+
+
+
+\# Arquitetura geral
+
+
+
+
+
+User
+
+
+
+|
+
+
+
+|
+
+
+
+Company Member
+
+
+
+|
+
+
+
+|
+
+
+
+Company
+
+
+
+|
+
+
+
++----------------+
+
+
+
+|                |
+
+
+
+Member Profile   Company Intelligence Profile
+
+
+
+|                |
+
+
+
+|                |
+
+
+
+Individual       Agregação
+
+
+
+Identity         Estratégica
 
 
 
@@ -96,7 +180,7 @@ Contexto interno usado pelos agentes AI.
 
 
 
-Representa a empresa/escritório.
+Representa o gabinete/escritório.
 
 
 
@@ -106,7 +190,11 @@ Tabela:
 
 
 
+
+
 companies
+
+
 
 
 
@@ -134,10 +222,6 @@ description
 
 
 
-location
-
-
-
 created\_at
 
 
@@ -150,17 +234,35 @@ updated\_at
 
 
 
+Exemplo:
+
+
+
+
+
+CNLL
+
+
+
+Gabinete de arquitetura.
+
+
+
+
+
+
+
 \---
 
 
 
-\# 2. Company Users
+\# 2. Company Members
 
 
 
 
 
-Relaciona utilizadores com empresas.
+Representa a relação entre uma pessoa e uma empresa.
 
 
 
@@ -170,7 +272,11 @@ Tabela:
 
 
 
-company\_users
+
+
+company\_members
+
+
 
 
 
@@ -198,6 +304,16 @@ role
 
 
 
+status
+
+
+
+created\_at
+
+
+
+
+
 
 
 Roles:
@@ -214,7 +330,45 @@ admin
 
 
 
-member
+architect
+
+
+
+designer
+
+
+
+collaborator
+
+
+
+
+
+
+
+Exemplo:
+
+
+
+
+
+CNLL
+
+
+
+|
+
+
+
++-- Utilizador A (owner)
+
+
+
+|
+
+
+
++-- Utilizador B (architect)
 
 
 
@@ -226,13 +380,377 @@ member
 
 
 
-\# 3. Company Profiles
+\# 3. Member Profiles
 
 
 
 
 
-Perfil inteligente da empresa.
+Representa a identidade profissional individual.
+
+
+
+
+
+Cada pessoa possui o seu próprio perfil.
+
+
+
+
+
+Tabela:
+
+
+
+
+
+member\_profiles
+
+
+
+
+
+
+
+Campos:
+
+
+
+
+
+id
+
+
+
+member\_id
+
+
+
+identity\_json
+
+
+
+experience\_json
+
+
+
+competences\_json
+
+
+
+preferences\_json
+
+
+
+goals\_json
+
+
+
+visibility\_json
+
+
+
+created\_at
+
+
+
+updated\_at
+
+
+
+
+
+
+
+\---
+
+
+
+\# Member Profile JSON
+
+
+
+
+
+\## identity\_json
+
+
+
+
+
+Informação profissional:
+
+
+
+
+
+{
+
+"name": "",
+
+
+
+"role": "",
+
+
+
+"specialization": "",
+
+
+
+"education": ""
+
+
+
+}
+
+
+
+
+
+
+
+\---
+
+
+
+\## experience\_json
+
+
+
+
+
+Experiência:
+
+
+
+
+
+{
+
+"projects": \[],
+
+
+
+"typologies": \[],
+
+
+
+"sectors": \[],
+
+
+
+"responsibilities": \[]
+
+
+
+}
+
+
+
+
+
+
+
+\---
+
+
+
+\## competences\_json
+
+
+
+
+
+Competências:
+
+
+
+
+
+{
+
+"technical": \[],
+
+
+
+"software": \[],
+
+
+
+"methodologies": \[]
+
+
+
+}
+
+
+
+
+
+
+
+\---
+
+
+
+\## preferences\_json
+
+
+
+
+
+Interesses profissionais:
+
+
+
+
+
+{
+
+"preferred\_typologies": \[],
+
+
+
+"preferred\_sectors": \[],
+
+
+
+"preferred\_locations": \[]
+
+
+
+}
+
+
+
+
+
+
+
+\---
+
+
+
+\## goals\_json
+
+
+
+
+
+Objetivos:
+
+
+
+
+
+{
+
+"career\_goals": \[],
+
+
+
+"development\_areas": \[]
+
+
+
+}
+
+
+
+
+
+
+
+\---
+
+
+
+\## visibility\_json
+
+
+
+
+
+Controlo de informação:
+
+
+
+
+
+{
+
+"company\_visible": \[],
+
+
+
+"private": \[]
+
+
+
+}
+
+
+
+
+
+
+
+\---
+
+
+
+\# 4. Company Intelligence Profile
+
+
+
+
+
+Representa a camada agregada da empresa.
+
+
+
+
+
+Não substitui os perfis individuais.
+
+
+
+
+
+É construída através de:
+
+
+
+
+
+Company Information
+
+
+
+\+
+
+
+
+Member Profiles
+
+
+
+\+
+
+
+
+Projects
+
+
+
+\+
+
+
+
+Decisions
+
+
 
 
 
@@ -245,6 +763,8 @@ Tabela:
 
 
 company\_profiles
+
+
 
 
 
@@ -264,11 +784,7 @@ company\_id
 
 
 
-
-
 public\_profile\_json
-
-
 
 
 
@@ -276,17 +792,11 @@ strategy\_profile\_json
 
 
 
-
-
 ai\_memory\_json
 
 
 
-
-
 completion\_score
-
-
 
 
 
@@ -328,15 +838,19 @@ Informação institucional:
 
 
 
-"projects": \[],
-
-
-
 "competences": \[],
 
 
 
-"values": \[]
+"projects": \[],
+
+
+
+"values": \[],
+
+
+
+"methodology": {}
 
 
 
@@ -358,7 +872,7 @@ Informação institucional:
 
 
 
-Informação estratégica:
+Informação estratégica privada:
 
 
 
@@ -366,23 +880,23 @@ Informação estratégica:
 
 {
 
-"priority\_areas": {},
+"priority\_areas": \[],
 
 
 
-"preferred\_typologies": {},
+"preferred\_typologies": \[],
 
 
 
-"locations": {},
+"preferred\_locations": \[],
 
 
 
-"procedures": {},
+"preferred\_scales": \[],
 
 
 
-"scale\_preferences": {}
+"avoid\_areas": \[]
 
 
 
@@ -404,7 +918,7 @@ Informação estratégica:
 
 
 
-Memória:
+Memória da AI:
 
 
 
@@ -424,7 +938,11 @@ Memória:
 
 
 
-"language\_style": \[]
+"contradictions": \[],
+
+
+
+"learning\_history": \[]
 
 
 
@@ -440,189 +958,13 @@ Memória:
 
 
 
-\# 4. Company Documents
+\# 5. Company Projects
 
 
 
 
 
-Documentos enviados pela empresa.
-
-
-
-
-
-Tabela:
-
-
-
-
-
-company\_documents
-
-
-
-
-
-Campos:
-
-
-
-
-
-id
-
-
-
-company\_id
-
-
-
-type
-
-
-
-file\_url
-
-
-
-source
-
-
-
-processed
-
-
-
-created\_at
-
-
-
-
-
-
-
-Tipos:
-
-
-
-
-
-portfolio
-
-
-
-website
-
-
-
-presentation
-
-
-
-other
-
-
-
-
-
-
-
-\---
-
-
-
-\# 5. Company AI Sessions
-
-
-
-
-
-Histórico da entrevista.
-
-
-
-
-
-Tabela:
-
-
-
-
-
-company\_ai\_sessions
-
-
-
-
-
-Campos:
-
-
-
-
-
-id
-
-
-
-company\_id
-
-
-
-question
-
-
-
-question\_type
-
-
-
-answer
-
-
-
-source
-
-
-
-created\_at
-
-
-
-
-
-
-
-Permite:
-
-
-
-
-
-\- continuar entrevista;
-
-\- consultar histórico;
-
-\- melhorar perfil.
-
-
-
-
-
-
-
-\---
-
-
-
-\# 6. Company Projects
-
-
-
-
-
-Projetos extraídos.
+Projetos associados à empresa.
 
 
 
@@ -635,6 +977,8 @@ Tabela:
 
 
 company\_projects
+
+
 
 
 
@@ -694,83 +1038,13 @@ confidence
 
 
 
-\# 7. Competition Matching
+\# 6. Company Decisions
 
 
 
 
 
-Ligação entre empresa e concursos.
-
-
-
-
-
-Tabela:
-
-
-
-
-
-company\_competition\_matches
-
-
-
-
-
-Campos:
-
-
-
-
-
-id
-
-
-
-company\_id
-
-
-
-competition\_id
-
-
-
-score
-
-
-
-recommendation
-
-
-
-reasons\_json
-
-
-
-risks\_json
-
-
-
-created\_at
-
-
-
-
-
-
-
-\---
-
-
-
-\# 8. Company Decisions
-
-
-
-
-
-Decisões humanas.
+Decisões tomadas sobre concursos.
 
 
 
@@ -788,6 +1062,8 @@ company\_decisions
 
 
 
+
+
 Campos:
 
 
@@ -803,6 +1079,10 @@ company\_id
 
 
 competition\_id
+
+
+
+recommendation\_score
 
 
 
@@ -822,7 +1102,7 @@ created\_at
 
 
 
-Decisions possíveis:
+Decisions:
 
 
 
@@ -848,61 +1128,65 @@ avaliar
 
 
 
-\# 9. AI Responses
+\# Relação entre entidades
 
 
 
 
 
-Respostas geradas.
+Uma empresa:
 
 
 
 
 
-Tabela:
+companies
 
 
 
 
 
-company\_ai\_responses
+tem:
 
 
 
 
 
-Campos:
+company\_members
 
 
 
 
 
-id
+que têm:
 
 
 
-company\_id
+
+
+member\_profiles
 
 
 
-competition\_id
 
 
 
-strategy\_json
+
+E possui:
 
 
 
-arguments\_json
+
+
+company\_projects
 
 
 
-references\_json
+company\_profiles
 
 
 
-created\_at
+company\_decisions
 
 
 
@@ -920,13 +1204,7 @@ created\_at
 
 
 
-Todas as tabelas devem possuir:
-
-
-
-
-
-company\_id
+Todas as entidades devem estar isoladas por empresa.
 
 
 
@@ -938,19 +1216,21 @@ Nunca permitir:
 
 
 
-Empresa A consultar dados Empresa B.
+Empresa A consultar dados da Empresa B.
 
 
 
 
 
-Utilizar:
+
+
+Toda a informação deve respeitar:
 
 
 
 
 
-Row Level Security (Supabase RLS)
+company\_id
 
 
 
@@ -962,45 +1242,265 @@ Row Level Security (Supabase RLS)
 
 
 
-\# JSON vs tabelas
+\# Informação pública vs privada
 
 
 
 
 
-Guardar em JSON:
+\## Pública
 
 
 
 
 
-\- perfis flexíveis;
+Pode aparecer no site:
+
+
+
+
+
+\- identidade da empresa;
+
+\- projetos publicados;
+
+\- competências institucionais;
+
+\- serviços.
+
+
+
+
+
+
+
+\## Interna da empresa
+
+
+
+
+
+Usada para AI:
+
+
+
+
+
+\- estratégia;
 
 \- preferências;
 
-\- memória AI;
-
-\- argumentos.
-
-
-
-
-
-Guardar em tabelas:
-
-
-
-
-
-\- relações;
-
-\- documentos;
-
-\- projetos;
-
 \- decisões;
 
-\- histórico.
+\- scoring.
+
+
+
+
+
+
+
+\## Privada individual
+
+
+
+
+
+Pertence ao membro:
+
+
+
+
+
+\- objetivos pessoais;
+
+\- notas privadas;
+
+\- preferências não partilhadas.
+
+
+
+
+
+
+
+\---
+
+
+
+\# Relação com AI
+
+
+
+
+
+\## Extractor
+
+
+
+
+
+Recebe:
+
+
+
+
+
+Website
+
+
+
+\+
+
+
+
+Portfolio
+
+
+
+
+
+Cria:
+
+
+
+
+
+Company Intelligence inicial.
+
+
+
+
+
+
+
+\---
+
+
+
+\## Interviewer
+
+
+
+
+
+Pode entrevistar:
+
+
+
+
+
+Empresa:
+
+
+
+\- posicionamento;
+
+\- estratégia.
+
+
+
+
+
+Membros:
+
+
+
+\- experiência;
+
+\- competências;
+
+\- interesses.
+
+
+
+
+
+
+
+\---
+
+
+
+\## Matching Engine
+
+
+
+
+
+Analisa:
+
+
+
+
+
+Concurso
+
+
+
+\+
+
+
+
+Empresa
+
+
+
+\+
+
+
+
+Membros relevantes
+
+
+
+
+
+
+
+Resultado:
+
+
+
+
+
+Score de compatibilidade.
+
+
+
+
+
+
+
+\---
+
+
+
+\## Response Generator
+
+
+
+
+
+Usa:
+
+
+
+
+
+\- experiência da empresa;
+
+\- experiência dos membros;
+
+\- estratégia;
+
+\- projetos.
+
+
+
+
+
+Para criar respostas personalizadas.
 
 
 
@@ -1026,77 +1526,15 @@ Preparado para:
 
 \- embeddings;
 
-\- vector database;
+\- RAG;
 
-\- múltiplos utilizadores;
+\- aprendizagem contínua;
 
-\- planos comerciais;
+\- matching de pessoas a concursos;
 
-\- equipas dentro de empresas.
+\- equipas multidisciplinares;
 
+\- evolução profissional;
 
-
-
-
-
-
-\---
-
-
-
-\# Fluxo de dados
-
-
-
-
-
-Empresa cria conta
-
-
-
-↓
-
-
-
-Cria company
-
-
-
-↓
-
-
-
-Upload documentos
-
-
-
-↓
-
-
-
-AI extrai informação
-
-
-
-↓
-
-
-
-Cria company\_profile
-
-
-
-↓
-
-
-
-Interviewer completa informação
-
-
-
-↓
-
-
-
-Perfil usado em concursos
+\- múltiplos escritórios.
 
