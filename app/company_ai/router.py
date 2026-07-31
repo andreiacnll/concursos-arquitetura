@@ -10,6 +10,7 @@ from .company_storage import (
     listar_membros,
     obter_empresa_utilizador,
 )
+from .intelligence_builder import build_company_intelligence
 from .member_storage import (
     criar_member_profile,
     guardar_member_profile,
@@ -95,6 +96,24 @@ def atualizar_company_profile(
         )
 
     return guardar_company_profile_storage(empresa["id"], perfil)
+
+
+@router.get("/intelligence")
+def obter_company_intelligence(
+    utilizador: UtilizadorAutenticado = Depends(
+        obter_utilizador_atual
+    ),
+):
+    empresa = obter_empresa_utilizador(utilizador.id)
+    if empresa is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Empresa não encontrada para o utilizador atual.",
+        )
+
+    # Futuro: esta visão agregada será consumida por interviewer,
+    # matching engine, response generator e knowledge base.
+    return build_company_intelligence(empresa["id"])
 
 
 @router.get(
