@@ -173,6 +173,155 @@ def _criar_tabela_versoes_analise(cursor):
     )
 
 
+def _criar_tabelas_company_ai(cursor):
+    """Base SQLite para empresas, equipa e perfil AI da empresa."""
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS companies (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            owner_user_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            website TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS company_members (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            company_id INTEGER NOT NULL,
+            user_id TEXT NOT NULL,
+            role TEXT NOT NULL DEFAULT 'member',
+            status TEXT NOT NULL DEFAULT 'active',
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+
+            UNIQUE(company_id, user_id),
+            FOREIGN KEY(company_id)
+            REFERENCES companies(id)
+        )
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE TRIGGER IF NOT EXISTS companies_updated_at
+        AFTER UPDATE ON companies
+        FOR EACH ROW
+        WHEN NEW.updated_at = OLD.updated_at
+        BEGIN
+            UPDATE companies
+            SET updated_at = CURRENT_TIMESTAMP
+            WHERE id = NEW.id;
+        END
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_company_members_company_id
+        ON company_members(company_id)
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_company_members_user_id
+        ON company_members(user_id)
+        """
+    )
+
+
+def _criar_tabela_company_profiles(cursor):
+    """Armazena o profile AI agregado por empresa."""
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS company_profiles (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            company_id INTEGER UNIQUE NOT NULL,
+            profile_json TEXT NOT NULL,
+            strategy_json TEXT,
+            ai_memory_json TEXT,
+            completion_score REAL DEFAULT 0,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY(company_id)
+            REFERENCES companies(id)
+            ON DELETE CASCADE
+        )
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE TRIGGER IF NOT EXISTS company_profiles_updated_at
+        AFTER UPDATE ON company_profiles
+        FOR EACH ROW
+        WHEN NEW.updated_at = OLD.updated_at
+        BEGIN
+            UPDATE company_profiles
+            SET updated_at = CURRENT_TIMESTAMP
+            WHERE id = NEW.id;
+        END
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_company_profiles_company_id
+        ON company_profiles(company_id)
+        """
+    )
+
+
+def _criar_tabela_member_profiles(cursor):
+    """Armazena a identidade profissional individual de cada membro."""
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS member_profiles (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            member_id INTEGER UNIQUE NOT NULL,
+            identity_json TEXT NOT NULL,
+            experience_json TEXT,
+            competences_json TEXT,
+            preferences_json TEXT,
+            goals_json TEXT,
+            visibility_json TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY(member_id)
+            REFERENCES company_members(id)
+            ON DELETE CASCADE
+        )
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE TRIGGER IF NOT EXISTS member_profiles_updated_at
+        AFTER UPDATE ON member_profiles
+        FOR EACH ROW
+        WHEN NEW.updated_at = OLD.updated_at
+        BEGIN
+            UPDATE member_profiles
+            SET updated_at = CURRENT_TIMESTAMP
+            WHERE id = NEW.id;
+        END
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_member_profiles_member_id
+        ON member_profiles(member_id)
+        """
+    )
+
+
 def _migrar_tabela_analises(cursor):
     """Permite uma análise por utilizador sem tocar nas fichas legadas."""
     definicao = cursor.execute(
@@ -550,6 +699,9 @@ def criar_base_dados():
     _migrar_tabela_analises(cursor)
     _adicionar_colunas_alertas_em_falta(cursor)
     _criar_tabela_versoes_analise(cursor)
+    _criar_tabelas_company_ai(cursor)
+    _criar_tabela_company_profiles(cursor)
+    _criar_tabela_member_profiles(cursor)
 
     cursor.execute(
         """
