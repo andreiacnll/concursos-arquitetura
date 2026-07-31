@@ -23,6 +23,7 @@ from .database import (
 )
 from .auth import obter_utilizador_atual
 from .analise.worker import executar_worker
+from .company_ai.router import router as company_ai_router
 from .routes.analises import router as analises_router
 from .routes.alertas import router as alertas_router
 from .routes.favoritos import router as favoritos_router
@@ -81,6 +82,7 @@ app.add_middleware(
 app.include_router(favoritos_router)
 app.include_router(analises_router)
 app.include_router(alertas_router)
+app.include_router(company_ai_router)
 
 
 def obter_conexao() -> sqlite3.Connection:

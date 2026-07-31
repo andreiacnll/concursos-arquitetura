@@ -1,0 +1,57 @@
+{
+  "identity": {
+    "company_name": "",
+    "description": "",
+    "location": "",
+    "website": ""
+  },
+
+  "services": [],
+
+  "competences": [],
+
+  "project_experience": [
+    {
+      "name": "",
+      "typology": "",
+      "location": "",
+      "skills_demonstrated": []
+    }
+  ],
+
+  "preferences": {
+
+    "typologies": [],
+
+    "procedures": [],
+
+    "locations": [],
+
+    "project_scale": []
+
+  },
+
+  "strategy": {
+
+    "priority_areas": [],
+
+    "secondary_areas": [],
+
+    "avoid_areas": [],
+
+    "future_goals": []
+
+  },
+
+  "ai_memory": {
+
+    "confirmed_facts": [],
+
+    "assumptions": [],
+
+    "validated_preferences": [],
+
+    "open_questions": []
+
+  }
+}

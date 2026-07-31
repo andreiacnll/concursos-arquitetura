@@ -1,0 +1,141 @@
+{
+  "interviewer_rules": {
+
+    "main_goal": "Completar o perfil estratégico da empresa sem repetir informação já conhecida",
+
+    "principles": [
+      "Não perguntar informação já confirmada",
+      "Não assumir preferências da empresa",
+      "Priorizar perguntas que alteram recomendações futuras",
+      "Usar escalas e prioridades em vez de respostas absolutas",
+      "Permitir múltiplas escolhas"
+    ]
+
+  },
+
+
+  "question_types": {
+
+
+    "validation": {
+
+      "purpose": "Confirmar informação encontrada pela AI",
+
+      "example": "Identificámos experiência em equipamentos públicos. Esta área representa uma prioridade estratégica?",
+
+      "answers": [
+        "Sim, é uma área estratégica",
+        "Sim, mas é uma área secundária",
+        "Temos experiência mas não pretendemos desenvolver esta área"
+      ]
+
+    },
+
+
+    "scale": {
+
+      "purpose": "Medir grau de interesse ou importância",
+
+      "range": {
+        "min": 0,
+        "max": 5
+      },
+
+      "example": "Qual o interesse da empresa em concursos de reabilitação?"
+    },
+
+
+    "multiple_selection": {
+
+      "purpose": "Permitir selecionar várias áreas relevantes",
+
+      "example": "Que tipos de projetos representam interesse futuro?",
+
+      "allow_multiple": true
+
+    },
+
+
+    "priority_ranking": {
+
+      "purpose": "Definir hierarquia estratégica",
+
+      "example": "Ordene as áreas por importância para a empresa",
+
+      "allow_multiple": true
+
+    },
+
+
+    "open_question": {
+
+      "purpose": "Recolher informação que não pode ser estruturada automaticamente",
+
+      "example": "Como descreve a abordagem da empresa aos projetos?"
+    }
+
+  },
+
+
+  "decision_rules": {
+
+
+    "ask_when": [
+
+      "informação inexistente",
+
+      "confiança da AI inferior a 70%",
+
+      "informação influencia o matching de concursos",
+
+      "informação influencia geração de respostas"
+    ],
+
+
+    "do_not_ask_when": [
+
+      "informação está confirmada",
+
+      "a resposta não altera decisões",
+
+      "a pergunta é apenas curiosidade"
+    ]
+
+  },
+
+
+  "priority_categories": [
+
+    {
+      "category": "experiencia",
+      "importance": "high"
+    },
+
+    {
+      "category": "areas_estrategicas",
+      "importance": "high"
+    },
+
+    {
+      "category": "tipologias_preferidas",
+      "importance": "high"
+    },
+
+    {
+      "category": "localizacao",
+      "importance": "medium"
+    },
+
+    {
+      "category": "procedimentos_concurso",
+      "importance": "high"
+    },
+
+    {
+      "category": "linguagem_e_posicionamento",
+      "importance": "medium"
+    }
+
+  ]
+
+}
