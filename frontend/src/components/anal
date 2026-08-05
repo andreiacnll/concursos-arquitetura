@@ -1,0 +1,135 @@
+type Props = {
+  investimento?: any;
+  programa?: any;
+  economia?: any;
+  isConcursoConcecao?: boolean;
+};
+
+
+export default function MetricsBar({
+  investimento,
+  programa,
+  economia,
+  isConcursoConcecao = false,
+}: Props) {
+
+  // Para concursos de conceção: areas é um array de strings
+  // Para concursos normais: areas é um objeto com chaves (ex: { total: "6990 m²" })
+  const areaIntervencao = isConcursoConcecao
+    ? (Array.isArray(programa?.areas) && programa.areas.length > 0
+        ? programa.areas[0]
+        : "Não indicada")
+    : programa?.areas?.total;
+
+
+  return (
+
+    <section className="metrics-bar">
+
+
+      <div className="metric-item">
+
+        <span>
+          {isConcursoConcecao ? "Valor do procedimento" : "Valor do contrato"}
+        </span>
+
+        <strong>
+          {isConcursoConcecao
+            ? (economia?.valor_procedimento || "Não disponível")
+            : (investimento?.valor_obra || '8.600.000 €')}
+        </strong>
+
+        <small>
+          {isConcursoConcecao ? "Prémios do concurso" : "Sem IVA"}
+        </small>
+
+      </div>
+
+
+
+      <div className="metric-item">
+
+        <span>
+          Área de intervenção
+        </span>
+
+        <strong>
+          {areaIntervencao}
+        </strong>
+
+      </div>
+
+
+
+      <div className="metric-item">
+
+        <span>
+          Prazo de entrega
+        </span>
+
+        <strong>
+          {isConcursoConcecao
+            ? "A definir"
+            : investimento?.prazo_projeto}
+        </strong>
+
+        <small>
+          {isConcursoConcecao ? "Definido em fase posterior" : "Prazo previsto"}
+        </small>
+
+      </div>
+
+
+
+      <div className="metric-item">
+
+        <span>
+          {isConcursoConcecao ? "Valor do procedimento" : "Valor do contrato"}
+        </span>
+
+        <strong>
+          {isConcursoConcecao
+            ? (economia?.valor_procedimento || "Não disponível")
+            : (investimento?.valor_obra || '8.600.000 €')}
+        </strong>
+
+        <small>
+          {isConcursoConcecao ? "Prémios do concurso" : "Sem IVA"}
+        </small>
+
+
+        <div className="criteria-line">
+
+          <div className="criteria-quality"></div>
+
+          <div className="criteria-price"></div>
+
+        </div>
+
+
+      </div>
+
+
+
+      <div className="metric-item">
+
+        <span>
+          Tipo de procedimento
+        </span>
+
+        <strong>
+          {isConcursoConcecao ? "Concurso de conceção" : "Concurso público"}
+        </strong>
+
+        <small>
+          {isConcursoConcecao ? "Por conceção" : "Por prévia qualificação"}
+        </small>
+
+      </div>
+
+
+    </section>
+
+  );
+
+}

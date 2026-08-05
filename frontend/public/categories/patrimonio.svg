@@ -1,0 +1,23 @@
+<svg width="1200" height="700"
+viewBox="0 0 1200 700"
+xmlns="http://www.w3.org/2000/svg">
+
+<rect width="1200" height="700" fill="#DDB7A5"/>
+
+
+<g fill="none" stroke="#222" stroke-width="3" opacity="0.45">
+
+<path d="M220 460 V260 Q420 80 620 260 V460"/>
+<path d="M320 460 V300 H520 V460"/>
+</g>
+
+<text x="90" y="590"
+font-family="Arial, Helvetica, sans-serif"
+font-size="90"
+font-weight="700"
+fill="#222"
+opacity="0.45">
+PAT
+</text>
+
+</svg>

@@ -1,0 +1,9 @@
+requests
+beautifulsoup4
+playwright
+fastapi
+uvicorn[standard]
+pypdf[crypto]
+python-dotenv
+tzdata
+xlrd>=2.0,<3

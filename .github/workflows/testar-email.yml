@@ -1,0 +1,42 @@
+name: Testar envio de email
+
+on:
+  workflow_dispatch:
+
+jobs:
+  testar-email:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Enviar email de teste
+        env:
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        run: |
+          python - <<'PY'
+          import os
+          import smtplib
+          from email.message import EmailMessage
+
+          utilizador = "andreiamarquescnlll@gmail.com"
+          palavra_passe = os.environ.get("SMTP_PASSWORD", "").strip()
+
+          if not palavra_passe:
+              raise RuntimeError(
+                  "O segredo SMTP_PASSWORD não está configurado no GitHub."
+              )
+
+          mensagem = EmailMessage()
+          mensagem["Subject"] = "Teste do GitHub Actions"
+          mensagem["From"] = utilizador
+          mensagem["To"] = utilizador
+          mensagem.set_content(
+              "Este email confirma que o envio através do GitHub Actions "
+              "está a funcionar corretamente."
+          )
+
+          with smtplib.SMTP_SSL("smtp.gmail.com", 465) as servidor:
+              servidor.login(utilizador, palavra_passe)
+              servidor.send_message(mensagem)
+
+          print("Email de teste enviado com sucesso.")
+          PY

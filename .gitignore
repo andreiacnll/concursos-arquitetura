@@ -1,0 +1,58 @@
+__pycache__/
+*.pyc
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Next.js
+frontend/node_modules/
+frontend/.next/
+
+# Variáveis privadas
+.env
+app/.env
+frontend/.env.local
+
+.venv/
+frontend/node_modules/
+frontend/.next/
+
+# Python
+__pycache__/
+*.pyc
+
+# Next
+frontend/node_modules/
+frontend/.next/
+
+# Documentos extraídos
+analise_documentos/*/pecas_procedimentais/extraido/
+
+# Bases de dados grandes
+*.db
+*.backup
+*.sqlite
+
+
+# Documentos temporários dos concursos (usados durante análise)
+analise_documentos/*/pecas.zip
+analise_documentos/*/pecas_procedimentais/
+analise_documentos/*/extraido/
+analise_documentos/*/pecas_download/
+analise_documentos/*/pecas_download
+
+# backups locais
+*.backup*
+*_backup*
+*.old.*
+*.before*
+src_backup_*
+
+# Dados locais e ficheiros gerados
+analise_documentos/
+debug_exports/
+backups/
+*.zip

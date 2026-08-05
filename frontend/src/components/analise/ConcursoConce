@@ -1,0 +1,270 @@
+import { Trophy } from "lucide-react";
+
+
+/**
+ * Adaptador de dados para concursos de conceção.
+ *
+ * Transforma a estrutura de dados específica de conceção
+ * no formato esperado pelos componentes existentes
+ * (DecisionDashboard, AnalysisPanels, ProjectInfoPanel).
+ *
+ * Isto permite reutilizar todos os componentes visuais
+ * sem criar uma página paralela.
+ */
+export function adaptarFichaConcecao(ficha: any): any {
+
+  const analiseAi = ficha?.analise_ai || {};
+  const modeloConcurso = ficha?.modelo_concurso || {};
+  const equipaConcecao = ficha?.equipa || {};
+  const entregaveisConcecao = ficha?.entregaveis || {};
+  const criteriosConcecao = ficha?.criterios || {};
+  const localizacaoConcecao = ficha?.localizacao || {};
+
+
+  // --- Adaptar decisao para DecisionDashboard ---
+  // DecisionDashboard espera: score, classificacao, oportunidades, elegibilidade.estado, elegibilidade.motivos, risco.nivel
+  const decisao = {
+    score: analiseAi?.score || 0,
+    classificacao: analiseAi?.interesse_arquitetonico || "Não avaliado",
+    oportunidades: analiseAi?.oportunidades || [],
+    elegibilidade: {
+      estado: analiseAi?.vale_a_pena_concorrer?.veredito
+        ? `${analiseAi.vale_a_pena_concorrer.veredito} - recomendado`
+        : "Compatível",
+      motivos: analiseAi?.vale_a_pena_concorrer
+        ? [
+            analiseAi.vale_a_pena_concorrer.dimensao_oportunidade,
+            analiseAi.vale_a_pena_concorrer.probabilidade_exclusao,
+          ].filter(Boolean)
+        : [],
+    },
+    risco: {
+      nivel: analiseAi?.complexidade === "Alta" ? "Médio" : "Baixo",
+      fatores: analiseAi?.riscos || [],
+    },
+    riscos: analiseAi?.riscos || [],
+  };
+
+
+  // --- Adaptar analise para AnalysisPanels ---
+  // AnalysisPanels espera: analise.analise.motivos, analise.analise.complexidade, analise.especialidades.lista
+  const analise = {
+    analise: {
+      complexidade: analiseAi?.complexidade || "Não avaliada",
+      motivos: analiseAi?.riscos || [],
+    },
+    especialidades: {
+      lista: equipaConcecao?.especialidades || [],
+    },
+  };
+
+
+  // --- Adaptar equipa para AnalysisPanels ---
+  // AnalysisPanels espera: equipa.total
+  const equipa = {
+    total: equipaConcecao?.equipa_minima?.length
+      || equipaConcecao?.especialidades?.length
+      || 0,
+  };
+
+
+  // --- Adaptar criterio_resumo para AnalysisPanels ---
+  let criterioResumo = "Por conceção - avaliação por mérito";
+  if (criteriosConcecao?.percentagens && criteriosConcecao.percentagens.length > 0) {
+    criterioResumo = criteriosConcecao.percentagens
+      .map((c: { criterio: string; percentagem: string }) => `${c.percentagem} ${c.criterio.split(" ")[0]}`)
+      .join(" · ");
+  }
+
+
+  // --- Adaptar entregaveis para ProjectInfoPanel ---
+  // ProjectInfoPanel espera: entregaveis.principais, especialidades.lista, requisitos.obrigatorios, requisitos.riscos_participacao
+  const entregaveis = {
+    principais: entregaveisConcecao?.elementos_obrigatorios || [],
+  };
+
+  const especialidades = {
+    lista: equipaConcecao?.especialidades || [],
+  };
+
+  const requisitos = {
+    obrigatorios: equipaConcecao?.habilitacoes_exigidas || [],
+    riscos_participacao: analiseAi?.riscos || [],
+  };
+
+
+  // --- Adaptar localizacao para ProjectInfoPanel ---
+  // ProjectInfoPanel espera: localizacao.cidade, localizacao.latitude, localizacao.longitude
+  const localizacao = {
+    ...localizacaoConcecao,
+    cidade: localizacaoConcecao?.municipio || ficha?.identificacao?.localizacao || "Não identificado",
+    morada: localizacaoConcecao?.morada || "Não identificado",
+    latitude: localizacaoConcecao?.latitude ?? null,
+    longitude: localizacaoConcecao?.longitude ?? null,
+  };
+
+
+  // --- Adaptar descricao para ProjectInfoPanel ---
+  const descricao = ficha?.programa?.resumo_intervencao || "Não identificado";
+
+
+  // --- Retornar ficha adaptada ---
+  // Mantém os campos originais e adiciona os adaptados
+  return {
+    ...ficha,
+    // Dados adaptados para os componentes existentes
+    decisao,
+    analise,
+    equipa,
+    criterio_resumo: criterioResumo,
+    entregaveis,
+    especialidades,
+    requisitos,
+    localizacao,
+    descricao,
+    // Manter programa original (já tem a estrutura correta)
+    programa: ficha?.programa || {},
+  };
+}
+
+
+/**
+ * Bloco "Modelo do concurso" - único bloco novo
+ * que não tem equivalente nos concursos normais.
+ *
+ * Mostra prémios, júri, trabalhos selecionados e fase posterior.
+ * Usa as mesmas classes CSS dos cards existentes (analysis-card).
+ */
+interface ModeloConcursoCardProps {
+  ficha: any;
+}
+
+
+export function ModeloConcursoCard({
+  ficha,
+}: ModeloConcursoCardProps) {
+
+  const modelo = ficha?.modelo_concurso || {};
+
+  const premios = modelo?.premios || [];
+  const jurados = modelo?.jurados || [];
+  const trabalhosSelecionados = modelo?.trabalhos_selecionados || 0;
+  const fasePosterior = modelo?.fase_posterior || modelo?.desenvolvimento_posterior || "Não especificado";
+
+
+  // Não renderizar se não houver dados de modelo
+  if (premios.length === 0 && jurados.length === 0 && !trabalhosSelecionados) {
+    return null;
+  }
+
+
+  return (
+
+    <section className="analysis-panels">
+
+      {/* Prémios */}
+      {premios.length > 0 && (
+        <article className="analysis-card">
+
+          <span className="card-label">
+            <Trophy size={16} style={{ display: "inline", marginRight: "6px" }} />
+            Prémios do concurso
+          </span>
+
+          <p>
+            {premios.length} prémios em concurso de conceção
+          </p>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "8px" }}>
+            {premios.map((premio: { posicao: string; valor: string }, idx: number) => (
+              <div key={idx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span>{premio.posicao}</span>
+                <strong className="card-highlight" style={{ fontSize: "16px" }}>
+                  {premio.valor}
+                </strong>
+              </div>
+            ))}
+          </div>
+
+        </article>
+      )}
+
+
+      {/* Trabalhos selecionados + Fase posterior */}
+      <article className="analysis-card">
+
+        <span className="card-label">
+          Trabalhos selecionados
+        </span>
+
+        <p>
+          {trabalhosSelecionados > 0
+            ? `${trabalhosSelecionados} trabalhos selecionados para fase de conceção`
+            : "Não identificado"}
+        </p>
+
+        <strong className="team-number">
+          {trabalhosSelecionados || "—"}
+          <small>
+            trabalhos selecionados
+          </small>
+        </strong>
+
+      </article>
+
+
+      {/* Fase posterior */}
+      <article className="analysis-card">
+
+        <span className="card-label">
+          Fase posterior
+        </span>
+
+        <p>
+          {fasePosterior}
+        </p>
+
+      </article>
+
+
+      {/* Júri */}
+      {jurados.length > 0 && (
+        <article className="analysis-card">
+
+          <span className="card-label">
+            Júri de conceção
+          </span>
+
+          <p>
+            {jurados.join(" · ")}
+          </p>
+
+          <strong className="team-number">
+            {jurados.length}
+            <small>
+              elementos no júri
+            </small>
+          </strong>
+
+        </article>
+      )}
+
+    </section>
+
+  );
+}
+
+
+// Componente default mantido para compatibilidade
+// (apenas renderiza o ModeloConcursoCard)
+interface ConcursoConcecaoProps {
+  ficha: any;
+  concurso?: any;
+}
+
+
+export default function ConcursoConcecaoAnalysis({
+  ficha,
+}: ConcursoConcecaoProps) {
+  return <ModeloConcursoCard ficha={ficha} />;
+}

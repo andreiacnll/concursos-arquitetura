@@ -1,0 +1,115 @@
+{
+  "metadata": {
+    "case": "Escola Secundaria do Lumiar",
+    "purpose": "gold_standard_for_tests_only",
+    "is_official_document": false,
+    "must_not_be_used_as_reader_source": true,
+    "notes": [
+      "Conteudo validado pela utilizadora nesta conversa.",
+      "Serve para validar estrutura, organizacao, deduplicacao e campos do reader.",
+      "Nao e evidencia primaria; evidencias factuais devem vir das pecas originais."
+    ]
+  },
+  "procedure_identity": {
+    "object": "Concurso real da Escola Secundaria do Lumiar",
+    "entity": "Municipio de Lisboa",
+    "typology": "Educacao / escola",
+    "expected_fields": [
+      "objeto",
+      "entidade",
+      "tipologia",
+      "documentos obrigatorios",
+      "criterios",
+      "equipa",
+      "fases",
+      "prazos",
+      "pagamentos",
+      "riscos de exclusao"
+    ]
+  },
+  "prices": {
+    "service_price": {
+      "value": "1 221 957 EUR",
+      "meaning": "preco dos servicos / projeto"
+    },
+    "maximum_construction_cost": {
+      "value": "24 439 134 EUR",
+      "meaning": "custo maximo da obra"
+    },
+    "validation_rule": "Nao confundir preco dos servicos com custo da obra."
+  },
+  "award_strategy": {
+    "criteria_percentages": [
+      "35%",
+      "25%",
+      "25%",
+      "15%"
+    ],
+    "validation_rule": "Os criterios devem aparecer como estrutura, nao texto corrido."
+  },
+  "required_team": {
+    "coordinator": {
+      "role": "coordenador arquiteto",
+      "minimum_experience": "cinco anos"
+    },
+    "mandatory_specialties": {
+      "expected": true,
+      "notes": "Devem ser extraidas das pecas originais e separadas da capacidade da empresa."
+    }
+  },
+  "phases_and_deliverables": {
+    "must_include": [
+      "fases",
+      "prazos",
+      "pagamentos",
+      "entregaveis por fase"
+    ],
+    "validation_rule": "Agrupar fases, prazos, entregaveis e pagamentos; nao perder prazos/pagamentos."
+  },
+  "submission_documents": {
+    "must_include": "documentos obrigatorios da proposta",
+    "validation_rule": "Separar documentos da proposta de documentos de habilitacao."
+  },
+  "post_award_documents": {
+    "must_include": "documentos de habilitacao / pos-adjudicacao quando existirem"
+  },
+  "financial_conditions": {
+    "must_include": [
+      "preco dos servicos",
+      "custo maximo da obra",
+      "pagamentos"
+    ]
+  },
+  "exclusion_risks": {
+    "must_include": [
+      "regras de anonimato",
+      "motivos de exclusao"
+    ],
+    "validation_rule": "Distinguir criterios de pontuacao e motivos de exclusao."
+  },
+  "technical_constraints": {
+    "must_include": [
+      "riscos tecnicos",
+      "condicionantes tecnicas"
+    ]
+  },
+  "evidence": {
+    "required_fields": [
+      "source_document",
+      "page",
+      "section",
+      "evidence_excerpt",
+      "confidence",
+      "status"
+    ],
+    "validation_rule": "O gold standard nao e evidencia primaria."
+  },
+  "document_alerts": {
+    "must_check": [
+      "duplicados",
+      "frases repetidas",
+      "campos com tipos inconsistentes",
+      "ausencia falsa de Programa, Caderno de Encargos ou Programa Preliminar"
+    ]
+  }
+}
