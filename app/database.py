@@ -1,6 +1,8 @@
 import json
 import re
 import sqlite3
+
+from .sqlite_snapshot import SnapshotConnection
 from contextlib import closing
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -97,7 +99,11 @@ COLUNAS_ADICIONAIS = {
 
 def abrir_conexao() -> sqlite3.Connection:
     """Abre a base principal com as garantias usadas pela API."""
-    conexao = sqlite3.connect(DB_PATH, timeout=5)
+    conexao = sqlite3.connect(
+        DB_PATH,
+        timeout=5,
+        factory=SnapshotConnection,
+    )
     conexao.row_factory = sqlite3.Row
     conexao.execute("PRAGMA foreign_keys = ON")
     conexao.execute("PRAGMA busy_timeout = 5000")
