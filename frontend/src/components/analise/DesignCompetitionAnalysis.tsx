@@ -368,11 +368,289 @@ function AiPanel({
 }
 
 export default function DesignCompetitionAnalysis({
-  ficha,
+  ficha: fichaOriginal,
   concurso,
   presentation,
 }: Props) {
-  const extraction = ficha?.design_competition_extraction || {};
+  const sourceFicha = fichaOriginal || {};
+
+  const legacyPrizes = Array.isArray(
+    sourceFicha?.modelo_concurso?.premios,
+  )
+    ? sourceFicha.modelo_concurso.premios
+    : [];
+
+  const legacyAreas = Array.isArray(sourceFicha?.programa?.areas)
+    ? sourceFicha.programa.areas.map(
+        (item: any, index: number) => {
+          const raw = clean(item);
+          const [label, ...rest] = raw.split(":");
+
+          return {
+            label: rest.length
+              ? label.trim()
+              : `Área ${index + 1}`,
+            value: rest.length
+              ? rest.join(":").trim()
+              : raw,
+          };
+        },
+      )
+    : [];
+
+  const legacyCriteriaDetails = Array.isArray(
+    sourceFicha?.criterios?.percentagens,
+  )
+    ? sourceFicha.criterios.percentagens
+        .map((item: any) =>
+          [
+            clean(item?.criterio),
+            clean(item?.percentagem),
+          ]
+            .filter(Boolean)
+            .join(" · "),
+        )
+        .filter(Boolean)
+        .join(" · ")
+    : "";
+
+  const panelText = clean(
+    sourceFicha?.entregaveis?.numero_paineis,
+  );
+  const panelMatch = panelText.match(/\d+/);
+
+  const legacyExtraction = {
+    facts: {
+      procedure_value: {
+        value: clean(
+          sourceFicha?.economia?.valor_procedimento,
+        ),
+      },
+      estimated_construction_cost: {
+        value: clean(
+          sourceFicha?.economia?.valor_estimado_obra,
+        ),
+      },
+      design_services_value: {
+        value: "",
+      },
+      competition_prize_first: {
+        value: clean(legacyPrizes[0]?.valor),
+      },
+      competition_prize_second: {
+        value: clean(legacyPrizes[1]?.valor),
+      },
+      competition_prize_third: {
+        value: clean(legacyPrizes[2]?.valor),
+      },
+      specialties: {
+        value: clean(sourceFicha?.equipa?.especialidades),
+      },
+      descriptive_memory: {
+        value: clean(
+          sourceFicha?.entregaveis?.documentos_escritos,
+        ),
+      },
+      digital_files: {
+        value: clean(
+          sourceFicha?.entregaveis?.ficheiros_digitais,
+        ),
+      },
+    },
+
+    functional_program: {
+      summary: clean(
+        sourceFicha?.programa?.resumo_intervencao,
+      ),
+      area_intervencao: {
+        value: clean(sourceFicha?.programa?.areas),
+      },
+      total_area: clean(sourceFicha?.programa?.areas),
+      areas: legacyAreas,
+      main_spaces:
+        sourceFicha?.programa?.funcoes_identificadas || [],
+      requirements:
+        sourceFicha?.entregaveis?.elementos_obrigatorios || [],
+      constraints:
+        sourceFicha?.programa?.condicionantes || [],
+    },
+
+    financial: {},
+
+    submission: {
+      physical_panels: {
+        quantity_confirmed: Boolean(panelMatch),
+        quantity: panelMatch ? Number(panelMatch[0]) : 0,
+        format: clean(
+          sourceFicha?.entregaveis?.formato_pecas,
+        ),
+        orientation: "",
+      },
+
+      digital_booklet: {
+        required: Boolean(
+          clean(sourceFicha?.entregaveis?.ficheiros_digitais),
+        ),
+        name: "Ficheiros digitais",
+        format: clean(
+          sourceFicha?.entregaveis?.ficheiros_digitais,
+        ),
+      },
+
+      descriptive_memory: {
+        required: Array.isArray(
+          sourceFicha?.entregaveis?.documentos_escritos,
+        )
+          ? sourceFicha.entregaveis.documentos_escritos.some(
+              (item: any) =>
+                normalizeCategory(item).includes("memoria"),
+            )
+          : false,
+        integrated_in: "",
+      },
+    },
+
+    contract: {
+      specialty_count: Array.isArray(
+        sourceFicha?.equipa?.especialidades,
+      )
+        ? sourceFicha.equipa.especialidades.length
+        : 0,
+    },
+  };
+
+  const nativeExtraction =
+    sourceFicha?.design_competition_extraction || {};
+
+  const extraction = {
+    ...legacyExtraction,
+    ...nativeExtraction,
+
+    facts: {
+      ...legacyExtraction.facts,
+      ...(nativeExtraction?.facts || {}),
+    },
+
+    functional_program:
+      nativeExtraction?.functional_program ||
+      nativeExtraction?.program_functional ||
+      legacyExtraction.functional_program,
+
+    financial: {
+      ...legacyExtraction.financial,
+      ...(nativeExtraction?.financial || {}),
+    },
+
+    submission: {
+      ...legacyExtraction.submission,
+      ...(nativeExtraction?.submission || {}),
+    },
+
+    contract: {
+      ...legacyExtraction.contract,
+      ...(nativeExtraction?.contract || {}),
+    },
+  };
+
+  const ficha = {
+    ...sourceFicha,
+
+    identificacao: {
+      ...(sourceFicha?.identificacao || {}),
+      link:
+        clean(sourceFicha?.identificacao?.link) ||
+        clean(sourceFicha?.identificacao?.url_base),
+    },
+
+    criterio_resumo:
+      clean(sourceFicha?.criterio_resumo) ||
+      clean(sourceFicha?.criterios?.modelo_avaliacao) ||
+      clean(sourceFicha?.criterios?.criterio_adjudicacao),
+
+    criterio_detalhe:
+      clean(sourceFicha?.criterio_detalhe) ||
+      legacyCriteriaDetails ||
+      clean(
+        sourceFicha?.modelo_concurso?.criterios_avaliacao,
+      ),
+
+    document_insights: {
+      ...(sourceFicha?.document_insights || {}),
+
+      document_status:
+        clean(
+          sourceFicha?.document_insights?.document_status,
+        ) ||
+        (Object.keys(sourceFicha).length
+          ? "Ficha estruturada disponível"
+          : ""),
+
+      jury:
+        clean(sourceFicha?.document_insights?.jury) ||
+        clean(sourceFicha?.modelo_concurso?.jurados),
+    },
+
+    jury: {
+      ...(sourceFicha?.jury || {}),
+      summary:
+        clean(sourceFicha?.jury?.summary) ||
+        clean(sourceFicha?.modelo_concurso?.jurados),
+    },
+
+    decisao:
+      sourceFicha?.decisao ||
+      {
+        score: sourceFicha?.analise_ai?.score,
+
+        classificacao:
+          sourceFicha?.analise_ai
+            ?.vale_a_pena_concorrer?.veredito,
+
+        oportunidades:
+          sourceFicha?.analise_ai?.oportunidades || [],
+
+        risco: {
+          nivel: sourceFicha?.analise_ai?.complexidade,
+        },
+
+        elegibilidade: {
+          estado:
+            sourceFicha?.analise_ai
+              ?.vale_a_pena_concorrer
+              ?.probabilidade_exclusao ||
+            sourceFicha?.analise_ai
+              ?.vale_a_pena_concorrer?.veredito,
+        },
+      },
+
+    recomendacao_final:
+      sourceFicha?.recomendacao_final ||
+      {
+        justificacao:
+          sourceFicha?.analise_ai?.recomendacao,
+      },
+
+    company_matching:
+      sourceFicha?.company_matching ||
+      {
+        recommendation: {
+          explanation:
+            sourceFicha?.analise_ai?.recomendacao,
+        },
+
+        oportunidades:
+          sourceFicha?.analise_ai?.oportunidades || [],
+
+        strengths:
+          sourceFicha?.analise_ai?.oportunidades || [],
+
+        weaknesses:
+          sourceFicha?.analise_ai?.riscos || [],
+      },
+
+    design_competition_extraction: extraction,
+  };
+
   const program =
     extraction?.functional_program ||
     extraction?.program_functional ||
