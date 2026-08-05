@@ -138,10 +138,7 @@ export default async function AnalisePage({
     ""
   ).toLowerCase();
 
-  const isConcursoConcecao = tipoProcedimento.includes("concurso de conceção") ||
-                              tipoProcedimento.includes("concurso de concecao");
-
-  // ── Dados adaptados para concursos de conceção ──
+  const isConcursoConcecao = tipoProcedimento.includes("concurso de conce");// ── Dados adaptados para concursos de conceção ──
   const decisaoData = isConcursoConcecao
     ? adaptarDecisaoConcecao(ficha)
     : ficha.decisao;
