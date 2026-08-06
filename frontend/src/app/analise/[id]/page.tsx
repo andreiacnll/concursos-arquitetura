@@ -138,7 +138,16 @@ export default async function AnalisePage({
     ""
   ).toLowerCase();
 
-  const isConcursoConcecao = tipoProcedimento.includes("concurso de conce");// ── Dados adaptados para concursos de conceção ──
+  const isConcursoConcecao = tipoProcedimento.includes("concurso de conceção") ||
+                              tipoProcedimento.includes("concurso de concecao");
+
+  const isInterventionProgram = Boolean(
+    ficha?.analysis_variant === "intervention_program" ||
+      ficha?.intervention_program?.active ||
+      ficha?.design_competition_extraction?.intervention_program?.active,
+  );
+
+  // ── Dados adaptados para concursos de conceção ──
   const decisaoData = isConcursoConcecao
     ? adaptarDecisaoConcecao(ficha)
     : ficha.decisao;
@@ -147,7 +156,7 @@ export default async function AnalisePage({
     ? adaptarProgramaConcecao(ficha)
     : ficha.programa;
 
-  if (isConcursoConcecao) {
+  if (isConcursoConcecao || isInterventionProgram) {
     return (
       <PrivateLayout>
         <DesignCompetitionAnalysis
@@ -191,13 +200,15 @@ export default async function AnalisePage({
           <DocumentInsightsCards insights={ficha.document_insights} />
         )}
 
-        <CompanyMatchingSection
-          matching={{
-            ...ficha.company_matching,
-            competition_type: presentation?.competition_type,
-            competition_subtype: presentation?.competition_subtype,
-          }}
-        />
+        {!isConcursoConcecao ? (
+          <CompanyMatchingSection
+            matching={{
+              ...ficha.company_matching,
+              competition_type: presentation?.competition_type,
+              competition_subtype: presentation?.competition_subtype,
+            }}
+          />
+        ) : null}
 
         {!presentation && programaData && (
           <section className="programa-preliminar-section">

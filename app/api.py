@@ -31,11 +31,6 @@ from .company_ai.compatibility_analysis import analyze_compatibility
 from .routes.analises import router as analises_router
 from .routes.alertas import router as alertas_router
 from .routes.favoritos import router as favoritos_router
-from .sqlite_snapshot import (
-    encerrar_sincronizador_snapshot,
-    executar_sincronizador_snapshot,
-    restaurar_snapshot_se_ativo,
-)
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,14 +39,7 @@ CHECKPOINT_PATH = BASE_DIR / "concursos_recolhidos.json"
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    await asyncio.to_thread(
-        restaurar_snapshot_se_ativo,
-        DB_PATH,
-    )
     criar_base_dados()
-    snapshot_task = asyncio.create_task(
-        executar_sincronizador_snapshot(DB_PATH)
-    )
     stop_worker = asyncio.Event()
     worker_task = None
 
@@ -74,11 +62,6 @@ async def lifespan(_: FastAPI):
             worker_task.cancel()
             with suppress(asyncio.CancelledError):
                 await worker_task
-
-        await encerrar_sincronizador_snapshot(
-            snapshot_task,
-            DB_PATH,
-        )
 
 
 app = FastAPI(
@@ -422,7 +405,38 @@ def carregar_concursos_base_dados() -> list[dict[str, Any]]:
                 codigo_postal,
                 latitude,
                 longitude,
-                localizacao_contexto
+                localizacao_contexto,
+                (
+                    SELECT cf.fonte
+                    FROM concurso_fontes AS cf
+                    WHERE cf.concurso_id = concursos.id
+                    ORDER BY cf.principal DESC, cf.id ASC
+                    LIMIT 1
+                ) AS fonte,
+                (
+                    SELECT cf.referencia
+                    FROM concurso_fontes AS cf
+                    WHERE cf.concurso_id = concursos.id
+                    ORDER BY cf.principal DESC, cf.id ASC
+                    LIMIT 1
+                ) AS referencia_fonte,
+                (
+                    SELECT cf.estado_fonte
+                    FROM concurso_fontes AS cf
+                    WHERE cf.concurso_id = concursos.id
+                    ORDER BY cf.principal DESC, cf.id ASC
+                    LIMIT 1
+                ) AS estado_fonte,
+                (
+                    SELECT MIN(cf.first_seen_at)
+                    FROM concurso_fontes AS cf
+                    WHERE cf.concurso_id = concursos.id
+                ) AS first_seen_at,
+                (
+                    SELECT MAX(cf.last_seen_at)
+                    FROM concurso_fontes AS cf
+                    WHERE cf.concurso_id = concursos.id
+                ) AS last_seen_at
             FROM concursos
             WHERE relevante = 1
             ORDER BY id DESC
@@ -520,6 +534,16 @@ def normalizar_concurso_json(
         "latitude": item.get("latitude"),
         "longitude": item.get("longitude"),
         "localizacao_contexto": item.get("localizacao_contexto"),
+        "fonte": item.get("fonte") or ("base_gov" if id_portal_base else None),
+        "referencia_fonte": item.get("referencia_fonte"),
+        "estado_fonte": item.get("estado_fonte"),
+        "first_seen_at": item.get("first_seen_at"),
+        "last_seen_at": item.get("last_seen_at"),
+        "data_ordenacao_iso": (
+            data_publicacao.isoformat()
+            if data_publicacao
+            else item.get("first_seen_at")
+        ),
         "id_portal_base": id_portal_base,
         "id_procedimento": item.get("id_procedimento"),
         "texto": item.get("texto"),
@@ -651,7 +675,9 @@ def executar_listagem(
 
     concursos.sort(
         key=lambda concurso: (
-            concurso.get("data_publicacao_iso") or "",
+            concurso.get("data_ordenacao_iso")
+            or concurso.get("data_publicacao_iso")
+            or "",
             str(concurso.get("id") or ""),
         ),
         reverse=True,

@@ -19,6 +19,8 @@ import {
 import ProjectInfoPanel from "@/components/analise/dashboard/ProjectInfoPanel";
 import { DomainDetailsButton } from "@/components/analise/DesignCompetitionDomainModal";
 import FunctionalProgramSummaryCard from "@/components/analise/FunctionalProgramSummaryCard";
+import InterventionProgramSummaryCard from "@/components/analise/InterventionProgramSummaryCard";
+import SubmissionRequirementsCards from "@/components/analise/SubmissionRequirementsCards";
 
 type Props = {
   ficha: any;
@@ -367,296 +369,79 @@ function AiPanel({
   );
 }
 
+function TimelineSidebarCard({
+  items,
+}: {
+  items: Fact[];
+}) {
+  const visibleItems = items.filter(
+    (item) => item.confirmed && item.value !== EMPTY,
+  );
+
+  return (
+    <article className="dc-side-timeline">
+      <div className="dc-side-timeline-heading">
+        <CalendarDays size={18} />
+        <div>
+          <span>Cronograma</span>
+          <h3>Marcos do concurso</h3>
+        </div>
+      </div>
+
+      {visibleItems.length ? (
+        <div className="dc-side-timeline-list">
+          {visibleItems.map((item) => (
+            <div
+              key={item.label}
+              className={
+                item.label === "Entrega das propostas"
+                  ? "dc-side-timeline-item is-deadline"
+                  : "dc-side-timeline-item"
+              }
+            >
+              <i aria-hidden="true" />
+              <div>
+                <span>{item.label}</span>
+                <strong>{item.value}</strong>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="dc-side-timeline-empty">
+          Datas ainda por confirmar.
+        </p>
+      )}
+    </article>
+  );
+}
+
 export default function DesignCompetitionAnalysis({
-  ficha: fichaOriginal,
+  ficha,
   concurso,
   presentation,
-}: Props) {
-  const sourceFicha = fichaOriginal || {};
 
-  const legacyPrizes = Array.isArray(
-    sourceFicha?.modelo_concurso?.premios,
-  )
-    ? sourceFicha.modelo_concurso.premios
-    : [];
-
-  const legacyAreas = Array.isArray(sourceFicha?.programa?.areas)
-    ? sourceFicha.programa.areas.map(
-        (item: any, index: number) => {
-          const raw = clean(item);
-          const [label, ...rest] = raw.split(":");
-
-          return {
-            label: rest.length
-              ? label.trim()
-              : `Área ${index + 1}`,
-            value: rest.length
-              ? rest.join(":").trim()
-              : raw,
-          };
-        },
-      )
-    : [];
-
-  const legacyCriteriaDetails = Array.isArray(
-    sourceFicha?.criterios?.percentagens,
-  )
-    ? sourceFicha.criterios.percentagens
-        .map((item: any) =>
-          [
-            clean(item?.criterio),
-            clean(item?.percentagem),
-          ]
-            .filter(Boolean)
-            .join(" · "),
-        )
-        .filter(Boolean)
-        .join(" · ")
-    : "";
-
-  const panelText = clean(
-    sourceFicha?.entregaveis?.numero_paineis,
-  );
-  const panelMatch = panelText.match(/\d+/);
-
-  const legacyExtraction = {
-    facts: {
-      procedure_value: {
-        value: clean(
-          sourceFicha?.economia?.valor_procedimento,
-        ),
-      },
-      estimated_construction_cost: {
-        value: clean(
-          sourceFicha?.economia?.valor_estimado_obra,
-        ),
-      },
-      design_services_value: {
-        value: "",
-      },
-      competition_prize_first: {
-        value: clean(legacyPrizes[0]?.valor),
-      },
-      competition_prize_second: {
-        value: clean(legacyPrizes[1]?.valor),
-      },
-      competition_prize_third: {
-        value: clean(legacyPrizes[2]?.valor),
-      },
-      specialties: {
-        value: clean(sourceFicha?.equipa?.especialidades),
-      },
-      descriptive_memory: {
-        value: clean(
-          sourceFicha?.entregaveis?.documentos_escritos,
-        ),
-      },
-      digital_files: {
-        value: clean(
-          sourceFicha?.entregaveis?.ficheiros_digitais,
-        ),
-      },
-    },
-
-    functional_program: {
-      summary: clean(
-        sourceFicha?.programa?.resumo_intervencao,
-      ),
-      area_intervencao: {
-        value: clean(sourceFicha?.programa?.areas),
-      },
-      total_area: clean(sourceFicha?.programa?.areas),
-      areas: legacyAreas,
-      main_spaces:
-        sourceFicha?.programa?.funcoes_identificadas || [],
-      requirements:
-        sourceFicha?.entregaveis?.elementos_obrigatorios || [],
-      constraints:
-        sourceFicha?.programa?.condicionantes || [],
-    },
-
-    financial: {},
-
-    submission: {
-      physical_panels: {
-        quantity_confirmed: Boolean(panelMatch),
-        quantity: panelMatch ? Number(panelMatch[0]) : 0,
-        format: clean(
-          sourceFicha?.entregaveis?.formato_pecas,
-        ),
-        orientation: "",
-      },
-
-      digital_booklet: {
-        required: Boolean(
-          clean(sourceFicha?.entregaveis?.ficheiros_digitais),
-        ),
-        name: "Ficheiros digitais",
-        format: clean(
-          sourceFicha?.entregaveis?.ficheiros_digitais,
-        ),
-      },
-
-      descriptive_memory: {
-        required: Array.isArray(
-          sourceFicha?.entregaveis?.documentos_escritos,
-        )
-          ? sourceFicha.entregaveis.documentos_escritos.some(
-              (item: any) =>
-                normalizeCategory(item).includes("memoria"),
-            )
-          : false,
-        integrated_in: "",
-      },
-    },
-
-    contract: {
-      specialty_count: Array.isArray(
-        sourceFicha?.equipa?.especialidades,
-      )
-        ? sourceFicha.equipa.especialidades.length
-        : 0,
-    },
-  };
-
-  const nativeExtraction =
-    sourceFicha?.design_competition_extraction || {};
-
-  const extraction = {
-    ...legacyExtraction,
-    ...nativeExtraction,
-
-    facts: {
-      ...legacyExtraction.facts,
-      ...(nativeExtraction?.facts || {}),
-    },
-
-    functional_program:
-      nativeExtraction?.functional_program ||
-      nativeExtraction?.program_functional ||
-      legacyExtraction.functional_program,
-
-    financial: {
-      ...legacyExtraction.financial,
-      ...(nativeExtraction?.financial || {}),
-    },
-
-    submission: {
-      ...legacyExtraction.submission,
-      ...(nativeExtraction?.submission || {}),
-    },
-
-    contract: {
-      ...legacyExtraction.contract,
-      ...(nativeExtraction?.contract || {}),
-    },
-  };
-
-  const ficha = {
-    ...sourceFicha,
-
-    identificacao: {
-      ...(sourceFicha?.identificacao || {}),
-      link:
-        clean(sourceFicha?.identificacao?.link) ||
-        clean(sourceFicha?.identificacao?.url_base),
-    },
-
-    criterio_resumo:
-      clean(sourceFicha?.criterio_resumo) ||
-      clean(sourceFicha?.criterios?.modelo_avaliacao) ||
-      clean(sourceFicha?.criterios?.criterio_adjudicacao),
-
-    criterio_detalhe:
-      clean(sourceFicha?.criterio_detalhe) ||
-      legacyCriteriaDetails ||
-      clean(
-        sourceFicha?.modelo_concurso?.criterios_avaliacao,
-      ),
-
-    document_insights: {
-      ...(sourceFicha?.document_insights || {}),
-
-      document_status:
-        clean(
-          sourceFicha?.document_insights?.document_status,
-        ) ||
-        (Object.keys(sourceFicha).length
-          ? "Ficha estruturada disponível"
-          : ""),
-
-      jury:
-        clean(sourceFicha?.document_insights?.jury) ||
-        clean(sourceFicha?.modelo_concurso?.jurados),
-    },
-
-    jury: {
-      ...(sourceFicha?.jury || {}),
-      summary:
-        clean(sourceFicha?.jury?.summary) ||
-        clean(sourceFicha?.modelo_concurso?.jurados),
-    },
-
-    decisao:
-      sourceFicha?.decisao ||
-      {
-        score: sourceFicha?.analise_ai?.score,
-
-        classificacao:
-          sourceFicha?.analise_ai
-            ?.vale_a_pena_concorrer?.veredito,
-
-        oportunidades:
-          sourceFicha?.analise_ai?.oportunidades || [],
-
-        risco: {
-          nivel: sourceFicha?.analise_ai?.complexidade,
-        },
-
-        elegibilidade: {
-          estado:
-            sourceFicha?.analise_ai
-              ?.vale_a_pena_concorrer
-              ?.probabilidade_exclusao ||
-            sourceFicha?.analise_ai
-              ?.vale_a_pena_concorrer?.veredito,
-        },
-      },
-
-    recomendacao_final:
-      sourceFicha?.recomendacao_final ||
-      {
-        justificacao:
-          sourceFicha?.analise_ai?.recomendacao,
-      },
-
-    company_matching:
-      sourceFicha?.company_matching ||
-      {
-        recommendation: {
-          explanation:
-            sourceFicha?.analise_ai?.recomendacao,
-        },
-
-        oportunidades:
-          sourceFicha?.analise_ai?.oportunidades || [],
-
-        strengths:
-          sourceFicha?.analise_ai?.oportunidades || [],
-
-        weaknesses:
-          sourceFicha?.analise_ai?.riscos || [],
-      },
-
-    design_competition_extraction: extraction,
-  };
-
-  const program =
-    extraction?.functional_program ||
-    extraction?.program_functional ||
-    ficha?.functional_program ||
-    ficha?.programa_funcional ||
+  concursoId,}: Props) {
+  const extraction = ficha?.design_competition_extraction || {};
+  const interventionProgram =
+    ficha?.intervention_program ||
+    extraction?.intervention_program ||
     {};
+  const isInterventionProgram = Boolean(
+    ficha?.analysis_variant === "intervention_program" ||
+      interventionProgram?.active,
+  );
+  const submissionRequirements =
+    extraction?.submission_requirements ||
+    ficha?.submission_requirements ||
+    {};
+  const program = isInterventionProgram
+    ? interventionProgram
+    : extraction?.functional_program ||
+      extraction?.program_functional ||
+      ficha?.functional_program ||
+      ficha?.programa_funcional ||
+      {};
 
   const title =
     clean(concurso?.titulo) ||
@@ -677,6 +462,9 @@ export default function DesignCompetitionAnalysis({
     clean(concurso?.link) ||
     clean(ficha?.identificacao?.link);
 
+  const coverUrl =
+    `/analises/${encodeURIComponent(String(concursoId))}-capa.png`;
+
   const procedureValue = getFact(extraction, "procedure_value");
   const constructionCost = getFact(
     extraction,
@@ -687,7 +475,6 @@ export default function DesignCompetitionAnalysis({
     "design_services_value",
   );
   const financialEnrichment = extraction?.financial || {};
-  const submissionEnrichment = extraction?.submission || {};
   const contractEnrichment = extraction?.contract || {};
   const servicesDisplay =
     clean(financialEnrichment?.design_services_value_display) ||
@@ -742,68 +529,6 @@ export default function DesignCompetitionAnalysis({
     makeFact("Custo estimado da obra", constructionCost, 90),
   ];
 
-  const booklet =
-    submissionEnrichment?.digital_booklet || {};
-  const panels =
-    submissionEnrichment?.physical_panels || {};
-  const memory =
-    submissionEnrichment?.descriptive_memory || {};
-
-  const submission = [
-    makeFact(
-      "Painéis físicos",
-      panels?.quantity_confirmed
-        ? `${panels.quantity} ${panels.quantity === 1 ? "painel" : "painéis"} · ${[
-            clean(panels.format) || "formato por confirmar",
-            clean(panels.orientation),
-          ].filter(Boolean).join(" ")}`
-        : `Quantidade por confirmar${clean(panels.format) ? ` · ${[
-            clean(panels.format),
-            clean(panels.orientation),
-          ].filter(Boolean).join(" ")}` : ""}`,
-      100,
-    ),
-    makeFact(
-      "Caderno digital",
-      booklet?.required
-        ? [
-            clean(booklet.format),
-            clean(booklet.page_size),
-            clean(booklet.orientation),
-            booklet.max_pages
-              ? `máx. ${booklet.max_pages} páginas`
-              : "",
-          ].filter(Boolean).join(" · ")
-        : "",
-      110,
-    ),
-    makeFact(
-      "Memória descritiva",
-      memory?.integrated_in
-        ? `Incluída no ${memory.integrated_in}`
-        : memory?.required
-        ? "Obrigatória"
-        : "",
-      110,
-    ),
-    makeFact(
-      "Anonimato",
-      clean(submissionEnrichment?.anonymity),
-      80,
-    ),
-    makeFact(
-      "Plataforma",
-      clean(submissionEnrichment?.platform) ||
-        getFact(extraction, "submission_platform"),
-      95,
-    ),
-    makeFact(
-      "Prazo de entrega",
-      getFact(extraction, "submission_deadline"),
-      100,
-    ),
-  ];
-
   const contractKeys = [
     "project_phases",
     "execution_project",
@@ -853,35 +578,6 @@ export default function DesignCompetitionAnalysis({
     ),
   ];
 
-  const evaluation = [
-    makeFact(
-      "Júri",
-      clean(ficha?.jury?.summary) ||
-        clean(ficha?.document_insights?.jury),
-      110,
-    ),
-    makeFact("Modelo de avaliação", criteria, 110),
-    makeFact(
-      "Critérios principais",
-      clean(ficha?.criterio_detalhe) ||
-        clean(ficha?.criterios?.detalhe),
-      130,
-    ),
-    makeFact(
-      "Riscos de exclusão",
-      Array.isArray(presentation?.risks)
-        ? `${presentation.risks.length} pontos`
-        : "",
-      80,
-    ),
-    makeFact(
-      "Informação em falta",
-      Array.isArray(presentation?.missing_information)
-        ? `${presentation.missing_information.length} itens`
-        : "",
-      80,
-    ),
-  ];
 
   const matching =
     ficha?.company_matching ||
@@ -953,11 +649,6 @@ export default function DesignCompetitionAnalysis({
       90,
     ),
     makeFact(
-      "Entrega das propostas",
-      deadline,
-      100,
-    ),
-    makeFact(
       "Pedidos de esclarecimento",
       getFact(extraction, "clarification_deadline"),
       120,
@@ -966,6 +657,11 @@ export default function DesignCompetitionAnalysis({
       "Visita ao local",
       getFact(extraction, "site_visit"),
       120,
+    ),
+    makeFact(
+      "Entrega das propostas",
+      deadline,
+      100,
     ),
   ];
 
@@ -979,7 +675,11 @@ export default function DesignCompetitionAnalysis({
 
         <div className="dc-hero-grid">
           <div>
-            <span className="dc-kicker">Análise automática de concurso</span>
+            <span className="dc-kicker">
+              {isInterventionProgram
+                ? "Análise de projeto e intervenção"
+                : "Análise automática de concurso"}
+            </span>
             <h1>{title}</h1>
             <div className="dc-meta">
               {location ? (
@@ -992,17 +692,32 @@ export default function DesignCompetitionAnalysis({
             </div>
           </div>
 
-          {officialUrl ? (
-            <a
-              className="dc-official"
-              href={officialUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Ver concurso no portal
-              <ExternalLink size={15} />
-            </a>
-          ) : null}
+          <div className="dc-hero-media">
+            <img
+              src={coverUrl}
+              alt=""
+              onError={(event) => {
+                const image = event.currentTarget;
+                const wrapper = image.parentElement;
+                image.remove();
+                if (wrapper && !officialUrl) {
+                  wrapper.style.display = "none";
+                }
+              }}
+            />
+
+            {officialUrl ? (
+              <a
+                className="dc-official"
+                href={officialUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Ver concurso no portal
+                <ExternalLink size={15} />
+              </a>
+            ) : null}
+          </div>
         </div>
       </header>
 
@@ -1072,106 +787,40 @@ export default function DesignCompetitionAnalysis({
               <article className="dc-card">
                 <div className="dc-card-title">
                   <Trophy size={18} />
-                  <h3>Valores financeiros</h3>
+                  <h3>
+                    {isInterventionProgram
+                      ? "Preço e critérios"
+                      : "Valores financeiros"}
+                  </h3>
                 </div>
                 <FactRows items={financial} />
               </article>
 
-              <article className="dc-card">
-                <div className="dc-card-title">
-                  <FileText size={18} />
-                  <h3>Candidatura e entrega</h3>
-                </div>
-                <FactRows items={submission} />
-                <DomainDetailsButton
-                  label="Ver requisitos completos de entrega"
-                  title="Candidatura e entrega"
-                  sections={[
-                    {
-                      title: "Painéis físicos",
-                      items: [
-                        {
-                          label: "Quantidade",
-                          value: panels?.quantity_confirmed
-                            ? String(panels.quantity)
-                            : EMPTY,
-                        },
-                        {
-                          label: "Formato",
-                          value: [
-                            clean(panels?.format),
-                            clean(panels?.orientation),
-                          ].filter(Boolean).join(" ") || EMPTY,
-                        },
-                      ],
-                    },
-                    {
-                      title: "Caderno digital",
-                      items: [
-                        {
-                          label: "Documento",
-                          value: clean(booklet?.name) || EMPTY,
-                        },
-                        {
-                          label: "Formato",
-                          value: [
-                            clean(booklet?.format),
-                            clean(booklet?.page_size),
-                            clean(booklet?.orientation),
-                          ].filter(Boolean).join(" · ") || EMPTY,
-                        },
-                        {
-                          label: "Limite",
-                          value: booklet?.max_pages
-                            ? `${booklet.max_pages} páginas`
-                            : EMPTY,
-                        },
-                      ],
-                    },
-                    {
-                      title: "Memória e regras",
-                      items: [
-                        {
-                          label: "Memória descritiva",
-                          value: memory?.integrated_in
-                            ? `Incluída no ${memory.integrated_in}`
-                            : memory?.required
-                            ? "Obrigatória"
-                            : EMPTY,
-                        },
-                        {
-                          label: "Capítulos identificados",
-                          value: Array.isArray(memory?.chapters)
-                            ? memory.chapters.join(" · ")
-                            : EMPTY,
-                        },
-                        {
-                          label: "Anonimato",
-                          value:
-                            clean(submissionEnrichment?.anonymity) ||
-                            EMPTY,
-                        },
-                        {
-                          label: "Plataforma",
-                          value:
-                            clean(submissionEnrichment?.platform) ||
-                            EMPTY,
-                        },
-                      ],
-                    },
-                  ]}
-                />
-              </article>
+              <SubmissionRequirementsCards
+                              requirements={submissionRequirements}
+                            />
 
               <article className="dc-card">
                 <div className="dc-card-title">
                   <Layers3 size={18} />
-                  <h3>Contrato e pós-adjudicação</h3>
+                  <h3>
+                    {isInterventionProgram
+                      ? "Equipa, fases e especialidades"
+                      : "Contrato e pós-adjudicação"}
+                  </h3>
                 </div>
                 <FactRows items={contract} />
                 <DomainDetailsButton
-                  label="Ver obrigações contratuais completas"
-                  title="Contrato e pós-adjudicação"
+                  label={
+                    isInterventionProgram
+                      ? "Ver equipa, fases e especialidades"
+                      : "Ver obrigações contratuais completas"
+                  }
+                  title={
+                    isInterventionProgram
+                      ? "Equipa, fases e especialidades"
+                      : "Contrato e pós-adjudicação"
+                  }
                   sections={[
                     {
                       title: "Fases do projeto",
@@ -1246,51 +895,38 @@ export default function DesignCompetitionAnalysis({
                 />
               </article>
 
-              <article className="dc-card">
-                <div className="dc-card-title">
-                  <ClipboardCheck size={18} />
-                  <h3>Avaliação e riscos</h3>
-                </div>
-                <FactRows items={evaluation} />
-              </article>
+
             </div>
           </section>
 
           <section className="dc-program">
             <div className="dc-heading">
-              <span>Programa funcional</span>
-              <h2>Resumo do programa preliminar</h2>
+              <span>
+                {isInterventionProgram
+                  ? "Programa de intervenção"
+                  : "Programa funcional"}
+              </span>
+              <h2>
+                {isInterventionProgram
+                  ? "Síntese territorial e técnica"
+                  : "Resumo do programa preliminar"}
+              </h2>
             </div>
 
-            <FunctionalProgramSummaryCard
-              functionalProgram={program}
-              extraction={extraction}
-            />
+            {isInterventionProgram ? (
+              <InterventionProgramSummaryCard
+                program={interventionProgram}
+              />
+            ) : (
+              <FunctionalProgramSummaryCard
+                functionalProgram={program}
+                extraction={extraction}
+              />
+            )}
           </section>
 
-          <AiPanel title="Aderência à empresa">
-            <div className="dc-company">
-              <div className="dc-score">
-                <span>Compatibilidade</span>
-                <strong>{score ?? "—"}</strong>
-                <small>/100</small>
-              </div>
-              <div className="dc-ai-copy">
-                <span>Pontos fortes</span>
-                <List items={strengths} />
-              </div>
-              <div className="dc-ai-copy">
-                <span>Gaps a considerar</span>
-                <List items={weaknesses} warning />
-              </div>
-              <div className="dc-ai-copy">
-                <span>Recomendação</span>
-                <p>{recommendation}</p>
-              </div>
-            </div>
-          </AiPanel>
 
-          <div className="dc-bottom">
+          <div className="dc-bottom dc-bottom-single">
             <article className="dc-card">
               <div className="dc-card-title">
                 <FileText size={18} />
@@ -1302,22 +938,24 @@ export default function DesignCompetitionAnalysis({
               </p>
               <div className="dc-counts">
                 <span>{extraction?.counts?.facts ?? 0} factos</span>
-                <span>{extraction?.counts?.areas ?? 0} áreas</span>
-                <span>{extraction?.counts?.spaces ?? 0} espaços</span>
+                <span>
+                  {isInterventionProgram
+                    ? `${interventionProgram?.counts?.confirmed_themes ?? 0} temas confirmados`
+                    : `${extraction?.counts?.areas ?? 0} áreas`}
+                </span>
+                <span>
+                  {isInterventionProgram
+                    ? `${interventionProgram?.counts?.source_documents ?? 0} fontes`
+                    : `${extraction?.counts?.spaces ?? 0} espaços`}
+                </span>
               </div>
             </article>
 
-            <article className="dc-card">
-              <div className="dc-card-title">
-                <CalendarDays size={18} />
-                <h3>Cronograma do concurso</h3>
-              </div>
-              <FactRows items={timeline} />
-            </article>
           </div>
         </div>
 
         <aside className="dc-sidebar">
+          <TimelineSidebarCard items={timeline} />
           <ProjectInfoPanel ficha={ficha} />
         </aside>
       </div>
@@ -1345,8 +983,8 @@ export default function DesignCompetitionAnalysis({
 
         .dc-hero-grid {
           display: grid;
-          grid-template-columns: minmax(0, 1fr) auto;
-          gap: 30px;
+          grid-template-columns: minmax(0, 1fr) minmax(250px, 330px);
+          gap: 34px;
           align-items: start;
         }
 
@@ -1361,11 +999,11 @@ export default function DesignCompetitionAnalysis({
         }
 
         .dc-hero h1 {
-          max-width: 1000px;
+          max-width: 860px;
           margin: 8px 0 14px;
-          font-size: clamp(30px, 3vw, 46px);
-          line-height: 1.04;
-          letter-spacing: -0.035em;
+          font-size: clamp(26px, 2.35vw, 38px);
+          line-height: 1.08;
+          letter-spacing: -0.032em;
         }
 
         .dc-meta {
@@ -1382,10 +1020,27 @@ export default function DesignCompetitionAnalysis({
           gap: 7px;
         }
 
+        .dc-hero-media {
+          display: grid;
+          gap: 10px;
+          width: 100%;
+        }
+
+        .dc-hero-media img {
+          display: block;
+          width: 100%;
+          aspect-ratio: 4 / 3;
+          border-radius: 14px;
+          object-fit: cover;
+          background: #eef0ea;
+        }
+
         .dc-official {
           display: inline-flex;
           align-items: center;
+          justify-content: center;
           gap: 9px;
+          width: 100%;
           padding: 13px 18px;
           border-radius: 9px;
           background: #587436;
@@ -1458,6 +1113,110 @@ export default function DesignCompetitionAnalysis({
         .dc-sidebar {
           position: sticky;
           top: 84px;
+        }
+
+        .dc-sidebar {
+          display: grid;
+          gap: 10px;
+        }
+
+        .dc-side-timeline {
+          padding: 18px;
+          border: 1px solid #dfe4d8;
+          border-radius: 15px;
+          background: #ffffff;
+        }
+
+        .dc-side-timeline-heading {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding-bottom: 14px;
+          border-bottom: 1px solid #e7eae3;
+        }
+
+        .dc-side-timeline-heading > svg {
+          color: #607b3f;
+        }
+
+        .dc-side-timeline-heading span {
+          display: block;
+          color: #6d8044;
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: 0.13em;
+          text-transform: uppercase;
+        }
+
+        .dc-side-timeline-heading h3 {
+          margin: 3px 0 0;
+          font-size: 15px;
+        }
+
+        .dc-side-timeline-list {
+          display: grid;
+          margin-top: 15px;
+        }
+
+        .dc-side-timeline-item {
+          position: relative;
+          display: grid;
+          grid-template-columns: 14px 1fr;
+          gap: 9px;
+          min-height: 55px;
+        }
+
+        .dc-side-timeline-item:not(:last-child)::after {
+          content: "";
+          position: absolute;
+          top: 13px;
+          bottom: -2px;
+          left: 5px;
+          width: 1px;
+          background: #dce3d4;
+        }
+
+        .dc-side-timeline-item i {
+          position: relative;
+          z-index: 1;
+          width: 11px;
+          height: 11px;
+          margin-top: 2px;
+          border: 2px solid #718a4c;
+          border-radius: 999px;
+          background: #ffffff;
+        }
+
+        .dc-side-timeline-item.is-deadline i {
+          border-color: #587436;
+          background: #587436;
+        }
+
+        .dc-side-timeline-item span {
+          display: block;
+          color: #73786f;
+          font-size: 10px;
+        }
+
+        .dc-side-timeline-item strong {
+          display: block;
+          margin-top: 4px;
+          font-size: 12px;
+          line-height: 1.35;
+        }
+
+        .dc-side-timeline-item.is-deadline strong {
+          color: #4e6b31;
+        }
+
+        .dc-side-timeline-empty {
+          margin: 14px 0 0;
+          color: #73786f;
+          font-size: 12px;
+        }
+
+        .dc-bottom-single {
+          grid-template-columns: 1fr;
         }
 
         .dc-ai {

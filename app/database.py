@@ -1,8 +1,8 @@
 import json
 import re
 import sqlite3
-
-from .sqlite_snapshot import SnapshotConnection
+import unicodedata
+from difflib import SequenceMatcher
 from contextlib import closing
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -99,11 +99,7 @@ COLUNAS_ADICIONAIS = {
 
 def abrir_conexao() -> sqlite3.Connection:
     """Abre a base principal com as garantias usadas pela API."""
-    conexao = sqlite3.connect(
-        DB_PATH,
-        timeout=5,
-        factory=SnapshotConnection,
-    )
+    conexao = sqlite3.connect(DB_PATH, timeout=5)
     conexao.row_factory = sqlite3.Row
     conexao.execute("PRAGMA foreign_keys = ON")
     conexao.execute("PRAGMA busy_timeout = 5000")
@@ -1128,6 +1124,41 @@ def criar_base_dados():
             REFERENCES concursos(id)
             ON DELETE CASCADE
         )
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS concurso_fontes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            concurso_id INTEGER NOT NULL,
+            fonte TEXT NOT NULL,
+            referencia TEXT NOT NULL,
+            pagina_url TEXT,
+            documentos_url TEXT,
+            estado_fonte TEXT,
+            titulo_origem TEXT,
+            first_seen_at TEXT NOT NULL,
+            last_seen_at TEXT NOT NULL,
+            principal INTEGER NOT NULL DEFAULT 0,
+            metadata_json TEXT,
+            UNIQUE(fonte, referencia),
+            FOREIGN KEY(concurso_id)
+                REFERENCES concursos(id)
+                ON DELETE CASCADE
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_concurso_fontes_concurso
+        ON concurso_fontes(concurso_id)
+        """
+    )
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_concurso_fontes_fonte_estado
+        ON concurso_fontes(fonte, estado_fonte)
         """
     )
 
@@ -3180,6 +3211,191 @@ def _texto_ou_none(valor):
     return texto
 
 
+def _normalizar_chave_concurso(valor) -> str:
+    texto = unicodedata.normalize("NFD", str(valor or ""))
+    texto = "".join(
+        caractere for caractere in texto
+        if unicodedata.category(caractere) != "Mn"
+    ).casefold()
+    return re.sub(r"[^a-z0-9]+", " ", texto).strip()
+
+
+def _normalizar_entidade_concurso(valor) -> str:
+    texto = _normalizar_chave_concurso(valor)
+    aliases = {
+        "lisboa sru": "lisboa ocidental sru",
+        "lisboa ocidental sru em sa": "lisboa ocidental sru",
+        "lisboa ocidental sru em s a": "lisboa ocidental sru",
+        "lisboa ocidental sru sociedade de reabilitacao urbana em sa": (
+            "lisboa ocidental sru"
+        ),
+        "lisboa ocidental sru sociedade de reabilitacao urbana em s a": (
+            "lisboa ocidental sru"
+        ),
+    }
+    return aliases.get(texto, texto)
+
+
+def _assinatura_titulo_concurso(valor) -> str:
+    palavras_genericas = {
+        "concurso", "publico", "internacional", "para", "a", "o", "de",
+        "da", "do", "das", "dos", "e", "em", "por", "aquisicao",
+        "servicos", "elaboracao", "empreitada",
+    }
+    return " ".join(
+        token
+        for token in _normalizar_chave_concurso(valor).split()
+        if token not in palavras_genericas and len(token) > 1
+    )
+
+
+def _semelhanca_titulo_concurso(esquerda, direita) -> float:
+    primeiro = _assinatura_titulo_concurso(esquerda)
+    segundo = _assinatura_titulo_concurso(direita)
+    if not primeiro or not segundo:
+        return 0.0
+    sequencia = SequenceMatcher(None, primeiro, segundo).ratio()
+    conjunto_a = set(primeiro.split())
+    conjunto_b = set(segundo.split())
+    intersecao = conjunto_a & conjunto_b
+    jaccard = len(intersecao) / max(1, len(conjunto_a | conjunto_b))
+    contencao = len(intersecao) / max(1, min(len(conjunto_a), len(conjunto_b)))
+    return max(sequencia, (jaccard * 0.55) + (contencao * 0.45))
+
+
+def _promover_fonte_externa_para_base(
+    cursor,
+    *,
+    titulo,
+    entidade,
+    link,
+    data,
+    data_limite,
+    data_esclarecimentos,
+    preco_base,
+    cpv,
+    tipo_procedimento,
+    criterio_tipo,
+    criterio_resumo,
+    criterio_detalhe,
+    entregaveis,
+    link_anuncio_dr,
+    link_pecas,
+    data_entrega_propostas,
+    municipio,
+    freguesia,
+    morada,
+    codigo_postal,
+    latitude,
+    longitude,
+    localizacao_contexto,
+):
+    """Promove um registo de fonte externa quando a BASE.gov publica o duplicado.
+
+    A regra só é aplicada a links da BASE.gov e apenas com correspondência
+    forte de entidade e título. O ID existente é preservado para não quebrar
+    favoritos, alertas ou análises. Todas as fontes complementares são
+    consideradas, não apenas a Lisboa SRU.
+    """
+    if "base.gov.pt" not in str(link or "").casefold():
+        return None
+
+    try:
+        candidatos = cursor.execute(
+            """
+            SELECT DISTINCT c.*
+            FROM concursos AS c
+            JOIN concurso_fontes AS cf ON cf.concurso_id = c.id
+            WHERE cf.fonte <> 'base_gov'
+              AND LOWER(COALESCE(c.link, '')) NOT LIKE '%base.gov.pt%'
+            """
+        ).fetchall()
+    except sqlite3.OperationalError:
+        return None
+
+    entidade_nova = _normalizar_entidade_concurso(entidade)
+    melhor = None
+    melhor_pontuacao = 0.0
+    for candidato in candidatos:
+        entidade_existente = _normalizar_entidade_concurso(candidato["entidade"])
+        if entidade_nova and entidade_existente and entidade_nova != entidade_existente:
+            continue
+        pontuacao = _semelhanca_titulo_concurso(titulo, candidato["titulo"])
+        if pontuacao >= 0.88 and pontuacao > melhor_pontuacao:
+            melhor = candidato
+            melhor_pontuacao = pontuacao
+
+    if melhor is None:
+        return None
+
+    concurso_id = int(melhor["id"])
+    cursor.execute(
+        """
+        UPDATE concursos
+        SET titulo = COALESCE(?, titulo),
+            entidade = COALESCE(?, entidade),
+            link = ?,
+            data = COALESCE(?, data),
+            data_limite = COALESCE(?, data_limite),
+            data_esclarecimentos = COALESCE(?, data_esclarecimentos),
+            preco_base = COALESCE(?, preco_base),
+            cpv = COALESCE(?, cpv),
+            tipo_procedimento = COALESCE(?, tipo_procedimento),
+            criterio_tipo = COALESCE(?, criterio_tipo),
+            criterio_resumo = COALESCE(?, criterio_resumo),
+            criterio_detalhe = COALESCE(?, criterio_detalhe),
+            entregaveis = COALESCE(?, entregaveis),
+            link_anuncio_dr = COALESCE(?, link_anuncio_dr),
+            link_pecas = COALESCE(?, link_pecas),
+            data_entrega_propostas = COALESCE(?, data_entrega_propostas),
+            municipio = COALESCE(?, municipio),
+            freguesia = COALESCE(?, freguesia),
+            morada = COALESCE(?, morada),
+            codigo_postal = COALESCE(?, codigo_postal),
+            latitude = COALESCE(?, latitude),
+            longitude = COALESCE(?, longitude),
+            localizacao_contexto = COALESCE(?, localizacao_contexto),
+            relevante = 1
+        WHERE id = ?
+        """,
+        (
+            _texto_ou_none(titulo),
+            _texto_ou_none(entidade),
+            link,
+            _texto_ou_none(data),
+            _texto_ou_none(data_limite),
+            _texto_ou_none(data_esclarecimentos),
+            _texto_ou_none(preco_base),
+            _texto_ou_none(cpv),
+            _texto_ou_none(tipo_procedimento),
+            _texto_ou_none(criterio_tipo),
+            _texto_ou_none(criterio_resumo),
+            _texto_ou_none(criterio_detalhe),
+            _texto_ou_none(entregaveis),
+            _texto_ou_none(link_anuncio_dr),
+            _texto_ou_none(link_pecas),
+            _texto_ou_none(data_entrega_propostas),
+            _texto_ou_none(municipio),
+            _texto_ou_none(freguesia),
+            _texto_ou_none(morada),
+            _texto_ou_none(codigo_postal),
+            latitude,
+            longitude,
+            _texto_ou_none(localizacao_contexto),
+            concurso_id,
+        ),
+    )
+    cursor.execute(
+        """
+        UPDATE concurso_fontes
+        SET principal = 0
+        WHERE concurso_id = ?
+        """,
+        (concurso_id,),
+    )
+    return concurso_id
+
+
 def guardar_concurso(
     titulo,
     entidade,
@@ -3216,6 +3432,36 @@ def guardar_concurso(
     cursor = conn.cursor()
 
     try:
+        promovido = _promover_fonte_externa_para_base(
+            cursor,
+            titulo=titulo,
+            entidade=entidade,
+            link=link,
+            data=data,
+            data_limite=data_limite,
+            data_esclarecimentos=data_esclarecimentos,
+            preco_base=preco_base,
+            cpv=cpv,
+            tipo_procedimento=tipo_procedimento,
+            criterio_tipo=criterio_tipo,
+            criterio_resumo=criterio_resumo,
+            criterio_detalhe=criterio_detalhe,
+            entregaveis=entregaveis,
+            link_anuncio_dr=link_anuncio_dr,
+            link_pecas=link_pecas,
+            data_entrega_propostas=data_entrega_propostas,
+            municipio=municipio,
+            freguesia=freguesia,
+            morada=morada,
+            codigo_postal=codigo_postal,
+            latitude=latitude,
+            longitude=longitude,
+            localizacao_contexto=localizacao_contexto,
+        )
+        if promovido is not None:
+            conn.commit()
+            return promovido
+
         cursor.execute(
             """
             INSERT INTO concursos (

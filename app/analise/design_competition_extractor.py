@@ -12,6 +12,10 @@ from app.architecture_intelligence.schemas import (
     ConsolidatedCompetitionData,
 )
 
+from app.analise.submission_requirements import (
+    extract_submission_requirements,
+)
+
 
 TARGET_FIELDS = {
     "competition_prize_first",
@@ -1160,6 +1164,7 @@ def apply_design_competition_extraction(
     textos: dict[str, str],
 ) -> ConsolidatedCompetitionData:
     documents = _documents(textos)
+    submission_requirements = extract_submission_requirements(textos)
     facts: dict[str, dict[str, Any]] = {}
 
     _financial_facts(documents, facts)
@@ -1232,6 +1237,9 @@ def apply_design_competition_extraction(
             "constraints": len(program.get("constraints") or []),
         },
     }
+
+    extraction["submission_requirements"] = submission_requirements
+    ficha["submission_requirements"] = submission_requirements
 
     ficha["design_competition_extraction"] = extraction
     ficha["programa_funcional"] = program["functional_program"]

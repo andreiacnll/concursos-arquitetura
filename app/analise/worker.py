@@ -2038,6 +2038,23 @@ def _guardar_resultados(
     pasta.mkdir(parents=True, exist_ok=True)
 
     try:
+        from .intervention_program import apply_intervention_program
+
+        intervention_program = apply_intervention_program(
+            ficha=ficha,
+            textos=textos,
+        )
+    except Exception as erro:
+        intervention_program = {
+            "active": False,
+            "version": "intervention-program-v1",
+            "warnings": [f"{type(erro).__name__}: {erro}"],
+        }
+
+    if intervention_program.get("active"):
+        resumo_documentos["intervention_program"] = intervention_program
+
+    try:
         from .semantic_product_bridge import (
             attach_semantic_product_data,
         )
