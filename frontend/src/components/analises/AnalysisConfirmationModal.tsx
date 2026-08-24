@@ -104,8 +104,8 @@ export default function AnalysisConfirmationModal({
 
         <h3 id="analise-confirm-title">Criar análise AI?</h3>
         <p>
-          A análise AI irá recolher os documentos oficiais do Base.gov e
-          gerar uma análise CNLL deste concurso.
+          A análise AI irá recolher os documentos oficiais disponíveis na
+          fonte do concurso e gerar uma análise CNLL atualizada.
         </p>
 
         <div className="analise-confirm-detail">

@@ -93,6 +93,9 @@ class CompanyProjectExperience(BaseModel):
     typology: str = ""
     location: str = ""
     skills_demonstrated: list[str] = Field(default_factory=list)
+    normalized_typology: str = ""
+    original_typology: str = ""
+    source: str = ""
 
 
 class CompanyPreferences(BaseModel):
@@ -109,6 +112,25 @@ class CompanyMemory(BaseModel):
     open_questions: list[str] = Field(default_factory=list)
 
 
+class CompanyCVEntry(BaseModel):
+    id: str = ""
+    category: str = "fact"
+    title: str = ""
+    description: str = ""
+    reuse_key: str = ""
+    scope: str = "company"
+    role: str = ""
+    person: str = ""
+    project: str = ""
+    metric: str = ""
+    numeric_value: float | None = None
+    unit: str = ""
+    answer: str = ""
+    status: str = "confirmed"
+    source: str = "manual"
+    requirement_ids: list[str] = Field(default_factory=list)
+
+
 class CompanyProfile(BaseModel):
     # Futuro: este perfil ficará ligado a company_id e será alimentado
     # pelo extractor AI, interviewer, knowledge base e scoring.
@@ -122,6 +144,12 @@ class CompanyProfile(BaseModel):
     project_experience: list[CompanyProjectExperience] = Field(
         default_factory=list
     )
+    project_experience_summary: list[dict[str, Any]] = Field(
+        default_factory=list
+    )
+    project_experience_counts: dict[str, int] = Field(default_factory=dict)
+    project_counts_by_typology: dict[str, int] = Field(default_factory=dict)
+    cv: list[CompanyCVEntry] = Field(default_factory=list)
     preferences: CompanyPreferences = Field(
         default_factory=CompanyPreferences
     )
@@ -178,6 +206,13 @@ class CompanyProfile(BaseModel):
             location = " ".join(text(project.location).lower().split())
             return name, typology, location
 
+        def project_identity_key(
+            project: CompanyProjectExperience,
+        ) -> tuple[str, str]:
+            name = " ".join(text(project.name).lower().split())
+            location = " ".join(text(project.location).lower().split())
+            return name, location
+
         def merge_projects(
             current: list[CompanyProjectExperience],
             incoming: list[CompanyProjectExperience],
@@ -186,6 +221,11 @@ class CompanyProfile(BaseModel):
             indexes = {
                 project_key(project): index
                 for index, project in enumerate(result)
+            }
+            identity_indexes = {
+                project_identity_key(project): index
+                for index, project in enumerate(result)
+                if text(project.name)
             }
 
             for project in incoming or []:
@@ -204,12 +244,25 @@ class CompanyProfile(BaseModel):
                     continue
 
                 key = project_key(project)
-                if key in indexes:
-                    existing = result[indexes[key]]
+                identity_key = project_identity_key(project)
+                existing_index = indexes.get(key)
+                if existing_index is None and text(project.name):
+                    existing_index = identity_indexes.get(identity_key)
+
+                if existing_index is not None:
+                    existing = result[existing_index]
                     existing.name = merge_text(existing.name, project.name)
                     existing.typology = merge_text(
                         existing.typology,
                         project.typology,
+                    )
+                    existing.normalized_typology = merge_text(
+                        existing.normalized_typology,
+                        project.normalized_typology,
+                    )
+                    existing.original_typology = merge_text(
+                        existing.original_typology,
+                        project.original_typology,
                     )
                     existing.location = merge_text(
                         existing.location,
@@ -219,10 +272,16 @@ class CompanyProfile(BaseModel):
                         existing.skills_demonstrated,
                         project.skills_demonstrated,
                     )
+                    existing.source = merge_text(existing.source, project.source)
+                    indexes[project_key(existing)] = existing_index
+                    if text(existing.name):
+                        identity_indexes[project_identity_key(existing)] = existing_index
                     continue
 
                 result.append(project.model_copy(deep=True))
                 indexes[key] = len(result) - 1
+                if text(project.name):
+                    identity_indexes[identity_key] = len(result) - 1
 
             return result
 
@@ -257,6 +316,18 @@ class CompanyProfile(BaseModel):
         merged.project_experience = merge_projects(
             merged.project_experience,
             incoming.project_experience,
+        )
+        merged.project_experience_summary = (
+            incoming.project_experience_summary
+            or merged.project_experience_summary
+        )
+        merged.project_experience_counts = (
+            incoming.project_experience_counts
+            or merged.project_experience_counts
+        )
+        merged.project_counts_by_typology = (
+            incoming.project_counts_by_typology
+            or merged.project_counts_by_typology
         )
         merged.preferences = CompanyPreferences(
             typologies=merge_list(

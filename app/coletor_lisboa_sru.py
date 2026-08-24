@@ -153,6 +153,8 @@ class CollectionReport:
     already_known: int = 0
     source_state_updated: int = 0
     outside_window: int = 0
+    enriched_before_analysis: int = 0
+    enrichment_errors: int = 0
 
 
 def now_portugal() -> datetime:
@@ -333,6 +335,11 @@ def parse_page(html: str) -> list[SourceProcedure]:
 
 def infer_procedure_type(title: str) -> str:
     text = normalize(title)
+    if (
+        "concecao construcao" in text
+        or "concepcao construcao" in text
+    ):
+        return "Conceção-Construção"
     if "concurso publico internacional" in text:
         return "Concurso Público Internacional"
     if "concurso de ideias" in text:
@@ -797,6 +804,27 @@ def collect(
 
     if not dry_run:
         save_checkpoint(checkpoint, checkpoint_path)
+
+        # O enriquecimento leve é posterior à recolha e não cria análises AI.
+        # Falhas de plataformas/documentos nunca anulam a recolha principal.
+        try:
+            from app.analise.pre_analysis_enrichment import (
+                automatic_enabled,
+                enrich_many,
+                source_concurso_ids,
+            )
+
+            if automatic_enabled():
+                maximum = max(1, int(os.getenv("LISBOA_SRU_MAX_ENRIQUECIMENTOS", "8")))
+                ids = source_concurso_ids(SOURCE_NAME)[:maximum]
+                for enrichment in enrich_many(ids, root=Path.cwd(), allow_download=True):
+                    if enrichment.status in {"updated", "no_new_verified_fields", "classified_without_documents"}:
+                        report.enriched_before_analysis += 1
+                    else:
+                        report.enrichment_errors += 1
+        except Exception as error:
+            report.enrichment_errors += 1
+            print(f"AVISO: enriquecimento pré-análise não concluído: {error}")
     return selected, report
 
 
@@ -824,6 +852,8 @@ def print_report(
         print(f"- associados a registos BASE.gov: {report.associated_to_base}")
         print(f"- já conhecidos: {report.already_known}")
         print(f"- estados de fonte atualizados: {report.source_state_updated}")
+        print(f"- concursos enriquecidos antes da análise: {report.enriched_before_analysis}")
+        print(f"- falhas não bloqueantes de enriquecimento: {report.enrichment_errors}")
     print("- concursos selecionados:")
     for item in procedures:
         print(f"  · {item.reference} — {item.title}")

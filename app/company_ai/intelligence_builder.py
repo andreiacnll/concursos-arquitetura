@@ -29,9 +29,12 @@ def _texto_limpo(valor: Any) -> str:
 
 
 def _normalizar_tipologia(valor: Any) -> str:
-    return _texto_limpo(
+    tipologia = _texto_limpo(
         normalize_concept(valor, TYPOLOGY_TAXONOMY)
     )
+    if tipologia.casefold() in CANONICAL_TYPOLOGY_KEYS:
+        return tipologia
+    return ""
 
 
 def _chave_projeto(
@@ -114,53 +117,88 @@ def _inferir_tipologia_projeto(*valores: Any) -> str:
     return ""
 
 
+def _separar_valores_tipologia(valor: Any) -> list[str]:
+    if valor is None:
+        return []
+    if isinstance(valor, (list, tuple, set)):
+        resultado: list[str] = []
+        for item in valor:
+            resultado.extend(_separar_valores_tipologia(item))
+        return resultado
+    texto = _texto_limpo(valor)
+    if not texto:
+        return []
+    return [
+        parte.strip()
+        for parte in re.split(r"[,;/+|]|\s+ e \s+", texto)
+        if parte.strip()
+    ] or [texto]
+
+
+def _inferir_tipologias_projeto(*valores: Any) -> list[str]:
+    tipologias: list[str] = []
+    for valor in valores:
+        for candidato in _separar_valores_tipologia(valor):
+            tipologia = _inferir_tipologia_projeto(candidato)
+            if tipologia:
+                tipologias.append(tipologia)
+    return _lista_unica(tipologias)
+
+
+def classificar_tipologia_projeto(*valores: Any) -> str:
+    return _inferir_tipologia_projeto(*valores)
+
+
 def _iterar_projetos_reais(company_profile, members):
     for project in company_profile.project_experience:
         skills = list(getattr(project, "skills_demonstrated", []) or [])
         nome = getattr(project, "name", "")
         tipologia_original = getattr(project, "typology", "")
         localizacao = getattr(project, "location", "")
-        tipologia = _inferir_tipologia_projeto(
+        tipologias = _inferir_tipologias_projeto(
             getattr(project, "normalized_typology", ""),
             tipologia_original,
             getattr(project, "original_typology", ""),
             nome,
+            skills,
         )
         if _is_placeholder_project(nome, tipologia_original, localizacao, skills):
             continue
-        if not tipologia:
+        if not tipologias:
             continue
 
-        yield {
-            "name": _texto_limpo(nome),
-            "typology": tipologia,
-            "original_typology": _texto_limpo(tipologia_original),
-            "normalized_typology": tipologia,
-            "location": _texto_limpo(localizacao),
-            "skills_demonstrated": skills,
-            "source": "company_profile",
-        }
+        for tipologia in tipologias:
+            yield {
+                "name": _texto_limpo(nome),
+                "typology": tipologia,
+                "original_typology": _texto_limpo(tipologia_original),
+                "normalized_typology": tipologia,
+                "location": _texto_limpo(localizacao),
+                "skills_demonstrated": skills,
+                "source": "company_profile",
+            }
 
     for member in members:
         member_profile = obter_member_profile(member["id"])
         for project_name in member_profile.experience.projects:
             nome = _texto_limpo(project_name)
-            tipologia = _inferir_tipologia_projeto(nome)
+            tipologias = _inferir_tipologias_projeto(nome)
             if _is_placeholder_project(nome, "", "", []):
                 continue
-            if not tipologia:
+            if not tipologias:
                 continue
-            yield {
-                "name": nome,
-                "typology": tipologia,
-                "original_typology": "",
-                "normalized_typology": tipologia,
-                "location": "",
-                "skills_demonstrated": [],
-                "source": "member_profile",
-                "member_id": member["id"],
-                "user_id": member["user_id"],
-            }
+            for tipologia in tipologias:
+                yield {
+                    "name": nome,
+                    "typology": tipologia,
+                    "original_typology": "",
+                    "normalized_typology": tipologia,
+                    "location": "",
+                    "skills_demonstrated": [],
+                    "source": "member_profile",
+                    "member_id": member["id"],
+                    "user_id": member["user_id"],
+                }
 
 
 def _esta_vazio_texto(valor: Any) -> bool:
@@ -273,17 +311,16 @@ def _resumir_experiencia_projetos(
             continue
         seen_projects.add(project_key)
         counters[key] += 1
-        if len(evidence[key]) < 5:
-            evidence[key].append(
-                {
-                    "name": _texto_limpo(project.get("name")),
-                    "location": _texto_limpo(project.get("location")),
-                    "source": project.get("source") or "company_profile",
-                    "normalized_typology": typology,
-                    "original_typology": _texto_limpo(project.get("original_typology")),
-                    "skills_demonstrated": list(project.get("skills_demonstrated") or []),
-                }
-            )
+        evidence[key].append(
+            {
+                "name": _texto_limpo(project.get("name")),
+                "location": _texto_limpo(project.get("location")),
+                "source": project.get("source") or "company_profile",
+                "normalized_typology": typology,
+                "original_typology": _texto_limpo(project.get("original_typology")),
+                "skills_demonstrated": list(project.get("skills_demonstrated") or []),
+            }
+        )
 
     summary: list[dict[str, Any]] = []
     for key, count in sorted(counters.items(), key=lambda item: (-item[1], item[0])):

@@ -102,11 +102,15 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // Refresh session
-  const user = await supabase.auth
-    .getUser()
-    .then(({ data }) => data.user)
-    .catch(() => null);
+  // Validate the access token from the cookies locally (or through the
+  // project's JWKS). A network-based getUser() here made every protected
+  // navigation look unauthenticated when the middleware could not reach the
+  // Auth endpoint, even though the browser still had a valid session.
+  const { data: claimsData, error: claimsError } =
+    await supabase.auth.getClaims();
+  const user = claimsError || !claimsData?.claims?.sub
+    ? null
+    : claimsData.claims;
 
   // Redirect unauthenticated users to login
   if (isProtected && !user) {

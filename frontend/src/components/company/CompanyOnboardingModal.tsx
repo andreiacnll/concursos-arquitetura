@@ -549,7 +549,7 @@ export default function CompanyOnboardingModal({
       setSessionId(draft.sessionId ?? null);
       setQuestions(draft.questions ?? []);
       setAnswers(draft.answers ?? {});
-      setSummaryProfile(draft.summaryProfile ?? profile);
+      setSummaryProfile(normalizeCompanyProfile(draft.summaryProfile ?? profile));
       setError(null);
       setSearchResults([]);
       setSearchLoading(false);
@@ -581,7 +581,7 @@ export default function CompanyOnboardingModal({
     setSessionId(null);
     setQuestions([]);
     setAnswers({});
-    setSummaryProfile(profile);
+    setSummaryProfile(normalizeCompanyProfile(profile));
     setError(null);
     setSearchResults([]);
     setSearchLoading(false);
@@ -726,14 +726,19 @@ export default function CompanyOnboardingModal({
   if (!open) return null;
 
   function profileWithIdentity(base: CompanyProfile): CompanyProfile {
-    return {
-      ...base,
+    const normalized = normalizeCompanyProfile(base);
+    const nextCompanyName =
+      companyName.trim() || normalized.identity.company_name;
+    const nextWebsite = website.trim() || normalized.identity.website;
+
+    return normalizeCompanyProfile({
+      ...normalized,
       identity: {
-        ...base.identity,
-        company_name: companyName.trim(),
-        website: website.trim(),
+        ...normalized.identity,
+        company_name: nextCompanyName,
+        website: nextWebsite,
       },
-    };
+    });
   }
 
   async function ensureCompany(): Promise<CompanyBasicInfo> {

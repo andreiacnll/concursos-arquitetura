@@ -107,29 +107,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    let active = true;
+    let initialSessionLoaded = false;
+
+    // Subscribe before loading the initial session, but keep the provider in
+    // loading state until getSession() has completed. Otherwise the initial
+    // auth event can briefly expose user=null and AuthGuard can redirect a
+    // valid session to /auth/login.
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!active) return;
+
+      // Do not let a delayed INITIAL_SESSION event overwrite the session
+      // already resolved by getSession().
+      if (event === "INITIAL_SESSION" && initialSessionLoaded) return;
+
+      setSession(session);
+      setUser(session?.user ?? null);
+
+      if (initialSessionLoaded) {
+        setLoading(false);
+      }
+    });
+
     // Get initial session
     supabase.auth
       .getSession()
       .then(({ data: { session } }) => {
+        if (!active) return;
+
         setSession(session);
         setUser(session?.user ?? null);
       })
       .catch(() => {
+        if (!active) return;
+
         setSession(null);
         setUser(null);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        initialSessionLoaded = true;
+        if (active) setLoading(false);
+      });
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (

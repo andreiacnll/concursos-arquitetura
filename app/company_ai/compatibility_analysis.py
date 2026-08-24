@@ -312,6 +312,11 @@ def _catalog_match(value: Any, catalog: dict[str, tuple[str, ...]]) -> str:
     return _clean(value)
 
 
+def _catalog_match_strict(value: Any, catalog: dict[str, tuple[str, ...]]) -> str:
+    matched = _catalog_match(value, catalog)
+    return matched if matched in catalog else ""
+
+
 def _catalog_matches(
     values: list[str],
     catalog: dict[str, tuple[str, ...]],
@@ -381,7 +386,7 @@ def _extract_company_projects(
     for index, project in enumerate(profile_projects):
         if not isinstance(project, dict):
             project = project.model_dump() if hasattr(project, "model_dump") else {}
-        typology = _catalog_match(project.get("typology"), TYPOLOGY_ALIASES)
+        typology = _catalog_match_strict(project.get("typology"), TYPOLOGY_ALIASES)
         name = _clean(project.get("name"))
         location = _clean(project.get("location"))
         skills = _unique(_list(project.get("skills_demonstrated")))
@@ -402,10 +407,19 @@ def _extract_company_projects(
                 }
             )
 
+    def summary_projects(value: Any) -> list[dict[str, Any]]:
+        if not isinstance(value, list):
+            return []
+        return [
+            project
+            for project in value
+            if isinstance(project, dict)
+        ]
+
     for item in summary_source:
         if not isinstance(item, dict):
             continue
-        typology = _catalog_match(item.get("typology"), TYPOLOGY_ALIASES)
+        typology = _catalog_match_strict(item.get("typology"), TYPOLOGY_ALIASES)
         count = int(item.get("project_count") or 0)
         if typology:
             counts[_norm(typology)] = max(counts[_norm(typology)], count)
@@ -417,12 +431,12 @@ def _extract_company_projects(
                 "experience_level_score": int(item.get("experience_level_score") or 0),
                 "origins": _unique(_list(item.get("origins"))),
                 "confidence": float(item.get("confidence") or 0.0),
-                "projects": [p for p in _list(item.get("projects"))][:5],
+                "projects": summary_projects(item.get("projects")),
             }
         )
 
     for typology, count in counts_source.items():
-        text = _catalog_match(typology, TYPOLOGY_ALIASES)
+        text = _catalog_match_strict(typology, TYPOLOGY_ALIASES)
         if text:
             counts[_norm(text)] = max(counts[_norm(text)], int(count or 0))
 
@@ -444,7 +458,7 @@ def _build_project_summary(
         for item in explicit:
             if not isinstance(item, dict):
                 continue
-            typology = _catalog_match(item.get("typology"), TYPOLOGY_ALIASES)
+            typology = _catalog_match_strict(item.get("typology"), TYPOLOGY_ALIASES)
             count = int(item.get("project_count") or 0)
             level = _clean(item.get("experience_level")) or "Not Found"
             level_score = int(item.get("experience_level_score") or 0)
@@ -462,7 +476,7 @@ def _build_project_summary(
                         "experience_level_score": level_score,
                         "origins": _unique(_list(item.get("origins"))),
                         "confidence": float(item.get("confidence") or 0.0),
-                        "projects": projects[:5],
+                        "projects": projects,
                     }
                 )
         if result:
@@ -502,15 +516,14 @@ def _build_project_summary(
             },
         )
         grouped[key]["project_count"] += 1
-        if len(grouped[key]["projects"]) < 5:
-            grouped[key]["projects"].append(
-                {
-                    "name": project.get("name") or "Not Found",
-                    "location": project.get("location") or "Not Found",
-                    "source": project.get("source") or "company_profile",
-                    "skills_demonstrated": list(project.get("skills_demonstrated") or []),
-                }
-            )
+        grouped[key]["projects"].append(
+            {
+                "name": project.get("name") or "Not Found",
+                "location": project.get("location") or "Not Found",
+                "source": project.get("source") or "company_profile",
+                "skills_demonstrated": list(project.get("skills_demonstrated") or []),
+            }
+        )
 
     for key, item in grouped.items():
         count = int(item["project_count"])

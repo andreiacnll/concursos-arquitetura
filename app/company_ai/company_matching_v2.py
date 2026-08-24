@@ -267,9 +267,13 @@ def _normalize_profile(
     counts: dict[str, int] = defaultdict(int)
     summary: list[dict[str, Any]] = []
 
+    def normalize_typology_strict(value: Any) -> str:
+        typology = normalize_concept(value, TYPOLOGY_TAXONOMY)
+        return typology if typology in TYPOLOGY_TAXONOMY else ""
+
     for project in project_experience:
         project_dict = _as_dict(project)
-        typology = normalize_concept(project_dict.get("typology") or project_dict.get("type"), TYPOLOGY_TAXONOMY)
+        typology = normalize_typology_strict(project_dict.get("typology") or project_dict.get("type"))
         name = " ".join(str(project_dict.get("name") or "").strip().split()) or "Not Found"
         location = " ".join(str(project_dict.get("location") or "").strip().split()) or "Not Found"
         skills = _unique(gather_texts(project_dict.get("skills_demonstrated") or project_dict.get("skills") or []))
@@ -289,7 +293,7 @@ def _normalize_profile(
 
     for item in project_experience_summary:
         item_dict = _as_dict(item)
-        typology = normalize_concept(item_dict.get("typology"), TYPOLOGY_TAXONOMY)
+        typology = normalize_typology_strict(item_dict.get("typology"))
         if not typology:
             continue
         count = int(item_dict.get("project_count") or 0)
@@ -302,12 +306,16 @@ def _normalize_profile(
                 "experience_level_score": int(item_dict.get("experience_level_score") or 0),
                 "origins": _unique(gather_texts(item_dict.get("origins") or [])),
                 "confidence": float(item_dict.get("confidence") or 0.0),
-                "projects": [project for project in _flatten(item_dict.get("projects") or []) if isinstance(project, dict)][:5],
+                "projects": [
+                    project
+                    for project in (item_dict.get("projects") or [])
+                    if isinstance(project, dict)
+                ],
             }
         )
 
     for typology, count in project_counts_by_typology.items():
-        canonical = normalize_concept(typology, TYPOLOGY_TAXONOMY)
+        canonical = normalize_typology_strict(typology)
         if canonical:
             counts[canonical] = max(counts[canonical], int(count or 0))
 
@@ -413,11 +421,15 @@ def _field_number(value: Any) -> float | None:
 
 def _build_project_summary(profile: dict[str, Any], competition_concepts: list[str]) -> list[dict[str, Any]]:
     competition_norms = {value.casefold() for value in competition_concepts if value and value != "Not Found"}
+    def normalize_typology_strict(value: Any) -> str:
+        typology = normalize_concept(value, TYPOLOGY_TAXONOMY)
+        return typology if typology in TYPOLOGY_TAXONOMY else ""
+
     explicit = profile.get("project_experience_summary") or []
     if explicit:
         result: list[dict[str, Any]] = []
         for item in explicit:
-            typology = normalize_concept(item.get("typology"), TYPOLOGY_TAXONOMY)
+            typology = normalize_typology_strict(item.get("typology"))
             if competition_norms and typology.casefold() not in competition_norms:
                 continue
             result.append(
@@ -428,7 +440,11 @@ def _build_project_summary(profile: dict[str, Any], competition_concepts: list[s
                     "experience_level_score": int(item.get("experience_level_score") or 0),
                     "origins": _unique(gather_texts(item.get("origins") or [])),
                     "confidence": float(item.get("confidence") or 0.0),
-                    "projects": [project for project in _flatten(item.get("projects") or []) if isinstance(project, dict)][:5],
+                    "projects": [
+                        project
+                        for project in (item.get("projects") or [])
+                        if isinstance(project, dict)
+                    ],
                 }
             )
         if result:
@@ -437,7 +453,7 @@ def _build_project_summary(profile: dict[str, Any], competition_concepts: list[s
     projects = profile.get("project_experience") or []
     grouped: dict[str, dict[str, Any]] = {}
     for project in projects:
-        typology = normalize_concept(project.get("typology"), TYPOLOGY_TAXONOMY)
+        typology = normalize_typology_strict(project.get("typology"))
         if not typology or typology == "Not Found":
             continue
         if competition_norms and typology.casefold() not in competition_norms:
@@ -455,15 +471,14 @@ def _build_project_summary(profile: dict[str, Any], competition_concepts: list[s
             },
         )
         entry["project_count"] += 1
-        if len(entry["projects"]) < 5:
-            entry["projects"].append(
-                {
-                    "name": project.get("name") or "Not Found",
-                    "location": project.get("location") or "Not Found",
-                    "source": project.get("source") or "company_profile",
-                    "skills_demonstrated": list(project.get("skills_demonstrated") or []),
-                }
-            )
+        entry["projects"].append(
+            {
+                "name": project.get("name") or "Not Found",
+                "location": project.get("location") or "Not Found",
+                "source": project.get("source") or "company_profile",
+                "skills_demonstrated": list(project.get("skills_demonstrated") or []),
+            }
+        )
 
     for item in grouped.values():
         count = int(item["project_count"])

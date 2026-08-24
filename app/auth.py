@@ -15,8 +15,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Em produção prevalecem sempre as variáveis do ambiente. Em
 # desenvolvimento local, o frontend e a API partilham a configuração
 # Supabase já existente no projeto.
-load_dotenv(BASE_DIR / ".env", override=False)
-load_dotenv(BASE_DIR / "frontend" / ".env.local", override=False)
+load_dotenv(BASE_DIR / ".env", override=False, encoding="utf-8-sig")
+load_dotenv(
+    BASE_DIR / "frontend" / ".env.local",
+    override=False,
+    encoding="utf-8-sig",
+)
 
 
 class UtilizadorAutenticado(BaseModel):
@@ -28,17 +32,22 @@ bearer_scheme = HTTPBearer(auto_error=False)
 
 
 def _configuracao_supabase() -> tuple[str, str]:
+    def env(nome: str) -> str:
+        return (
+            os.getenv(nome)
+            or os.getenv(f"\ufeff{nome}")
+            or ""
+        ).strip()
+
     url = (
-        os.getenv("SUPABASE_URL")
-        or os.getenv("NEXT_PUBLIC_SUPABASE_URL")
-        or ""
-    ).strip()
+        env("SUPABASE_URL")
+        or env("NEXT_PUBLIC_SUPABASE_URL")
+    )
     chave = (
-        os.getenv("SUPABASE_PUBLISHABLE_KEY")
-        or os.getenv("SUPABASE_ANON_KEY")
-        or os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
-        or ""
-    ).strip()
+        env("SUPABASE_PUBLISHABLE_KEY")
+        or env("SUPABASE_ANON_KEY")
+        or env("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+    )
 
     if not url or not chave:
         raise HTTPException(

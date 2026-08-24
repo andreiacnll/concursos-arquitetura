@@ -50,9 +50,16 @@ analise_documentos/*/pecas_download
 *.old.*
 *.before*
 src_backup_*
-
-# Dados locais e ficheiros gerados
+# Artefactos locais que nunca entram no deploy
 analise_documentos/
 debug_exports/
 backups/
-*.zip
+rollback*/
+*.db-wal
+*.db-shm
+*checkpoint*.json
+*transport_state*.json
+concursos_recolhidos.json
+relatorio_*.txt
+.presentation_cache/
+**/.presentation_cache/

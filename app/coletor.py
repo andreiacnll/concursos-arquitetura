@@ -1,12 +1,12 @@
 """
-Coletor de anúncios públicos do Portal BASE.
+Coletor de anÃºncios pÃºblicos do Portal BASE.
 
-O Portal BASE está protegido por F5 e pode devolver HTTP 404 a clientes HTTP
+O Portal BASE estÃ¡ protegido por F5 e pode devolver HTTP 404 a clientes HTTP
 simples, mesmo quando o mesmo pedido funciona num browser. Por esse motivo,
-este módulo usa Playwright/Chromium e executa os pedidos internos através da
-sessão real do browser.
+este mÃ³dulo usa Playwright/Chromium e executa os pedidos internos atravÃ©s da
+sessÃ£o real do browser.
 
-Interface pública mantida:
+Interface pÃºblica mantida:
     procurar_concursos() -> list[dict]
 """
 
@@ -55,9 +55,9 @@ dias_pedidos = int(
 
 if dias_pedidos > DIAS_MAXIMOS_PESQUISA:
     print(
-        f"Aviso: o máximo permitido é "
+        f"Aviso: o mÃ¡ximo permitido Ã© "
         f"{DIAS_MAXIMOS_PESQUISA} dias. "
-        f"Será utilizado esse valor."
+        f"SerÃ¡ utilizado esse valor."
     )
 
 DIAS_A_PESQUISAR = max(
@@ -74,11 +74,11 @@ INTERVALO_DETALHES = float(os.getenv("BASE_INTERVALO_DETALHES", "7.0"))
 MOSTRAR_DIAGNOSTICO = os.getenv(
     "BASE_MOSTRAR_DIAGNOSTICO",
     "1",
-).strip().lower() not in {"0", "false", "nao", "não", "off"}
+).strip().lower() not in {"0", "false", "nao", "nÃ£o", "off"}
 HEADLESS = os.getenv(
     "BASE_HEADLESS",
     "1",
-).strip().lower() not in {"0", "false", "nao", "não", "off"}
+).strip().lower() not in {"0", "false", "nao", "nÃ£o", "off"}
 
 PALAVRAS_FORTES = {
     "arquitetura",
@@ -233,7 +233,7 @@ FICHEIRO_CHECKPOINT = Path(
 
 
 def esperar_intervalo(valor_base: float) -> None:
-    """Espera o intervalo configurado com uma pequena variação aleatória."""
+    """Espera o intervalo configurado com uma pequena variaÃ§Ã£o aleatÃ³ria."""
     if valor_base <= 0:
         return
 
@@ -243,7 +243,7 @@ def esperar_intervalo(valor_base: float) -> None:
 
 
 def guardar_checkpoint(concursos: list[dict[str, Any]]) -> None:
-    """Guarda os resultados de forma atómica para evitar ficheiros incompletos."""
+    """Guarda os resultados de forma atÃ³mica para evitar ficheiros incompletos."""
     temporario = FICHEIRO_CHECKPOINT.with_suffix(
         FICHEIRO_CHECKPOINT.suffix + ".tmp"
     )
@@ -270,7 +270,7 @@ def carregar_checkpoint() -> list[dict[str, Any]]:
         )
     except (OSError, json.JSONDecodeError) as erro:
         print(
-            "Aviso: não foi possível carregar o checkpoint: "
+            "Aviso: nÃ£o foi possÃ­vel carregar o checkpoint: "
             f"{erro}"
         )
         return []
@@ -289,7 +289,7 @@ def normalizar_texto(valor: Any) -> str:
     if valor is None:
         return ""
     if isinstance(valor, bool):
-        return "Sim" if valor else "Não"
+        return "Sim" if valor else "NÃ£o"
     return " ".join(str(valor).split())
 
 
@@ -380,7 +380,7 @@ def criar_link_detalhe(identificador: Any) -> str:
 
 
 class PortalBaseBrowser:
-    """Controla a sessão Chromium usada para consultar o Portal BASE."""
+    """Controla a sessÃ£o Chromium usada para consultar o Portal BASE."""
 
     def __init__(self) -> None:
         self.playwright: Playwright = sync_playwright().start()
@@ -444,7 +444,7 @@ class PortalBaseBrowser:
 
         if resposta is None:
             raise RuntimeError(
-                "O browser não recebeu resposta ao abrir o Portal BASE."
+                "O browser nÃ£o recebeu resposta ao abrir o Portal BASE."
             )
 
         if resposta.status >= 400:
@@ -462,7 +462,7 @@ class PortalBaseBrowser:
 
         titulo = self.page.title()
         if MOSTRAR_DIAGNOSTICO:
-            print(f"Portal BASE aberto no browser: {titulo or '(sem título)'}")
+            print(f"Portal BASE aberto no browser: {titulo or '(sem tÃ­tulo)'}")
 
     def post_json(self, dados: dict[str, Any]) -> dict[str, Any]:
         ultimo_erro = ""
@@ -560,7 +560,7 @@ class PortalBaseBrowser:
             except json.JSONDecodeError as erro:
                 raise RuntimeError(
                     "O Portal BASE devolveu uma resposta "
-                    "que não é JSON. "
+                    "que nÃ£o Ã© JSON. "
                     f"HTTP {estado}; content-type="
                     f"{resultado.get('contentType', '')}; "
                     f"excerto={resposta_texto[:500]}"
@@ -568,16 +568,16 @@ class PortalBaseBrowser:
 
             if not isinstance(convertido, dict):
                 raise RuntimeError(
-                    "A resposta do Portal BASE não contém "
+                    "A resposta do Portal BASE nÃ£o contÃ©m "
                     "um objeto JSON."
                 )
 
             return convertido
 
         raise RuntimeError(
-            "O Portal BASE continuou a bloquear o acesso após "
+            "O Portal BASE continuou a bloquear o acesso apÃ³s "
             f"{MAXIMO_TENTATIVAS} tentativas. "
-            f"Último erro: {ultimo_erro}"
+            f"Ãšltimo erro: {ultimo_erro}"
         )
 
     def pesquisar_pagina(self, pagina: int) -> dict[str, Any]:
@@ -726,17 +726,17 @@ def deve_consultar_detalhe(anuncio: dict[str, Any]) -> bool:
 
 def criar_texto_completo(anuncio: dict[str, Any]) -> str:
     campos = [
-        ("Descrição", anuncio.get("contractDesignation") or anuncio.get("description")),
+        ("DescriÃ§Ã£o", anuncio.get("contractDesignation") or anuncio.get("description")),
         ("Entidade", obter_nome_entidade(anuncio)),
         ("Tipo de ato", anuncio.get("type")),
         ("Tipo de modelo", anuncio.get("modelType")),
         ("Tipo de contrato", anuncio.get("contractType")),
         ("Tipo de procedimento", anuncio.get("contractingProcedureType")),
         ("CPV", "; ".join(obter_cpvs(anuncio))),
-        ("Preço base", anuncio.get("basePrice")),
+        ("PreÃ§o base", anuncio.get("basePrice")),
         ("Prazo para propostas", anuncio.get("proposalDeadline")),
-        ("Data de publicação", anuncio.get("drPublicationDate")),
-        ("Número do anúncio", anuncio.get("announcementNumber")),
+        ("Data de publicaÃ§Ã£o", anuncio.get("drPublicationDate")),
+        ("NÃºmero do anÃºncio", anuncio.get("announcementNumber")),
     ]
 
     linhas = []
@@ -841,14 +841,14 @@ def recolher_listagem(
 
     for pagina in range(MAXIMO_PAGINAS):
         if MOSTRAR_DIAGNOSTICO:
-            print(f"A obter página {pagina + 1}...")
+            print(f"A obter pÃ¡gina {pagina + 1}...")
 
         dados = portal.pesquisar_pagina(pagina)
         itens = dados.get("items", [])
 
         if not isinstance(itens, list):
             raise RuntimeError(
-                "O Portal BASE devolveu um campo 'items' inválido."
+                "O Portal BASE devolveu um campo 'items' invÃ¡lido."
             )
 
         if not itens:
@@ -951,14 +951,14 @@ def enriquecer(
 
                 except Exception as erro:
                     print(
-                        "Aviso: não foi possível repetir o "
+                        "Aviso: nÃ£o foi possÃ­vel repetir o "
                         "enriquecimento DR de "
                         f"{identificador}: {erro}"
                     )
 
             if MOSTRAR_DIAGNOSTICO:
                 print(
-                    f"Já guardado {indice}/{len(candidatos)}: "
+                    f"JÃ¡ guardado {indice}/{len(candidatos)}: "
                     f"{identificador}"
                 )
             continue
@@ -970,7 +970,7 @@ def enriquecer(
             )
             print(
                 f"Detalhe {indice}/{len(candidatos)}: "
-                f"{identificador} — {titulo[:90]}"
+                f"{identificador} â€” {titulo[:90]}"
             )
 
         try:
@@ -978,8 +978,8 @@ def enriquecer(
         except (RuntimeError, PlaywrightError) as erro:
             erros += 1
             print(
-                "Aviso: não foi possível obter o detalhe "
-                f"do anúncio {identificador}: {erro}"
+                "Aviso: nÃ£o foi possÃ­vel obter o detalhe "
+                f"do anÃºncio {identificador}: {erro}"
             )
             continue
 
@@ -999,7 +999,7 @@ def enriquecer(
 
             except Exception as erro:
                 print(
-                    "Aviso: não foi possível extrair "
+                    "Aviso: nÃ£o foi possÃ­vel extrair "
                     "data de entrega do PDF DR:",
                     erro,
                 )
@@ -1013,7 +1013,7 @@ def enriquecer(
             if MOSTRAR_DIAGNOSTICO:
                 print(
                     f"Checkpoint atualizado: "
-                    f"{len(por_id)} anúncios guardados."
+                    f"{len(por_id)} anÃºncios guardados."
                 )
 
         esperar_intervalo(INTERVALO_DETALHES)
@@ -1021,7 +1021,7 @@ def enriquecer(
     resultados = list(por_id.values())
     guardar_checkpoint(resultados)
 
-    print(f"Novos anúncios adicionados ao checkpoint: {novos}")
+    print(f"Novos anÃºncios adicionados ao checkpoint: {novos}")
 
     return resultados, len(candidatos), erros
 
@@ -1034,7 +1034,7 @@ def descarregar_anuncios() -> list[dict[str, Any]]:
 
             if MOSTRAR_DIAGNOSTICO:
                 print(
-                    "Anúncios encontrados no intervalo: "
+                    "AnÃºncios encontrados no intervalo: "
                     f"{len(listagem)}"
                 )
 
@@ -1045,33 +1045,33 @@ def descarregar_anuncios() -> list[dict[str, Any]]:
 
     except PlaywrightError as erro:
         raise RuntimeError(
-            "Não foi possível iniciar ou controlar o Chromium. "
+            "NÃ£o foi possÃ­vel iniciar ou controlar o Chromium. "
             "Confirma que executaste: playwright install chromium"
         ) from erro
 
-    print(f"Anúncios selecionados pelo pré-filtro: {candidatos}")
-    print(f"Anúncios enviados para análise: {len(relevantes)}")
+    print(f"AnÃºncios selecionados pelo prÃ©-filtro: {candidatos}")
+    print(f"AnÃºncios enviados para anÃ¡lise: {len(relevantes)}")
 
     if erros:
-        print(f"Detalhes que não foi possível obter: {erros}")
+        print(f"Detalhes que nÃ£o foi possÃ­vel obter: {erros}")
 
     return relevantes
 
 
 def procurar_concursos() -> list[dict[str, Any]]:
     """
-    Função usada pelo restante projeto.
+    FunÃ§Ã£o usada pelo restante projeto.
     """
 
     anuncios = descarregar_anuncios()
 
     print(
-        "Anúncios recolhidos do Portal BASE para análise: "
+        "AnÃºncios recolhidos do Portal BASE para anÃ¡lise: "
         f"{len(anuncios)}"
     )
     print(
         "Intervalo pesquisado: "
-        f"{data_minima().strftime('%d-%m-%Y')} até "
+        f"{data_minima().strftime('%d-%m-%Y')} atÃ© "
         f"{data_atual_portugal().strftime('%d-%m-%Y')}"
     )
 
@@ -1094,11 +1094,11 @@ if __name__ == "__main__":
         )
 
     print(
-        f"\nGuardados {len(concursos)} anúncios em "
+        f"\nGuardados {len(concursos)} anÃºncios em "
         "concursos_recolhidos.json"
     )
 
-    print("\nPrimeiros anúncios encontrados:\n")
+    print("\nPrimeiros anÃºncios encontrados:\n")
 
     for concurso in concursos[:5]:
         print(
@@ -1108,4 +1108,3 @@ if __name__ == "__main__":
                 indent=2,
             )
         )
-

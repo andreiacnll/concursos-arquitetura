@@ -8,7 +8,6 @@ import {
   MapPin,
   Sparkles,
 } from "lucide-react";
-import Link from "next/link";
 import type { Concurso } from "./competition-types";
 import { useAuth } from "@/context/AuthContext";
 import AnalysisConfirmationModal from "./analises/AnalysisConfirmationModal";
@@ -129,6 +128,22 @@ function getCategory(title: string) {
   return "Arquitetura";
 }
 
+function competitionDiscoveryDate(concurso: Concurso) {
+  const extended = concurso as Concurso & {
+    data_ordenacao_iso?: string | null;
+    first_seen_at?: string | null;
+  };
+
+  return (
+    concurso.data_publicacao_iso ||
+    concurso.data ||
+    extended.data_ordenacao_iso ||
+    extended.first_seen_at ||
+    ""
+  );
+}
+
+
 function getFreshness(dateValue: string) {
   const date = new Date(dateValue);
   if (Number.isNaN(date.getTime())) return null;
@@ -143,6 +158,48 @@ function getFreshness(dateValue: string) {
   if (diff <= 7) return `${diff} dias`;
   return null;
 }
+
+function sourceAction(concurso: Concurso) {
+  const source = (concurso.fonte || "").toLowerCase();
+  const link = (concurso.link || "").toLowerCase();
+
+  if (
+    source === "lisboa_sru" ||
+    link.includes("lisboasru.pt")
+  ) {
+    return {
+      label: "Ver concurso Lisboa SRU",
+      aria: `Abrir concurso na Lisboa SRU: ${concurso.titulo}`,
+    };
+  }
+
+  if (source === "oasrs_encomenda") {
+    return {
+      label: "Ver concurso OA-SRS",
+      aria: `Abrir concurso na Plataforma Encomenda OA-SRS: ${concurso.titulo}`,
+    };
+  }
+
+  if (source === "ordem_arquitectos") {
+    return {
+      label: "Ver concurso na Ordem",
+      aria: `Abrir concurso na Ordem dos Arquitectos: ${concurso.titulo}`,
+    };
+  }
+
+  if (source === "espaco") {
+    return {
+      label: "Ver concurso",
+      aria: `Abrir concurso na fonte original: ${concurso.titulo}`,
+    };
+  }
+
+  return {
+    label: "Ver concurso Base.gov",
+    aria: `Abrir concurso na Base.gov: ${concurso.titulo}`,
+  };
+}
+
 
 export function CompetitionCardBase({
   concurso,
@@ -173,9 +230,25 @@ export function CompetitionCardBase({
     categoryImages[category as keyof typeof categoryImages] ??
     categoryImages.Arquitetura;
   const image = images[index % images.length];
-  const freshness = getFreshness(concurso.data);
+  const officialPublicationDate =
+    concurso.data_publicacao_iso || concurso.data || "";
+  const discoveryDate = competitionDiscoveryDate(concurso);
+  const freshness = getFreshness(discoveryDate);
   const location =
     concurso.municipio || concurso.distrito || concurso.entidade || "Portugal";
+
+  const publicationDate = officialPublicationDate || discoveryDate;
+  const publicationLabel = officialPublicationDate
+    ? "Publicado"
+    : discoveryDate
+      ? "Detetado"
+      : "Publicado";
+  const submissionDeadline =
+    concurso.data_entrega_propostas ||
+    concurso.data_fim_calculada ||
+    concurso.data_limite;
+  const awardSummary =
+    concurso.criterio_resumo || concurso.criterio_tipo || "";
 
   return (
     <article className={`competition-card ${className}`.trim()}>
@@ -255,39 +328,37 @@ export function CompetitionCardBase({
           </span>
           <span>
             <CalendarDays size={15} />
-            Publicado {formatDate(concurso.data)}
+            {publicationLabel} {formatDate(publicationDate)}
           </span>
 
           <span>
-            Entrega {formatDataEntrega(
-              concurso.data_fim_calculada
-            )}
+            Entrega {formatDataEntrega(submissionDeadline)}
           </span>
 
-          {diasRestantes(concurso.data_fim_calculada) !== null && (
+          {diasRestantes(submissionDeadline) !== null && (
             <span>
               {
-                diasRestantes(concurso.data_fim_calculada)! > 0
-                  ? `Faltam ${diasRestantes(concurso.data_fim_calculada)} dias`
+                diasRestantes(submissionDeadline)! > 0
+                  ? `Faltam ${diasRestantes(submissionDeadline)} dias`
                   : "Prazo terminado"
               }
             </span>
           )}
         </div>
 
-        {concurso.criterio_tipo && (
+        {awardSummary && (
           <div className="award-criteria">
             <span className="award-label">
               Criterio de adjudicacao
             </span>
 
-            <strong>
-              {concurso.criterio_tipo}
-            </strong>
+            <strong>{awardSummary}</strong>
 
-            <p>
-              {concurso.criterio_resumo}
-            </p>
+            {concurso.criterio_tipo &&
+            concurso.criterio_resumo &&
+            concurso.criterio_tipo !== concurso.criterio_resumo ? (
+              <p>{concurso.criterio_tipo}</p>
+            ) : null}
           </div>
         )}
 
@@ -322,6 +393,7 @@ export default function CompetitionCard({
   onToggleFavorite,
   temAnalise,
   analiseEstado,
+  analiseStage,
   onCriarAnalise,
 }: {
   concurso: Concurso;
@@ -330,10 +402,18 @@ export default function CompetitionCard({
   onToggleFavorite: () => void;
   temAnalise?: boolean;
   analiseEstado?: string;
+  analiseStage?: string;
   onCriarAnalise?: () => Promise<void>;
 }) {
   const [showConfirmacao, setShowConfirmacao] = useState(false);
   const { user } = useAuth();
+  const source = sourceAction(concurso);
+  const analysisVersion =
+    concurso.updatedAtAnalise ||
+    concurso.analiseId ||
+    "latest";
+  const analysisHref =
+    `/analise/${concurso.id}?v=${encodeURIComponent(String(analysisVersion))}`;
 
   function handleCriarAnalise() {
     setShowConfirmacao(true);
@@ -354,21 +434,21 @@ export default function CompetitionCard({
               href={concurso.link}
               target="_blank"
               rel="noreferrer"
-              aria-label={`Abrir concurso na Base.gov: ${concurso.titulo}`}
+              aria-label={source.aria}
             >
-              Ver concurso Base.gov
+              {source.label}
               <ExternalLink size={15} />
             </a>
 
             {user && (
               temAnalise && ["concluida", "completed", "partial"].includes(analiseEstado || "") ? (
-                <Link
-                  href={`/analise/${concurso.id}`}
+                <a
+                  href={analysisHref}
                   className="card-link card-link-analise"
                   style={{ background: "#111", color: "white", border: "none" }}
                 >
                   Ver analise AI
-                </Link>
+                </a>
               ) : temAnalise && ["erro", "failed", "cancelada", "cancelled", "interrupted"].includes(analiseEstado || "") ? (
                 <button
                   type="button"
@@ -389,7 +469,7 @@ export default function CompetitionCard({
                     job_id: 0,
                     concurso_id: concurso.id,
                     status: analiseEstado === "aguarda" ? "queued" : "processing",
-                    stage: analiseEstado,
+                    stage: analiseStage || analiseEstado,
                   })}
                 </button>
               ) : (

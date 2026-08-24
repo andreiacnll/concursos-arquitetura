@@ -32,6 +32,7 @@ TARGET_FIELDS = {
     "digital_files",
     "anonymity_requirement",
     "submission_platform",
+    "publication_date",
     "submission_deadline",
     "site_visit",
     "clarification_deadline",
@@ -466,6 +467,15 @@ def _submission_facts(
 
         sentence_rules = [
             (
+                "publication_date",
+                (
+                    r"data\s+de\s+publica[cç][aã]o"
+                    r"|publicad[oa]\s+em"
+                    r"|publica[cç][aã]o\s+do\s+an[uú]ncio"
+                ),
+                "schedule",
+            ),
+            (
                 "descriptive_memory",
                 r"mem[oó]ria\s+descritiva",
                 "submission_deliverables",
@@ -498,6 +508,8 @@ def _submission_facts(
                 (
                     r"prazo\s+para\s+apresenta[cç][aã]o"
                     r"|data\s+limite\s+de\s+entrega"
+                    r"|termo\s+do\s+prazo\s+para\s+apresenta[cç][aã]o"
+                    r"|prazo\s+de\s+entrega\s+das\s+propostas"
                 ),
                 "schedule",
             ),

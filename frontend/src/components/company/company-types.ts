@@ -46,6 +46,26 @@ export interface CompanyMemory {
   open_questions: string[];
 }
 
+
+export interface CompanyCVEntry {
+  id: string;
+  category: string;
+  title: string;
+  description: string;
+  reuse_key: string;
+  scope: string;
+  role: string;
+  person: string;
+  project: string;
+  metric: string;
+  numeric_value: number | null;
+  unit: string;
+  answer: string;
+  status: string;
+  source: string;
+  requirement_ids: string[];
+}
+
 export interface CompanyProfile {
   company_id: number | null;
   identity: CompanyIdentity;
@@ -53,6 +73,7 @@ export interface CompanyProfile {
   competences: string[];
   specializations: string[];
   project_experience: CompanyProjectExperience[];
+  cv: CompanyCVEntry[];
   project_experience_summary?: CompanyTypologyExperience[];
   project_experience_counts?: Record<string, number>;
   project_counts_by_typology?: Record<string, number>;
@@ -221,6 +242,7 @@ const DEFAULT_PROFILE: CompanyProfile = {
   competences: [],
   specializations: [],
   project_experience: [],
+  cv: [],
   preferences: {
     typologies: [],
     procedures: [],
@@ -311,6 +333,66 @@ function toProjectArray(value: unknown): CompanyProjectExperience[] {
   });
 }
 
+function toTypologySummaryArray(value: unknown): CompanyTypologyExperience[] {
+  if (!Array.isArray(value)) return [];
+
+  return value.map((raw) => {
+    const item = (raw ?? {}) as Partial<CompanyTypologyExperience>;
+    return {
+      typology: String(item.typology ?? ""),
+      project_count:
+        typeof item.project_count === "number" ? item.project_count : 0,
+      experience_level: String(item.experience_level ?? ""),
+      experience_level_score:
+        typeof item.experience_level_score === "number"
+          ? item.experience_level_score
+          : 0,
+      origins: toStringArray(item.origins),
+      confidence:
+        typeof item.confidence === "number" ? item.confidence : 0,
+      projects: toProjectArray(item.projects),
+    };
+  });
+}
+
+function toCountRecord(value: unknown): Record<string, number> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const result: Record<string, number> = {};
+  for (const [key, count] of Object.entries(value as Record<string, unknown>)) {
+    const numeric = Number(count);
+    if (!key || !Number.isFinite(numeric)) continue;
+    result[key] = numeric;
+  }
+  return result;
+}
+
+function toCVArray(value: unknown): CompanyCVEntry[] {
+  if (!Array.isArray(value)) return [];
+  return value.map((raw) => {
+    const item = (raw ?? {}) as Partial<CompanyCVEntry>;
+    return {
+      id: String(item.id ?? ""),
+      category: String(item.category ?? "fact"),
+      title: String(item.title ?? ""),
+      description: String(item.description ?? ""),
+      reuse_key: String(item.reuse_key ?? ""),
+      scope: String(item.scope ?? "company"),
+      role: String(item.role ?? ""),
+      person: String(item.person ?? ""),
+      project: String(item.project ?? ""),
+      metric: String(item.metric ?? ""),
+      numeric_value:
+        typeof item.numeric_value === "number" ? item.numeric_value : null,
+      unit: String(item.unit ?? ""),
+      answer: String(item.answer ?? ""),
+      status: String(item.status ?? "confirmed"),
+      source: String(item.source ?? "manual"),
+      requirement_ids: toStringArray(item.requirement_ids),
+    };
+  });
+}
+
+
 export function createEmptyCompanyProfile(): CompanyProfile {
   return JSON.parse(JSON.stringify(DEFAULT_PROFILE)) as CompanyProfile;
 }
@@ -338,6 +420,12 @@ export function normalizeCompanyProfile(
     competences: toStringArray(raw.competences),
     specializations: toStringArray(raw.specializations),
     project_experience: toProjectArray(raw.project_experience),
+    project_experience_summary: toTypologySummaryArray(
+      raw.project_experience_summary,
+    ),
+    project_experience_counts: toCountRecord(raw.project_experience_counts),
+    project_counts_by_typology: toCountRecord(raw.project_counts_by_typology),
+    cv: toCVArray(raw.cv),
     preferences: {
       ...defaults.preferences,
       ...(raw.preferences ?? {}),
@@ -438,6 +526,7 @@ export function isCompanyProfileEmpty(profile: CompanyProfile): boolean {
     profile.competences.length === 0 &&
     profile.specializations.length === 0 &&
     profile.project_experience.length === 0 &&
+    profile.cv.length === 0 &&
     profile.strategy.priority_areas.length === 0 &&
     profile.strategy.secondary_areas.length === 0 &&
     profile.strategy.avoid_areas.length === 0 &&
@@ -466,8 +555,8 @@ export function needsCompanyOnboarding(profile: CompanyProfile): boolean {
   return !identityFilled || !foundationFilled || isCompanyProfileEmpty(profile);
 }
 
-export function listToText(value: string[]): string {
-  return value.join(", ");
+export function listToText(value?: string[] | null): string {
+  return toStringArray(value).join(", ");
 }
 
 export function textToList(value: string): string[] {

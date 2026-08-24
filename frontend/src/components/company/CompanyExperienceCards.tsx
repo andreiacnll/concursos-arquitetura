@@ -25,6 +25,7 @@ import styles from "./CompanyExperienceCards.module.css";
 type ExperienceProject = {
   name?: string;
   typology?: string;
+  typologies?: string[];
   normalized_typology?: string;
   original_typology?: string;
   location?: string;
@@ -207,7 +208,7 @@ function normalizeTypology(value: unknown): string {
     }
   }
 
-  return cleanText(value);
+  return "";
 }
 
 function displayTypology(value: string): string {
@@ -261,9 +262,50 @@ function starRow(stars: number) {
   ));
 }
 
-function isUsefulProject(project: ExperienceProject): boolean {
+function splitTypologyValues(value: unknown): string[] {
+  if (Array.isArray(value)) return value.flatMap(splitTypologyValues);
+  const text = cleanText(value);
+  if (!text) return [];
+  return text
+    .split(/[,;/+|]|\s+e\s+/gi)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function projectTypologyKeys(project: ExperienceProject): string[] {
+  const candidates = [
+    project.normalized_typology,
+    project.typology,
+    project.original_typology,
+    ...(Array.isArray(project.typologies) ? project.typologies : []),
+    project.name,
+    ...(project.skills_demonstrated || []),
+  ].flatMap(splitTypologyValues);
+
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const candidate of candidates) {
+    const typology = normalizeTypology(candidate);
+    const key = normalizeText(typology);
+    if (!typology || !key || seen.has(key)) continue;
+    seen.add(key);
+    result.push(typology);
+  }
+  return result;
+}
+
+function isUsefulProject(project: ExperienceProject, typologyKey?: string): boolean {
   const text = normalizeText([project.name, project.location].filter(Boolean).join(" "));
   if (!text) return false;
+  const typologyText = normalizeText(typologyKey || project.typology || project.normalized_typology);
+  const typologyLabel = normalizeText(typologyKey ? displayTypology(typologyKey) : "");
+  const hasContext =
+    Boolean(cleanText(project.location)) ||
+    Boolean(project.skills_demonstrated?.length) ||
+    Boolean(cleanText(project.source));
+  if (!hasContext && typologyText && (text === typologyText || text === typologyLabel)) {
+    return false;
+  }
   return !NOISE_PATTERNS.some((pattern) => pattern.test(text));
 }
 
@@ -337,7 +379,7 @@ function collectProjects(profile: ExperienceSource): TypologyCard[] {
     ).filter(Boolean);
 
     for (const project of ((item?.projects || []) as ExperienceProject[]).filter(Boolean)) {
-      if (isUsefulProject(project)) {
+      if (isUsefulProject(project, typologyKey)) {
         appendProject(existing, project);
       }
     }
@@ -382,48 +424,43 @@ function collectProjects(profile: ExperienceSource): TypologyCard[] {
     : [];
 
   for (const project of projects) {
-    const typologyKey = normalizeTypology(
-      project?.normalized_typology ||
-        project?.typology ||
-        project?.original_typology,
-    );
-    if (!typologyKey) continue;
+    for (const typologyKey of projectTypologyKeys(project)) {
+      const visuals = resolveVisuals(typologyKey);
+      const existing = cards.get(typologyKey) ?? {
+        typology: typologyKey,
+        label: displayTypology(typologyKey),
+        count: 0,
+        level: "",
+        levelLabel: "",
+        stars: 1,
+        confidence: 0,
+        origins: [],
+        accent: visuals.iconColor,
+        surface: visuals.iconBackground,
+        icon: visuals.icon,
+        projects: [],
+      };
 
-    const visuals = resolveVisuals(typologyKey);
-    const existing = cards.get(typologyKey) ?? {
-      typology: typologyKey,
-      label: displayTypology(typologyKey),
-      count: 0,
-      level: "",
-      levelLabel: "",
-      stars: 1,
-      confidence: 0,
-      origins: [],
-      accent: visuals.iconColor,
-      surface: visuals.iconBackground,
-      icon: visuals.icon,
-      projects: [],
-    };
-
-    if (isUsefulProject(project)) {
-      const projectFingerprint = [
-        normalizeText(project?.name),
-        normalizeText(project?.location),
-        typologyKey,
-      ].join("|");
-      if (!seenProjects.has(projectFingerprint)) {
-        seenProjects.add(projectFingerprint);
-        derivedCounts.set(typologyKey, (derivedCounts.get(typologyKey) || 0) + 1);
-        appendProject(existing, project);
+      if (isUsefulProject(project, typologyKey)) {
+        const projectFingerprint = [
+          normalizeText(project?.name),
+          normalizeText(project?.location),
+          typologyKey,
+        ].join("|");
+        if (!seenProjects.has(projectFingerprint)) {
+          seenProjects.add(projectFingerprint);
+          derivedCounts.set(typologyKey, (derivedCounts.get(typologyKey) || 0) + 1);
+          appendProject(existing, project);
+        }
       }
-    }
 
-    existing.levelLabel = experienceLabel(existing.count, existing.level);
-    existing.stars = starsForCount(existing.count, existing.level);
-    if (!existing.origins.includes("company_profile")) {
-      existing.origins.push("company_profile");
+      existing.levelLabel = experienceLabel(existing.count, existing.level);
+      existing.stars = starsForCount(existing.count, existing.level);
+      if (!existing.origins.includes("company_profile")) {
+        existing.origins.push("company_profile");
+      }
+      cards.set(typologyKey, existing);
     }
-    cards.set(typologyKey, existing);
   }
 
   for (const [typologyKey, derivedCount] of derivedCounts.entries()) {
@@ -466,9 +503,12 @@ function ExperienceCard({
   forceOpen?: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const activeOpen = Boolean(forceOpen) || open;
   const hasProjects = card.projects.length > 0;
   const Icon = card.icon;
+  const visibleProjects = showAll || forceOpen ? card.projects : card.projects.slice(0, 8);
+  const hiddenProjects = Math.max(card.projects.length - visibleProjects.length, 0);
 
   return (
     <article className={styles.card}>
@@ -523,16 +563,27 @@ function ExperienceCard({
       {activeOpen && (
         <div className={styles.projects}>
           {hasProjects ? (
-            <ul className={styles.projectsList}>
-              {card.projects.slice(0, 8).map((project, index) => (
-                <li key={`${card.typology}-${index}`} className={styles.projectItem}>
-                  <span className={styles.projectName}>{project.name}</span>
-                  {project.location ? (
-                    <span className={styles.projectMeta}>{project.location}</span>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul className={styles.projectsList}>
+                {visibleProjects.map((project, index) => (
+                  <li key={`${card.typology}-${index}`} className={styles.projectItem}>
+                    <span className={styles.projectName}>{project.name}</span>
+                    {project.location ? (
+                      <span className={styles.projectMeta}>{project.location}</span>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+              {hiddenProjects > 0 ? (
+                <button
+                  type="button"
+                  className={styles.moreProjectsAction}
+                  onClick={() => setShowAll(true)}
+                >
+                  Ver todos ({card.projects.length})
+                </button>
+              ) : null}
+            </>
           ) : (
             <p className={styles.projectsEmpty}>
               Projetos individuais ainda não disponíveis.

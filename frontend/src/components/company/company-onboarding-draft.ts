@@ -7,6 +7,7 @@ import type {
   CompanyProfilePath,
   CompanySourceStatus,
 } from "./company-types";
+import { normalizeCompanyProfile } from "./company-types";
 
 export interface CompanyOnboardingFileMeta {
   name: string;
@@ -57,6 +58,19 @@ export function buildCompanyOnboardingDraft(
     ...draft,
     version: 1,
     updatedAt: new Date().toISOString(),
+    sourceStatuses: Array.isArray(draft.sourceStatuses)
+      ? draft.sourceStatuses
+      : [],
+    portfolioFileMeta: Array.isArray(draft.portfolioFileMeta)
+      ? draft.portfolioFileMeta
+      : [],
+    institutionalFileMeta: Array.isArray(draft.institutionalFileMeta)
+      ? draft.institutionalFileMeta
+      : [],
+    questions: Array.isArray(draft.questions) ? draft.questions : [],
+    answers:
+      draft.answers && typeof draft.answers === "object" ? draft.answers : {},
+    summaryProfile: normalizeCompanyProfile(draft.summaryProfile),
   };
 }
 
@@ -95,7 +109,37 @@ export function loadCompanyOnboardingDraft(
   try {
     const parsed = JSON.parse(raw) as Partial<CompanyOnboardingDraft>;
     if (parsed.version !== 1) return null;
-    return parsed as CompanyOnboardingDraft;
+    return buildCompanyOnboardingDraft({
+      version: 1,
+      updatedAt: String(parsed.updatedAt ?? ""),
+      step: typeof parsed.step === "number" ? parsed.step : 0,
+      companyName: String(parsed.companyName ?? ""),
+      website: String(parsed.website ?? ""),
+      companyChoice: parsed.companyChoice ?? null,
+      profilePath: parsed.profilePath ?? null,
+      selectedExistingCompanyId:
+        typeof parsed.selectedExistingCompanyId === "number"
+          ? parsed.selectedExistingCompanyId
+          : null,
+      workingCompany: parsed.workingCompany ?? null,
+      workingHasProfile: Boolean(parsed.workingHasProfile),
+      sourceStatuses: Array.isArray(parsed.sourceStatuses)
+        ? parsed.sourceStatuses
+        : [],
+      portfolioFileMeta: Array.isArray(parsed.portfolioFileMeta)
+        ? parsed.portfolioFileMeta
+        : [],
+      institutionalFileMeta: Array.isArray(parsed.institutionalFileMeta)
+        ? parsed.institutionalFileMeta
+        : [],
+      sessionId: typeof parsed.sessionId === "number" ? parsed.sessionId : null,
+      questions: Array.isArray(parsed.questions) ? parsed.questions : [],
+      answers:
+        parsed.answers && typeof parsed.answers === "object"
+          ? parsed.answers
+          : {},
+      summaryProfile: normalizeCompanyProfile(parsed.summaryProfile),
+    });
   } catch {
     return null;
   }

@@ -1,5 +1,12 @@
 "use client";
 
+// CNLL_DIRECT_FICHA_CARDS_V17_10
+
+// CNLL_CARDS_MODAL_V17_9B
+
+// CNLL_UNIVERSAL_CARD_SOURCE_V17_7
+// CNLL_UNIVERSAL_MERGE_V17_8
+
 import type { ReactNode } from "react";
 import {
   AlertTriangle,
@@ -20,8 +27,13 @@ import ProjectInfoPanel from "@/components/analise/dashboard/ProjectInfoPanel";
 import { DomainDetailsButton } from "@/components/analise/DesignCompetitionDomainModal";
 import FunctionalProgramSummaryCard from "@/components/analise/FunctionalProgramSummaryCard";
 import InterventionProgramSummaryCard from "@/components/analise/InterventionProgramSummaryCard";
-import SubmissionRequirementsCards from "@/components/analise/SubmissionRequirementsCards";
+import UniversalSubmissionCards from "@/components/analise/UniversalSubmissionCards";
+import UniversalDecisionCriteria from "@/components/analise/UniversalDecisionCriteria";
+import ProcedureSpecificCards from "@/components/analise/ProcedureSpecificCards";
+import AnalysisQuestionsModal from "@/components/analise/AnalysisQuestionsModal";
 
+import { buildCriteriaSummary, getProcedureAnalysis, buildProcedureCardAnalysis } from "@/lib/analysis-universal";
+import { formatAnalysisItemForDisplay } from "@/lib/analysis-display";
 type Props = {
   ficha: any;
   concurso: any;
@@ -33,6 +45,7 @@ type Fact = {
   label: string;
   value: string;
   confirmed: boolean;
+  statusLabel?: string;
 };
 
 const EMPTY = "Por confirmar";
@@ -105,12 +118,31 @@ function valid(value: string): boolean {
   );
 }
 
-function makeFact(label: string, value: unknown, limit = 150): Fact {
+function documentStatusLabel(value: unknown): string {
+  const text = clean(value);
+  const normalized = normalizeCategory(text);
+  if (!text) return "";
+  if (["partial", "parcial"].includes(normalized)) return "Parcial";
+  if (["success", "completed", "complete", "concluida"].includes(normalized)) {
+    return "Completa";
+  }
+  if (normalized === "announcement_only") return "Apenas anúncio";
+  if (normalized === "login_required") return "Acesso condicionado";
+  return text;
+}
+
+function makeFact(
+  label: string,
+  value: unknown,
+  limit = 150,
+  statusLabel?: string,
+): Fact {
   const text = compact(value, limit);
   return {
     label,
     value: valid(text) ? text : EMPTY,
     confirmed: valid(text),
+    statusLabel: clean(statusLabel) || undefined,
   };
 }
 
@@ -149,11 +181,191 @@ function listValues(value: unknown, max = 6): string[] {
 }
 
 
+
+type OfficialScore = {
+  active: boolean;
+  displayValue: string;
+  suffix: string;
+  label: string;
+  note: string;
+  recommendation: string;
+  demonstrated: number | null;
+  maximum: number | null;
+  pending: number | null;
+};
+
+function formatScoreNumber(value: number): string {
+  return Math.abs(value - Math.round(value)) < 0.001
+    ? String(Math.round(value))
+    : value.toFixed(1).replace(".", ",");
+}
+
+function resultStatus(value: any): string {
+  return normalizeCategory(
+    value?.status ?? value?.label ?? value?.status_label ?? value,
+  );
+}
+
+function buildOfficialScore(ficha: any, awardFit: any): OfficialScore {
+  const canonical = ficha?.analysis_canonical || {};
+  const requirements = Array.isArray(canonical?.requirements)
+    ? canonical.requirements
+    : [];
+  const factors = Array.isArray(canonical?.criteria?.factors)
+    ? canonical.criteria.factors
+    : [];
+
+  const eliminatory = requirements.filter((item: any) => {
+    const nature = normalizeCategory(item?.nature);
+    const stage = normalizeCategory(item?.stage || item?.phase);
+    return nature === "eligibility" && stage !== "post award";
+  });
+  const failed = eliminatory.filter((item: any) => {
+    const status = resultStatus(item?.result);
+    return status.includes("not met") || status.includes("nao cumpre");
+  });
+  const unknownEligibility = eliminatory.filter((item: any) => {
+    const status = resultStatus(item?.profile || item?.result);
+    return !status || status.includes("missing") || status.includes("pending") || status.includes("por confirmar");
+  });
+
+  if (failed.length) {
+    return {
+      active: true,
+      displayValue: "Não elegível",
+      suffix: "",
+      label: "Elegibilidade",
+      note: `${failed.length} requisito eliminatório não cumprido.`,
+      recommendation: "Há requisitos eliminatórios não cumpridos; a pontuação não deve ser calculada antes de resolver a elegibilidade.",
+      demonstrated: null,
+      maximum: null,
+      pending: null,
+    };
+  }
+
+  const assessed = Array.isArray(awardFit?.assessed_requirements)
+    ? awardFit.assessed_requirements
+    : [];
+
+  if (awardFit?.active && assessed.length) {
+    const demonstrated = Number(awardFit?.documented_weight || 0);
+    const relevant = Number(awardFit?.relevant_weight || 0);
+    const pendingRelevant = Number(awardFit?.pending_weight || 0);
+    const maximum = relevant > 0 && relevant <= 100 ? 100 : relevant || null;
+    const pendingOther = maximum !== null ? Math.max(0, maximum - relevant) : 0;
+    const pending = pendingRelevant + pendingOther;
+    const high = maximum !== null
+      ? Math.min(maximum, demonstrated + pending)
+      : null;
+
+    return {
+      active: true,
+      displayValue: formatScoreNumber(demonstrated),
+      suffix: maximum !== null ? `/${formatScoreNumber(maximum)}` : "",
+      label: unknownEligibility.length ? "Elegibilidade por confirmar" : "Pontuação demonstrável",
+      note: high !== null
+        ? `Potencial atual: ${formatScoreNumber(demonstrated)}–${formatScoreNumber(high)} / ${formatScoreNumber(maximum || 100)}.`
+        : `${formatScoreNumber(demonstrated)} pontos demonstráveis; restante por avaliar.`,
+      recommendation: unknownEligibility.length
+        ? `A elegibilidade ainda tem ${unknownEligibility.length} requisito(s) por confirmar. A pontuação demonstrável nos critérios oficiais é ${formatScoreNumber(demonstrated)}${maximum !== null ? `/${formatScoreNumber(maximum)}` : ""}; o restante depende de prova específica e fatores ainda por avaliar.`
+        : `Com os factos comprováveis atuais, estão demonstrados ${formatScoreNumber(demonstrated)}${maximum !== null ? `/${formatScoreNumber(maximum)}` : ""} pontos dos critérios oficiais; o restante fica por confirmar ou por avaliar.`,
+      demonstrated,
+      maximum,
+      pending,
+    };
+  }
+
+  const weightedRequirements = requirements.filter((item: any) => {
+    const nature = normalizeCategory(item?.nature);
+    const weight = Number(item?.impact_weight_percent || 0);
+    const stage = normalizeCategory(item?.stage || item?.phase);
+    return stage !== "post award" && weight > 0 && ["team", "evaluation"].includes(nature);
+  });
+
+  if (weightedRequirements.length) {
+    const officialWeightGroups = new Map<string, { weight: number; statuses: string[] }>();
+
+    for (const item of weightedRequirements) {
+      const key = [
+        clean(item?.factor_code),
+        clean(item?.subfactor_code),
+        clean(item?.subfactor_label || item?.label || item?.id),
+      ]
+        .filter(Boolean)
+        .join("|")
+        .toLowerCase();
+
+      if (!key) continue;
+
+      const current = officialWeightGroups.get(key) || { weight: 0, statuses: [] };
+      current.weight = Math.max(current.weight, Number(item?.impact_weight_percent || 0));
+      current.statuses.push(resultStatus(item?.result || item?.profile));
+      officialWeightGroups.set(key, current);
+    }
+
+    const groups = Array.from(officialWeightGroups.values()).filter(
+      (item) => item.weight > 0,
+    );
+    const maximum = groups.reduce((sum, item) => sum + item.weight, 0);
+    const demonstrated = groups.reduce((sum, item) => {
+      const statuses = item.statuses.filter(Boolean);
+      const hasNotMet = statuses.some(
+        (status) =>
+          status.includes("not met") ||
+          status.includes("nao cumpre") ||
+          status.includes("nao demonstrado"),
+      );
+      const allMet =
+        statuses.length > 0 &&
+        statuses.every(
+          (status) =>
+            !hasNotMet &&
+            (status.includes("met") ||
+              status.includes("cumpre") ||
+              status.includes("confirmed") ||
+              status.includes("confirmado")),
+        );
+      return sum + (allMet ? item.weight : 0);
+    }, 0);
+
+    return {
+      active: true,
+      displayValue: formatScoreNumber(demonstrated),
+      suffix: maximum ? `/${formatScoreNumber(maximum)}` : "",
+      label: unknownEligibility.length ? "Elegibilidade por confirmar" : "Pontuação demonstrável",
+      note: `Critérios oficiais parcialmente estruturados por subcritério: ${formatScoreNumber(demonstrated)}–${formatScoreNumber(maximum)} pontos calculáveis.`,
+      recommendation: `A experiência/equipa tem critérios oficiais estruturados, mas ainda depende de confirmação específica da empresa. Não foi atribuída pontuação média a fatores por avaliar.`,
+      demonstrated,
+      maximum,
+      pending: Math.max(0, maximum - demonstrated),
+    };
+  }
+
+  const hasOfficialCriteria = factors.length > 0 || assessed.length > 0;
+
+  return {
+    active: hasOfficialCriteria || requirements.length > 0,
+    displayValue: "—",
+    suffix: "",
+    label: unknownEligibility.length ? "Elegibilidade por confirmar" : "Pontuação por confirmar",
+    note: hasOfficialCriteria
+      ? "Existem critérios oficiais, mas faltam pesos/regras suficientes para calcular pontuação sem heurística."
+      : "Sem árvore de critérios oficiais calculável.",
+    recommendation: unknownEligibility.length
+      ? `Há ${unknownEligibility.length} requisito(s) de elegibilidade por confirmar. A pontuação fica suspensa até haver factos suficientes.`
+      : "A leitura identificou informação relevante, mas ainda não há pesos oficiais suficientes para calcular uma pontuação auditável.",
+    demonstrated: null,
+    maximum: null,
+    pending: null,
+  };
+}
 function normalizeCategory(value: unknown): string {
   return clean(value)
     .normalize("NFD")
     .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase();
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .trim();
 }
 
 function categoryAliases(category: string): string[] {
@@ -348,6 +560,178 @@ function List({
   );
 }
 
+function awardItemCode(item: any): string {
+  const direct = clean(
+    item?.subfactor_code ??
+      item?.criterion_code ??
+      item?.code,
+  );
+  if (direct) return direct.toLowerCase();
+
+  const evidence = clean(
+    item?.evidence_excerpt ??
+      item?.source_excerpt ??
+      item?.name ??
+      item?.display_name,
+  );
+  const match = evidence.match(/\b([A-Z]\d+)\b/i);
+  return match ? match[1].toLowerCase() : "";
+}
+
+function isWeightOnlyRequirement(text: string): boolean {
+  const normalized = normalizeCategory(text);
+  return (
+    normalized.includes("ponderacao") ||
+    normalized.includes("peso parcial")
+  );
+}
+
+function awardRequirementDetail(
+  item: any,
+  canonical: any,
+): string {
+  const requirements = Array.isArray(canonical?.requirements)
+    ? canonical.requirements
+    : [];
+  const code = awardItemCode(item);
+  const label = normalizeCategory(
+    clean(item?.name) || clean(item?.display_name),
+  );
+
+  const linked = requirements.filter((requirement: any) => {
+    const reqCode = clean(requirement?.subfactor_code).toLowerCase();
+    if (code && reqCode && code === reqCode) return true;
+
+    const reqLabel = normalizeCategory(requirement?.label);
+    return Boolean(
+      label &&
+        reqLabel &&
+        (
+          label.includes(reqLabel) ||
+          reqLabel.includes(label)
+        ),
+    );
+  });
+
+  const preferred = linked
+    .map((requirement: any) =>
+      formatAnalysisItemForDisplay(requirement, "requirement").primaryValue,
+    )
+    .filter((text: string) => text && !isWeightOnlyRequirement(text));
+
+  if (preferred.length) return preferred[0];
+
+  const fallback = [
+    ...linked.map((requirement: any) =>
+      clean(requirement?.required?.text) ||
+        clean(requirement?.source?.excerpt),
+    ),
+    clean(item?.requirement_text),
+    clean(item?.source_text),
+    clean(item?.description),
+    clean(item?.summary),
+    clean(item?.evidence_excerpt),
+  ].filter(Boolean);
+
+  return fallback.length ? compact(fallback[0], 96) : "Requisito identificado";
+}
+
+function awardRequirementProvenance(item: any): string {
+  return clean(
+    item?.status_label ??
+      item?.source_document ??
+      item?.source_heading ??
+      item?.source?.document,
+  ) || "Confirmado nas peças";
+}
+
+function AwardFitList({ fit }: { fit: any }) {
+  const items = Array.isArray(fit?.assessed_requirements)
+    ? fit.assessed_requirements
+    : [];
+  if (!items.length) return <p className="dc-empty">{EMPTY}</p>;
+  return (
+    <div className="dc-award-fit-list">
+      {items.slice(0, 5).map((item: any, index: number) => {
+        const confirmed = clean(item?.status) === "confirmed";
+        const label = clean(item?.display_name) || clean(item?.name) || "Experiência avaliada";
+        const weight = Number(item?.absolute_weight || 0);
+        const canonical = fit?.__canonical;
+        const itemCode = clean(
+          item?.subfactor_code ??
+            item?.criterion_code ??
+            item?.code,
+        ).toLowerCase();
+        const itemLabel = normalizeCategory(label);
+        let publishedWeight: number | null = null;
+        let weightContext = "do fator";
+
+        for (const factor of Array.isArray(canonical?.criteria?.factors)
+          ? canonical.criteria.factors
+          : []) {
+          for (const sub of Array.isArray(factor?.subfactors)
+            ? factor.subfactors
+            : []) {
+            const subCode = clean(sub?.code).toLowerCase();
+            const subLabel = normalizeCategory(sub?.label);
+            const sameCode = Boolean(
+              itemCode && subCode && itemCode === subCode,
+            );
+            const sameLabel = Boolean(
+              itemLabel &&
+                subLabel &&
+                (itemLabel === subLabel ||
+                  itemLabel.includes(subLabel) ||
+                  subLabel.includes(itemLabel)),
+            );
+
+            if (sameCode || sameLabel) {
+              const candidate = Number(
+                sub?.display_weight_percent ??
+                  sub?.published_weight_percent ??
+                  sub?.internal_weight_percent,
+              );
+
+              if (Number.isFinite(candidate)) {
+                publishedWeight = candidate;
+                weightContext = clean(sub?.weight_context) || "do fator";
+              }
+            }
+          }
+        }
+
+        const requirementDetail = awardRequirementDetail(item, canonical);
+        const statusLabel =
+          clean(item?.status_label) ||
+          (confirmed ? "Comprovado" : "Por demonstrar");
+
+        return (
+          <div className="dc-award-fit-row" key={`${label}-${index}`}>
+            {confirmed ? <CheckCircle2 size={15} /> : <AlertTriangle size={15} />}
+            <div>
+              <strong>{label}</strong>
+              <span title={awardRequirementProvenance(item)}>
+                {requirementDetail}
+                {publishedWeight !== null
+                  ? ` · ${publishedWeight}% ${weightContext}`
+                  : weight
+                    ? ` · ${weight}% da avaliação`
+                    : ""}
+                {statusLabel ? ` · ${statusLabel}` : ""}
+              </span>
+            </div>
+          </div>
+        );
+      })}
+      {Array.isArray(fit?.unrelated_project_typologies) && fit.unrelated_project_typologies.length ? (
+        <p className="dc-award-fit-note">
+          Projetos noutras tipologias ({fit.unrelated_project_typologies.slice(0, 4).join(", ")}) não contam para estes critérios.
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 function AiPanel({
   title,
   children,
@@ -423,6 +807,18 @@ export default function DesignCompetitionAnalysis({
 
   concursoId,}: Props) {
   const extraction = ficha?.design_competition_extraction || {};
+  const procedureAnalysis = getProcedureAnalysis(ficha);
+  const procedureCardAnalysis = buildProcedureCardAnalysis(
+    ficha,
+    procedureAnalysis,
+  );
+  const analysisFamily =
+    clean(procedureAnalysis?.family) ||
+    clean(ficha?.analysis_family) ||
+    "design_competition";
+  const isDesignCompetition = analysisFamily === "design_competition";
+  const isProjectServices = analysisFamily === "project_services";
+  const isDesignBuild = analysisFamily === "design_build";
   const interventionProgram =
     ficha?.intervention_program ||
     extraction?.intervention_program ||
@@ -446,7 +842,8 @@ export default function DesignCompetitionAnalysis({
   const title =
     clean(concurso?.titulo) ||
     clean(ficha?.identificacao?.titulo) ||
-    "Concurso de conceção";
+    clean(procedureAnalysis?.family_label) ||
+    "Concurso de arquitetura";
   const entity =
     clean(concurso?.entidade) ||
     clean(ficha?.identificacao?.entidade);
@@ -455,9 +852,10 @@ export default function DesignCompetitionAnalysis({
     clean(ficha?.localizacao?.morada) ||
     clean(ficha?.identificacao?.localizacao);
   const procedure =
-    clean(concurso?.tipo_procedimento) ||
+    clean(procedureAnalysis?.family_label) ||
     clean(ficha?.identificacao?.tipo_procedimento) ||
-    "Concurso de conceção";
+    clean(concurso?.tipo_procedimento) ||
+    "Procedimento por confirmar";
   const officialUrl =
     clean(concurso?.link) ||
     clean(ficha?.identificacao?.link);
@@ -487,25 +885,74 @@ export default function DesignCompetitionAnalysis({
       ? getFact(extraction, "area_intervencao") || getFact(extraction, "total_area")
       : "");
   const deadline =
-    getFact(extraction, "submission_deadline") ||
-    clean(concurso?.data_limite);
-  const criteria =
+    clean(concurso?.data_entrega_propostas) ||
+    clean(concurso?.data_fim_calculada) ||
+    clean(concurso?.data_limite) ||
+    getFact(extraction, "submission_deadline");
+  const criteriaFallback =
+    clean(concurso?.criterio_resumo) ||
+    clean(ficha?.criterios?.resumo) ||
+    clean(concurso?.criterio_tipo) ||
     clean(ficha?.criterio_resumo) ||
-    clean(ficha?.criterios?.resumo);
-  const documentStatus =
-    clean(presentation?.document_status) ||
-    clean(ficha?.document_insights?.document_status);
+    clean(ficha?.criterios?.criterio_adjudicacao);
 
-  const metrics = [
-    makeFact("Valor do procedimento", procedureValue, 90),
-    makeFact("Custo estimado da obra", constructionCost, 90),
-    makeFact("Honorários de projeto", servicesDisplay, 90),
-    makeFact("Área de intervenção", totalArea, 90),
-    makeFact("Entrega das propostas", deadline, 105),
-    makeFact("Modelo de avaliação", criteria, 105),
-    makeFact("Tipo de procedimento", procedure, 100),
-    makeFact("Estado da documentação", documentStatus, 90),
-  ];
+  const criteria = buildCriteriaSummary(
+    ficha,
+    procedureAnalysis,
+    criteriaFallback,
+  );
+
+  const documentStatus = documentStatusLabel(
+    presentation?.document_status ||
+      ficha?.document_insights?.document_status,
+  );
+
+  const procedureMetrics: any[] = Array.isArray(
+    procedureAnalysis?.top_metrics,
+  )
+    ? procedureAnalysis.top_metrics
+    : [];
+  const procedureValueMetric = procedureMetrics.find(
+    (item: any) => clean(item?.key) === "procedure_value",
+  );
+  const constructionMetric = procedureMetrics.find(
+    (item: any) => clean(item?.key) === "construction_cost",
+  );
+  const procedureValueDisplay =
+    clean(procedureValueMetric?.value) || procedureValue;
+  const constructionCostDisplay =
+    clean(constructionMetric?.value) || constructionCost;
+  const constructionCostStatus =
+    clean(constructionMetric?.status_label) || undefined;
+  const metrics: Fact[] = procedureMetrics.length
+    ? procedureMetrics.map((item: any): Fact => {
+        const label = clean(item?.label) || "Indicador";
+        const value =
+          label === "Estado da documentação"
+            ? documentStatusLabel(item?.value)
+            : item?.value;
+        return makeFact(
+          label,
+          value,
+          120,
+          clean(item?.status_label) || undefined,
+        );
+      })
+    : [
+        makeFact("Valor do procedimento", procedureValue, 90),
+        makeFact(
+      "Estimativa de custo da obra",
+      constructionCostDisplay,
+      90,
+      constructionCostStatus,
+    ),
+        makeFact("Honorários de projeto", servicesDisplay, 90),
+        makeFact("Área de intervenção", totalArea, 90),
+        makeFact("Entrega das propostas", deadline, 105),
+        makeFact("Critérios de adjudicação", criteria, 120),
+        makeFact("Tipo de procedimento", procedure, 100),
+        makeFact("Estado da documentação", documentStatus, 90),
+      ];
 
   const prizeKeys = [
     "competition_prize_first",
@@ -521,12 +968,30 @@ export default function DesignCompetitionAnalysis({
     .filter((item) => item.confirmed);
 
   const financial = [
-    ...(prizes.length
-      ? prizes
-      : [makeFact("Prémios do concurso", "", 90)]),
-    makeFact("Valor do procedimento", procedureValue, 90),
-    makeFact("Honorários de projeto", servicesDisplay, 90),
-    makeFact("Custo estimado da obra", constructionCost, 90),
+    ...(isDesignCompetition
+      ? prizes.length
+        ? prizes
+        : [makeFact("Prémios do concurso", "", 90)]
+      : []),
+    makeFact(
+      isDesignBuild
+        ? "Preço base projeto + obra"
+        : isProjectServices
+          ? "Preço base dos serviços"
+          : "Valor do procedimento",
+      procedureValueDisplay,
+      100,
+    ),
+    ...(servicesDisplay && clean(servicesDisplay) !== clean(procedureValueDisplay)
+      ? [makeFact("Honorários de projeto", servicesDisplay, 90)]
+      : []),
+    makeFact(
+      "Estimativa de custo da obra",
+      constructionCostDisplay,
+      110,
+      constructionCostStatus,
+    ),
+    makeFact("Critérios de adjudicação", criteria, 140),
   ];
 
   const contractKeys = [
@@ -584,25 +1049,21 @@ export default function DesignCompetitionAnalysis({
     ficha?.adequacao_empresa ||
     {};
   const decision = ficha?.decisao || {};
-  const scoreCandidate =
-    matching?.compatibility_score ??
-    matching?.score ??
-    matching?.score_compatibilidade ??
-    decision?.score ??
-    ficha?.analise_ai?.score;
-  const score =
-    typeof scoreCandidate === "number" && Number.isFinite(scoreCandidate)
-      ? Math.round(scoreCandidate)
-      : null;
-
+  const awardFit =
+    matching?.award_criteria_fit ??
+    ficha?.adequacao_empresa?.award_criteria_fit ??
+    {};
+  const officialScore = buildOfficialScore(ficha, awardFit);
   const recommendation =
     compact(
-      matching?.recommendation?.explanation ??
-        matching?.final_recommendation?.explanation ??
-        ficha?.recomendacao_final?.justificacao ??
-        ficha?.decision_summary,
-      420,
+      officialScore.recommendation ||
+        (matching?.recommendation?.explanation ??
+          matching?.final_recommendation?.explanation ??
+          ficha?.recomendacao_final?.justificacao ??
+          ficha?.decision_summary),
+      260,
     ) || EMPTY;
+  const awardFitActive = Boolean(awardFit?.active);
   const opportunities = enrichOpportunityCounts(
     listValues(
       matching?.oportunidades ??
@@ -641,32 +1102,38 @@ export default function DesignCompetitionAnalysis({
   const constraints = unique(program?.constraints || [], 8);
   const summary = compact(program?.summary, 620) || EMPTY;
 
-  const timeline = [
-    makeFact(
-      "Publicação do anúncio",
-      clean(concurso?.data) ||
-        clean(ficha?.identificacao?.data),
-      90,
-    ),
-    makeFact(
-      "Pedidos de esclarecimento",
-      getFact(extraction, "clarification_deadline"),
-      120,
-    ),
-    makeFact(
-      "Visita ao local",
-      getFact(extraction, "site_visit"),
-      120,
-    ),
-    makeFact(
-      "Entrega das propostas",
-      deadline,
-      100,
-    ),
-  ];
+  const extractedTimeline = Array.isArray(procedureAnalysis?.timeline)
+    ? procedureAnalysis.timeline
+    : [];
+  const timeline = extractedTimeline.length
+    ? extractedTimeline.map((item: any) =>
+        makeFact(clean(item?.label) || "Marco", item?.value, 120),
+      )
+    : [
+        makeFact(
+          "Publicação do anúncio",
+          clean(concurso?.data_publicacao_iso) ||
+            clean(concurso?.data) ||
+            clean(ficha?.identificacao?.data_publicacao) ||
+            clean(ficha?.identificacao?.data),
+          90,
+        ),
+        makeFact(
+          "Pedidos de esclarecimento",
+          getFact(extraction, "clarification_deadline"),
+          120,
+        ),
+        makeFact(
+          "Visita ao local",
+          getFact(extraction, "site_visit"),
+          120,
+        ),
+        makeFact("Entrega das propostas", deadline, 100),
+      ];
 
   return (
     <main className="site-container dc-page">
+      <AnalysisQuestionsModal ficha={ficha} concursoId={concursoId} />
       <header className="dc-hero">
         <a className="dc-back" href="/analise">
           <ArrowLeft size={15} />
@@ -676,9 +1143,13 @@ export default function DesignCompetitionAnalysis({
         <div className="dc-hero-grid">
           <div>
             <span className="dc-kicker">
-              {isInterventionProgram
-                ? "Análise de projeto e intervenção"
-                : "Análise automática de concurso"}
+              {isDesignBuild
+                ? "Análise de Conceção-Construção"
+                : isProjectServices
+                  ? "Análise de prestação de serviços de projeto"
+                  : isInterventionProgram
+                    ? "Análise de projeto e intervenção"
+                    : "Análise de concurso de conceção"}
             </span>
             <h1>{title}</h1>
             <div className="dc-meta">
@@ -722,12 +1193,13 @@ export default function DesignCompetitionAnalysis({
       </header>
 
       <section className="dc-metrics">
-        {metrics.map((item) => (
+        {metrics.map((item: Fact) => (
           <article key={item.label}>
             <span>{item.label}</span>
             <strong>{item.value}</strong>
             <small className={item.confirmed ? "ok" : "pending"}>
-              {item.confirmed ? "Confirmado" : "Por confirmar"}
+              {item.statusLabel ||
+                (item.confirmed ? "Confirmado" : "Por confirmar")}
             </small>
           </article>
         ))}
@@ -738,9 +1210,10 @@ export default function DesignCompetitionAnalysis({
           <AiPanel title="Vale a pena concorrer?">
             <div className="dc-decision">
               <div className="dc-score">
-                <span>Pontuação global</span>
-                <strong>{score ?? "—"}</strong>
-                <small>/100</small>
+                <span>{officialScore.label}</span>
+                <strong>{officialScore.displayValue}</strong>
+                {officialScore.suffix ? <small>{officialScore.suffix}</small> : null}
+                {officialScore.note ? <em>{officialScore.note}</em> : null}
               </div>
 
               <div className="dc-ai-copy">
@@ -771,8 +1244,17 @@ export default function DesignCompetitionAnalysis({
               </div>
 
               <div className="dc-ai-copy">
-                <span>Porque é relevante</span>
-                <List items={opportunities} />
+                <span>{awardFitActive ? "Experiência que decide a nota" : "O que decide a nota"}</span>
+                {awardFitActive ? (
+                  <AwardFitList fit={{ ...awardFit, __canonical: ficha?.analysis_canonical }} />
+                ) : (
+                  <UniversalDecisionCriteria
+                    ficha={ficha}
+                    procedureAnalysis={procedureAnalysis}
+                    criteriaSummary={criteria}
+                    fallbackItems={opportunities}
+                  />
+                )}
               </div>
             </div>
           </AiPanel>
@@ -796,10 +1278,12 @@ export default function DesignCompetitionAnalysis({
                 <FactRows items={financial} />
               </article>
 
-              <SubmissionRequirementsCards
-                              requirements={submissionRequirements}
-                            />
+              <UniversalSubmissionCards
+                ficha={ficha}
+                procedureAnalysis={procedureAnalysis}
+              />
 
+              {isDesignCompetition ? (
               <article className="dc-card">
                 <div className="dc-card-title">
                   <Layers3 size={18} />
@@ -894,26 +1378,29 @@ export default function DesignCompetitionAnalysis({
                   ]}
                 />
               </article>
+              ) : null}
 
 
             </div>
           </section>
 
+          <ProcedureSpecificCards analysis={procedureAnalysis} ficha={ficha} />
+
           <section className="dc-program">
             <div className="dc-heading">
               <span>
-                {isInterventionProgram
+                {isProjectServices || isDesignBuild || isInterventionProgram
                   ? "Programa de intervenção"
                   : "Programa funcional"}
               </span>
               <h2>
-                {isInterventionProgram
+                {isProjectServices || isDesignBuild || isInterventionProgram
                   ? "Síntese territorial e técnica"
                   : "Resumo do programa preliminar"}
               </h2>
             </div>
 
-            {isInterventionProgram ? (
+            {isInterventionProgram || isProjectServices || isDesignBuild ? (
               <InterventionProgramSummaryCard
                 program={interventionProgram}
               />
@@ -1491,6 +1978,56 @@ export default function DesignCompetitionAnalysis({
           .dc-indicators {
             grid-template-columns: 1fr;
           }
+        }
+
+        .dc-score em {
+          display: block;
+          max-width: 150px;
+          margin-top: 8px;
+          color: #6c6f67;
+          font-size: 10px;
+          font-style: normal;
+          line-height: 1.35;
+        }
+        .dc-award-fit-list {
+          display: grid;
+          gap: 9px;
+          margin-top: 10px;
+        }
+        .dc-award-fit-row {
+          display: grid;
+          grid-template-columns: auto minmax(0, 1fr);
+          gap: 8px;
+          align-items: start;
+        }
+        .dc-award-fit-row svg {
+          margin-top: 2px;
+        }
+        .dc-award-fit-row div {
+          min-width: 0;
+        }
+        .dc-award-fit-row strong,
+        .dc-award-fit-row span {
+          display: block;
+          white-space: normal;
+          overflow-wrap: anywhere;
+        }
+        .dc-award-fit-row strong {
+          font-size: 12px;
+        }
+        .dc-award-fit-row span {
+          margin-top: 2px;
+          color: #6c6f67;
+          font-size: 10px;
+          line-height: 1.35;
+        }
+        .dc-award-fit-note {
+          margin: 4px 0 0;
+          padding-top: 8px;
+          border-top: 1px solid rgba(82, 91, 67, 0.18);
+          color: #6c6f67;
+          font-size: 10px;
+          line-height: 1.4;
         }
       `}</style>
     </main>

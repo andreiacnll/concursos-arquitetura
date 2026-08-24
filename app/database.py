@@ -1,6 +1,8 @@
 import json
 import re
 import sqlite3
+
+from .sqlite_snapshot import SnapshotConnection
 import unicodedata
 from difflib import SequenceMatcher
 from contextlib import closing
@@ -99,7 +101,11 @@ COLUNAS_ADICIONAIS = {
 
 def abrir_conexao() -> sqlite3.Connection:
     """Abre a base principal com as garantias usadas pela API."""
-    conexao = sqlite3.connect(DB_PATH, timeout=5)
+    conexao = sqlite3.connect(
+        DB_PATH,
+        timeout=5,
+        factory=SnapshotConnection,
+    )
     conexao.row_factory = sqlite3.Row
     conexao.execute("PRAGMA foreign_keys = ON")
     conexao.execute("PRAGMA busy_timeout = 5000")
@@ -2579,55 +2585,90 @@ def estados_analise_concursos(
 
     return mapa
 
-
+# CNLL_ANALYSIS_CONTEXT_SELECTION_V17_5_1B
 def obter_analise_ativa_concurso(
     concurso_id: int,
     user_id: str | None = None,
     company_id: int | None = None,
 ):
-    """Resolve a ficha ativa pela BD, não pelo ficheiro solto."""
+    """
+    Resolve a análise ativa respeitando primeiro o contexto do utilizador.
+
+    Prioridade:
+    1. análise do próprio utilizador na empresa atual;
+    2. análise do próprio utilizador;
+    3. análise da empresa sem user_id, por compatibilidade;
+    4. análise pública/sistema apenas como fallback.
+
+    Uma análise pública mais recente nunca deve esconder uma análise
+    personalizada que contém matching, CV e analysis_canonical.
+    """
     with closing(abrir_conexao()) as conexao:
-        if company_id is not None:
+        if user_id:
+            if company_id is not None:
+                linha = conexao.execute(
+                    """
+                    SELECT *
+                    FROM analises
+                    WHERE concurso_id = ?
+                      AND estado = 'concluida'
+                      AND user_id = ?
+                      AND company_id = ?
+                    ORDER BY updated_at DESC, id DESC
+                    LIMIT 1
+                    """,
+                    (concurso_id, user_id, company_id),
+                ).fetchone()
+                if linha:
+                    return dict(linha)
+
             linha = conexao.execute(
                 """
                 SELECT *
                 FROM analises
                 WHERE concurso_id = ?
-                  AND company_id = ?
                   AND estado = 'concluida'
-                ORDER BY updated_at DESC, id DESC
+                  AND user_id = ?
+                ORDER BY
+                  CASE
+                    WHEN company_id = ? THEN 0
+                    WHEN company_id IS NULL THEN 1
+                    ELSE 2
+                  END,
+                  updated_at DESC,
+                  id DESC
                 LIMIT 1
                 """,
-                (concurso_id, company_id),
+                (concurso_id, user_id, company_id),
             ).fetchone()
             if linha:
                 return dict(linha)
 
-        if user_id:
-            linha = conexao.execute(
-                """
-                SELECT *
-                FROM analises
-                WHERE concurso_id = ?
-                  AND user_id = ?
-                  AND company_id IS NULL
-                  AND estado = 'concluida'
-                ORDER BY updated_at DESC, id DESC
-                LIMIT 1
-                """,
-                (concurso_id, user_id),
-            ).fetchone()
-            if linha:
-                return dict(linha)
+            if company_id is not None:
+                linha = conexao.execute(
+                    """
+                    SELECT *
+                    FROM analises
+                    WHERE concurso_id = ?
+                      AND estado = 'concluida'
+                      AND user_id IS NULL
+                      AND company_id = ?
+                    ORDER BY updated_at DESC, id DESC
+                    LIMIT 1
+                    """,
+                    (concurso_id, company_id),
+                ).fetchone()
+                if linha:
+                    return dict(linha)
 
         linha = conexao.execute(
             """
             SELECT *
             FROM analises
             WHERE concurso_id = ?
+              AND estado = 'concluida'
               AND user_id IS NULL
               AND company_id IS NULL
-              AND estado = 'concluida'
             ORDER BY updated_at DESC, id DESC
             LIMIT 1
             """,
@@ -2635,7 +2676,6 @@ def obter_analise_ativa_concurso(
         ).fetchone()
 
     return dict(linha) if linha else None
-
 
 def listar_versoes_analise(
     analise_id: int,
@@ -4341,4 +4381,3 @@ def gerar_timeline(concurso):
 
     conn.commit()
     conn.close()
-

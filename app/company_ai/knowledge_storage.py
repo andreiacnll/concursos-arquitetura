@@ -328,3 +328,116 @@ def apply_validation_answer(
         ).fetchone()
 
     return _linha_para_facto(linha_atualizada) if linha_atualizada else None
+
+# CNLL_CV_ANALYSIS_V17_2
+def upsert_knowledge_fact(
+    company_id: int,
+    field: str,
+    value: Any,
+    source: str = "",
+    source_type: str = "",
+    url: str = "",
+    section: str = "",
+    evidence_text: str = "",
+    confidence: float = 0,
+    status: str = "unknown",
+) -> KnowledgeFact:
+    """Mantém um único facto corrente por (empresa, campo)."""
+    normalized_field = str(field or "").strip()
+    if not normalized_field:
+        raise ValueError("field é obrigatório")
+
+    with closing(abrir_conexao()) as conexao:
+        conexao.execute("BEGIN IMMEDIATE")
+        rows = conexao.execute(
+            """
+            SELECT id
+            FROM company_knowledge_memory
+            WHERE company_id = ? AND field = ?
+            ORDER BY updated_at DESC, created_at DESC, id DESC
+            """,
+            (company_id, normalized_field),
+        ).fetchall()
+
+        if rows:
+            keep_id = int(rows[0]["id"])
+            conexao.execute(
+                """
+                UPDATE company_knowledge_memory
+                SET value_json = ?,
+                    source = ?,
+                    source_type = ?,
+                    url = ?,
+                    section = ?,
+                    evidence_text = ?,
+                    confidence = ?,
+                    status = ?,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                """,
+                (
+                    _valor_para_json(value),
+                    str(source or "").strip() or None,
+                    str(source_type or "").strip() or None,
+                    str(url or "").strip() or None,
+                    str(section or "").strip() or None,
+                    str(evidence_text or "").strip()[:2000] or None,
+                    float(confidence or 0),
+                    str(status or "unknown").strip() or "unknown",
+                    keep_id,
+                ),
+            )
+            duplicate_ids = [int(row["id"]) for row in rows[1:]]
+            if duplicate_ids:
+                placeholders = ",".join("?" for _ in duplicate_ids)
+                conexao.execute(
+                    f"DELETE FROM company_knowledge_memory WHERE id IN ({placeholders})",
+                    duplicate_ids,
+                )
+        else:
+            cursor = conexao.execute(
+                """
+                INSERT INTO company_knowledge_memory (
+                    company_id, field, value_json, source, source_type,
+                    url, section, evidence_text, confidence, status
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    company_id,
+                    normalized_field,
+                    _valor_para_json(value),
+                    str(source or "").strip() or None,
+                    str(source_type or "").strip() or None,
+                    str(url or "").strip() or None,
+                    str(section or "").strip() or None,
+                    str(evidence_text or "").strip()[:2000] or None,
+                    float(confidence or 0),
+                    str(status or "unknown").strip() or "unknown",
+                ),
+            )
+            keep_id = int(cursor.lastrowid)
+
+        conexao.commit()
+        row = conexao.execute(
+            "SELECT * FROM company_knowledge_memory WHERE id = ? LIMIT 1",
+            (keep_id,),
+        ).fetchone()
+
+    return _linha_para_facto(row)
+
+
+def delete_knowledge_by_field(company_id: int, field: str) -> int:
+    normalized_field = str(field or "").strip()
+    if not normalized_field:
+        return 0
+    with closing(abrir_conexao()) as conexao:
+        cursor = conexao.execute(
+            """
+            DELETE FROM company_knowledge_memory
+            WHERE company_id = ? AND field = ?
+            """,
+            (company_id, normalized_field),
+        )
+        conexao.commit()
+        return int(cursor.rowcount or 0)

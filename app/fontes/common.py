@@ -630,6 +630,11 @@ def fetch_html(
 
 def infer_procedure_type(title: str, raw_text: str = "") -> str:
     text = normalize(f"{title} {raw_text}")
+    if (
+        "concecao construcao" in text
+        or "concepcao construcao" in text
+    ):
+        return "Conceção-Construção"
     if "concurso publico internacional de concecao" in text:
         return "Concurso Público Internacional de Conceção"
     if "concurso publico de concecao" in text or "concurso de concecao" in text:

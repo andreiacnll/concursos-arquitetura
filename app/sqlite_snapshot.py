@@ -11,8 +11,6 @@ from contextlib import closing, suppress
 from pathlib import Path
 from threading import Lock
 
-import psycopg
-from psycopg.types.json import Jsonb
 
 
 SNAPSHOT_TABLE_SQL = """
@@ -63,20 +61,39 @@ SNAPSHOT_SECURITY_SQL = (
 def _garantir_tabela_snapshot(conn) -> None:
     conn.execute(SNAPSHOT_TABLE_SQL)
 
-    for comando in SNAPSHOT_SECURITY_SQL:
+    roles = {
+        linha[0]
+        for linha in conn.execute(
+            "SELECT rolname FROM pg_roles WHERE rolname = ANY(%s)",
+            (["anon", "authenticated"],),
+        ).fetchall()
+    }
+    comandos = [SNAPSHOT_SECURITY_SQL[0]]
+    if {"anon", "authenticated"}.issubset(roles):
+        comandos.append(SNAPSHOT_SECURITY_SQL[1])
+
+    for comando in comandos:
         conn.execute(comando)
 
 
 TABLES_TO_COUNT = (
     "concursos",
+    "concurso_fontes",
     "analises",
     "analise_versoes",
     "analise_jobs",
     "companies",
     "company_members",
     "company_profiles",
+    "company_knowledge_memory",
+    "company_interview_sessions",
+    "company_interview_questions",
+    "company_interview_answers",
+    "company_source_raw_texts",
+    "member_profiles",
     "favoritos",
     "alertas",
+    "alerta_subscricoes",
     "timeline_eventos",
 )
 
@@ -86,6 +103,19 @@ _upload_lock = Lock()
 _generation = 0
 _synced_generation = 0
 
+
+
+def _psycopg_modulos():
+    try:
+        import psycopg
+        from psycopg.types.json import Jsonb
+    except ImportError as exc:
+        raise RuntimeError(
+            "CNLL_SQLITE_SNAPSHOT_ENABLED está ativo, "
+            "mas psycopg[binary] não está instalado."
+        ) from exc
+
+    return psycopg, Jsonb
 
 def _log(message: str) -> None:
     print(f"[sqlite-snapshot] {message}", flush=True)
@@ -249,6 +279,7 @@ def restaurar_snapshot_se_ativo(db_path: Path | str) -> bool:
 
     _log(f"A obter snapshot remoto '{chave}'...")
 
+    psycopg, _ = _psycopg_modulos()
     with psycopg.connect(_database_url()) as conn:
         _garantir_tabela_snapshot(conn)
         conn.commit()
@@ -403,6 +434,7 @@ def sincronizar_snapshot(db_path: Path | str) -> bool:
                 "counts": contagens,
             }
 
+            psycopg, Jsonb = _psycopg_modulos()
             with psycopg.connect(_database_url()) as conn:
                 with conn.transaction():
                     _garantir_tabela_snapshot(conn)

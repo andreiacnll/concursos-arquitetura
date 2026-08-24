@@ -6,11 +6,20 @@ import {
   BriefcaseBusiness,
   ClipboardCheck,
   FileSearch2,
-  Scale,
-  ShieldAlert,
+  FileText,
+  Layers3,
 } from "lucide-react";
+import ProjectMap from "../mapa/ProjectMap";
+import {
+  buildUniversalContract,
+  buildUniversalSubmission,
+  cleanUniversal,
+  getProcedureAnalysis,
+} from "@/lib/analysis-universal";
 
-type Props = { ficha: any };
+type Props = {
+  ficha: any;
+};
 
 type ExpandableCardProps = {
   id: string;
@@ -23,245 +32,223 @@ type ExpandableCardProps = {
   items: string[];
 };
 
-function clean(value: unknown): string {
-  if (value === null || value === undefined) return "";
-  if (typeof value === "string") return value.replace(/\s+/g, " ").trim();
-  if (typeof value === "number") return String(value);
-  if (Array.isArray(value)) return value.map(clean).filter(Boolean).join(" · ");
-  if (typeof value === "object") {
-    const item = value as Record<string, unknown>;
-    return clean(
-      item.value ??
-        item.normalized_value ??
-        item.title ??
-        item.label ??
-        item.name ??
-        item.description ??
-        "",
-    );
-  }
-  return "";
+function itemTitle(item: any): string {
+  return cleanUniversal(item);
 }
 
-function asArray(value: unknown): any[] {
-  return Array.isArray(value) ? value : [];
-}
-
-function asNumber(value: unknown): number {
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function plural(value: number, singular: string, pluralValue: string): string {
+function countLabel(
+  value: number,
+  singular: string,
+  pluralValue: string,
+): string {
+  if (!value) return "Por confirmar";
   return `${value} ${value === 1 ? singular : pluralValue}`;
-}
-
-function fact(extraction: any, key: string): string {
-  return clean(extraction?.facts?.[key]);
-}
-
-function requirementTitle(item: any): string {
-  return clean(
-    item?.title ?? item?.label ?? item?.name ?? item?.description,
-  );
-}
-
-function requirementDetail(item: any): string {
-  const details = [
-    clean(item?.format),
-    clean(item?.page_size ?? item?.size),
-    clean(item?.orientation),
-    item?.quantity ? `${item.quantity} un.` : "",
-    item?.max_pages ? `máx. ${item.max_pages} páginas` : "",
-    clean(item?.max_file_size ?? item?.maximum_file_size),
-  ].filter(Boolean);
-
-  const title = requirementTitle(item);
-  return details.length ? `${title}: ${details.join(" · ")}` : title;
 }
 
 export default function ProjectInfoPanel({ ficha }: Props) {
   const [open, setOpen] = useState<string | null>(null);
+
   const toggle = (id: string) => {
     setOpen((current) => (current === id ? null : id));
   };
 
-  const extraction = ficha?.design_competition_extraction ?? {};
-  const requirements =
-    ficha?.submission_requirements ??
-    extraction?.submission_requirements ??
-    {};
-
-  const groups = requirements?.groups ?? {};
-  const counts = requirements?.counts ?? {};
-  const submission = extraction?.submission ?? {};
-  const contract = extraction?.contract ?? {};
-
-  const participantDocuments = asArray(groups?.participant_documents);
-  const designWork = asArray(groups?.design_work);
-  const complementaryDocuments = asArray(groups?.complementary_documents);
-  const postSelectionDocuments = asArray(groups?.post_selection_documents);
-  const contractDeliverables = asArray(groups?.contract_deliverables);
-
-  const participantCount =
-    asNumber(counts?.participant_documents) || participantDocuments.length;
-  const deliveryTypeCount =
-    asNumber(counts?.competition_delivery_types) ||
-    designWork.length + complementaryDocuments.length;
-  const physicalUnits = asNumber(counts?.physical_units);
-  const digitalFiles = asNumber(counts?.digital_files);
-  const postSelectionCount =
-    asNumber(counts?.post_selection_documents) ||
-    postSelectionDocuments.length;
-  const contractCount =
-    asNumber(counts?.contract_deliverables) ||
-    contractDeliverables.length;
-  const specialtyCount = asNumber(contract?.specialty_count);
-  const documentsRead =
-    asNumber(requirements?.documents_read) ||
-    asNumber(extraction?.counts?.documents);
-  const sourceDocuments = asArray(requirements?.source_documents_used);
-  const sections = asArray(requirements?.sections);
+  const procedure = getProcedureAnalysis(ficha);
+  const submission = buildUniversalSubmission(ficha, procedure);
+  const contract = buildUniversalContract(ficha, procedure);
 
   const submissionItems = [
-    plural(
-      participantCount,
-      "documento do concorrente",
-      "documentos do concorrente",
-    ),
-    plural(deliveryTypeCount, "tipo de entrega", "tipos de entrega"),
-    plural(physicalUnits, "unidade física", "unidades físicas"),
-    plural(digitalFiles, "ficheiro digital", "ficheiros digitais"),
-  ];
-
-  const criticalItems = [
-    clean(submission?.anonymity)
-      ? `Anonimato: ${clean(submission.anonymity)}`
-      : "",
-    fact(extraction, "submission_platform")
-      ? `Plataforma: ${fact(extraction, "submission_platform")}`
-      : "",
-    fact(extraction, "submission_deadline")
-      ? `Prazo: ${fact(extraction, "submission_deadline")}`
-      : "",
-    ...designWork.map(requirementDetail).filter(Boolean).slice(0, 7),
-  ].filter(Boolean);
-
-  const criteriaDetail =
-    clean(ficha?.criterio_detalhe) ||
-    clean(ficha?.criterios?.detalhe) ||
-    clean(ficha?.criterio_resumo) ||
-    clean(ficha?.criterios?.resumo);
-
-  const evaluationItems = criteriaDetail
-    ? criteriaDetail
-        .split(/\s*[;•]\s*/)
-        .map((item) => item.trim())
-        .filter(Boolean)
-        .slice(0, 8)
-    : [];
-
-  const selectedItems = [
-    ...postSelectionDocuments.map(requirementTitle).filter(Boolean),
-    ...contractDeliverables.map(requirementTitle).filter(Boolean),
-    specialtyCount
-      ? plural(
-          specialtyCount,
-          "especialidade prevista",
-          "especialidades previstas",
+    submission.participantDocuments.length
+      ? countLabel(
+          submission.participantDocuments.length,
+          "documento do concorrente",
+          "documentos do concorrente",
         )
       : "",
+    submission.proposalDocuments.length
+      ? countLabel(
+          submission.proposalDocuments.length,
+          "elemento técnico",
+          "elementos técnicos",
+        )
+      : "",
+    submission.formatsAndLimits.length
+      ? countLabel(
+          submission.formatsAndLimits.length,
+          "regra de submissão",
+          "regras de submissão",
+        )
+      : "",
+    ...submission.criticalConditions
+      .slice(0, 3)
+      .map(itemTitle)
+      .filter(Boolean),
+  ].filter(Boolean);
+
+  const postSelectionItems = submission.postSelectionDocuments
+    .map(itemTitle)
+    .filter(Boolean);
+
+  const phases = Array.isArray(contract?.phases) ? contract.phases : [];
+  const specialties = Array.isArray(contract?.specialties)
+    ? contract.specialties
+    : [];
+  const deliverables = Array.isArray(contract?.deliverables)
+    ? contract.deliverables
+    : [];
+
+  const contractItems = [
+    phases.length
+      ? countLabel(phases.length, "fase de projeto", "fases de projeto")
+      : "",
+    specialties.length
+      ? countLabel(
+          specialties.length,
+          "especialidade",
+          "especialidades",
+        )
+      : "",
+    ...deliverables.slice(0, 5).map(itemTitle).filter(Boolean),
   ].filter(Boolean);
 
   const coverageItems = [
-    documentsRead
-      ? plural(documentsRead, "documento lido", "documentos lidos")
-      : "",
-    sourceDocuments.length
-      ? plural(
-          sourceDocuments.length,
-          "fonte utilizada",
-          "fontes utilizadas",
+    submission.documentsRead
+      ? countLabel(
+          submission.documentsRead,
+          "documento lido",
+          "documentos lidos",
         )
       : "",
-    sections.length
-      ? plural(
-          sections.length,
-          "secção estruturada",
-          "secções estruturadas",
-        )
-      : "",
-    clean(requirements?.version)
-      ? `Extrator: ${clean(requirements.version)}`
+    ...submission.sourceDocuments
+      .slice(0, 5)
+      .map(itemTitle)
+      .filter(Boolean),
+    submission.sourceVersion
+      ? `Estrutura: ${submission.sourceVersion}`
       : "",
   ].filter(Boolean);
 
+  const officialUrl =
+    ficha?.identificacao?.url_base ??
+    ficha?.identificacao?.link ??
+    ficha?.url_base ??
+    ficha?.link ??
+    "";
+
+  const location = ficha?.localizacao ?? {};
+
   return (
-    <div className="project-info-panel">
+    <aside className="project-info-panel">
       <ExpandableCard
         id="submissao"
         icon={<ClipboardCheck size={18} />}
         title="Resumo da submissão"
-        description="Candidatura e peças que têm de ser entregues."
-        count={plural(deliveryTypeCount, "tipo", "tipos")}
-        open={open}
-        toggle={toggle}
-        items={submissionItems}
-      />
-      <ExpandableCard
-        id="condicoes"
-        icon={<ShieldAlert size={18} />}
-        title="Condições críticas"
-        description="Regras formais que devem ser confirmadas antes da entrega."
-        count={plural(criticalItems.length, "regra", "regras")}
-        open={open}
-        toggle={toggle}
-        items={criticalItems}
-      />
-      <ExpandableCard
-        id="avaliacao"
-        icon={<Scale size={18} />}
-        title="Modelo de avaliação"
-        description="Critérios usados pelo júri para ordenar os trabalhos."
+        description="Elementos efetivamente identificados nas peças."
         count={
-          evaluationItems.length
-            ? plural(evaluationItems.length, "critério", "critérios")
+          submission.participantDocuments.length ||
+          submission.proposalDocuments.length
+            ? countLabel(
+                submission.participantDocuments.length +
+                  submission.proposalDocuments.length,
+                "elemento",
+                "elementos",
+              )
             : "Por confirmar"
         }
         open={open}
         toggle={toggle}
-        items={evaluationItems}
+        items={submissionItems}
       />
+
       <ExpandableCard
-        id="selecionado"
-        icon={<BriefcaseBusiness size={18} />}
-        title="Se for selecionado"
-        description="Habilitação e obrigações do contrato posterior."
-        count={plural(
-          postSelectionCount + contractCount,
-          "elemento",
-          "elementos",
+        id="pos-selecao"
+        icon={<FileText size={18} />}
+        title="Após seleção"
+        description="Documentos pedidos ao concorrente selecionado."
+        count={countLabel(
+          submission.postSelectionDocuments.length,
+          "documento",
+          "documentos",
         )}
         open={open}
         toggle={toggle}
-        items={selectedItems}
+        items={postSelectionItems}
       />
+
+      <ExpandableCard
+        id="contrato"
+        icon={<BriefcaseBusiness size={18} />}
+        title="Âmbito do contrato"
+        description="Fases, especialidades e entregáveis confirmados."
+        count={
+          phases.length || specialties.length || deliverables.length
+            ? countLabel(
+                phases.length + specialties.length + deliverables.length,
+                "elemento",
+                "elementos",
+              )
+            : "Por confirmar"
+        }
+        open={open}
+        toggle={toggle}
+        items={contractItems}
+      />
+
       <ExpandableCard
         id="cobertura"
         icon={<FileSearch2 size={18} />}
         title="Cobertura documental"
-        description="Peças efetivamente usadas nesta análise."
+        description="Peças efetivamente lidas para produzir esta análise."
         count={
-          documentsRead
-            ? plural(documentsRead, "documento", "documentos")
+          submission.documentsRead
+            ? countLabel(
+                submission.documentsRead,
+                "documento",
+                "documentos",
+              )
             : "Por confirmar"
         }
         open={open}
         toggle={toggle}
         items={coverageItems}
       />
-    </div>
+
+      <section className="project-summary">
+        <div className="info-card-icon">
+          <Layers3 size={18} />
+        </div>
+
+        <h3>Sobre o projeto</h3>
+
+        <p>
+          {ficha?.identificacao?.titulo ||
+            "Informação não disponível"}
+        </p>
+
+        {location?.morada ? (
+          <strong>📍 {location.morada}</strong>
+        ) : null}
+
+        {location?.cidade ? <span>{location.cidade}</span> : null}
+
+        {location?.latitude && location?.longitude ? (
+          <ProjectMap
+            latitude={location.latitude}
+            longitude={location.longitude}
+          />
+        ) : null}
+
+        {officialUrl ? (
+          <a
+            className="map-button"
+            href={officialUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Ver fonte oficial ↗
+          </a>
+        ) : null}
+      </section>
+    </aside>
   );
 }
 
@@ -287,10 +274,12 @@ function ExpandableCard({
         aria-expanded={isOpen}
       >
         <div className="info-card-icon">{icon}</div>
+
         <div className="info-card-content">
           <h4>{title}</h4>
           <p>{description}</p>
         </div>
+
         <div className="info-card-count">
           <span>{count}</span>
           <b>{isOpen ? "⌃" : "›"}</b>

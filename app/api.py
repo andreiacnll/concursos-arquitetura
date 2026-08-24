@@ -31,6 +31,11 @@ from .company_ai.compatibility_analysis import analyze_compatibility
 from .routes.analises import router as analises_router
 from .routes.alertas import router as alertas_router
 from .routes.favoritos import router as favoritos_router
+from .sqlite_snapshot import (
+    encerrar_sincronizador_snapshot,
+    executar_sincronizador_snapshot,
+    restaurar_snapshot_se_ativo,
+)
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,7 +44,14 @@ CHECKPOINT_PATH = BASE_DIR / "concursos_recolhidos.json"
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    await asyncio.to_thread(
+        restaurar_snapshot_se_ativo,
+        DB_PATH,
+    )
     criar_base_dados()
+    snapshot_task = asyncio.create_task(
+        executar_sincronizador_snapshot(DB_PATH)
+    )
     stop_worker = asyncio.Event()
     worker_task = None
 
@@ -63,6 +75,10 @@ async def lifespan(_: FastAPI):
             with suppress(asyncio.CancelledError):
                 await worker_task
 
+        await encerrar_sincronizador_snapshot(
+            snapshot_task,
+            DB_PATH,
+        )
 
 app = FastAPI(
     title="ArquiConcursos API",
@@ -776,23 +792,41 @@ def obter_analise(
         )
 
     try:
+        # CNLL_API_ACTIVE_ANALYSIS_SOURCE_V17_5_5
+        #
+        # A linha ativa da BD é a fonte de verdade. `dados_json` pode ser
+        # enriquecido posteriormente (canonical, CV, recuperação procedural),
+        # enquanto `ficheiro_ficha` pode continuar a apontar para um snapshot
+        # antigo do job. Ler primeiro o ficheiro fazia a API devolver dados
+        # stale mesmo quando a BD já tinha perguntas/fatores/equipa corretos.
         dados = None
-        ficheiro_relativo = analise_ativa.get("ficheiro_ficha")
-        if ficheiro_relativo:
-            ficha = (BASE_DIR / ficheiro_relativo).resolve()
-            if (
-                ANALISE_DIR.resolve() in ficha.parents
-                and ficha.name == "ficha.json"
-                and ficha.is_file()
-            ):
-                dados = json.loads(
-                    ficha.read_text(encoding="utf-8-sig")
-                )
+
+        dados_json = analise_ativa.get("dados_json")
+        if dados_json:
+            try:
+                candidato = json.loads(dados_json)
+                if isinstance(candidato, dict) and candidato:
+                    dados = candidato
+            except (TypeError, json.JSONDecodeError):
+                dados = None
+
+        # Compatibilidade apenas para análises antigas cujo `dados_json`
+        # esteja vazio ou ilegível.
+        if dados is None:
+            ficheiro_relativo = analise_ativa.get("ficheiro_ficha")
+            if ficheiro_relativo:
+                ficha = (BASE_DIR / ficheiro_relativo).resolve()
+                if (
+                    ANALISE_DIR.resolve() in ficha.parents
+                    and ficha.name == "ficha.json"
+                    and ficha.is_file()
+                ):
+                    dados = json.loads(
+                        ficha.read_text(encoding="utf-8-sig")
+                    )
 
         if dados is None:
-            dados = json.loads(
-                analise_ativa.get("dados_json") or "{}"
-            )
+            dados = {}
 
         pasta_legado = resolver_pasta_analise(str(concurso["id"]))
         analise_ai = pasta_legado / "analise_ai.json"

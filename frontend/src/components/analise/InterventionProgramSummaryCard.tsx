@@ -77,6 +77,10 @@ export default function InterventionProgramSummaryCard({
     clean(program?.intervention_type) ||
     "Arquitetura paisagista e espaço público";
 
+  const visibleThemes = ORDER.filter((key) =>
+    unique(themes[key]?.items, 2).length > 0,
+  );
+
   return (
     <article className="ip-card">
       <div className="ip-header">
@@ -96,29 +100,27 @@ export default function InterventionProgramSummaryCard({
       </div>
 
       <div className="ip-grid">
-        {ORDER.map((key) => {
+        {visibleThemes.map((key) => {
           const theme = themes[key] || {};
           const Icon = ICONS[key] || Map;
-          const items = unique(theme.items, 4);
+          const items = unique(theme.items, 2).map((item) =>
+            item.length > 260 ? `${item.slice(0, 257).trim()}…` : item,
+          );
 
           return (
             <section
               key={key}
-              className={items.length ? "ip-theme" : "ip-theme pending"}
+              className="ip-theme"
             >
               <div className="ip-theme-title">
                 <Icon size={17} />
                 <h4>{clean(theme.label) || key}</h4>
               </div>
-              {items.length ? (
-                <ul>
-                  {items.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p>Informação ainda não confirmada nas peças.</p>
-              )}
+              <ul>
+                {items.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
             </section>
           );
         })}
@@ -224,7 +226,7 @@ export default function InterventionProgramSummaryCard({
 
         .ip-theme,
         .ip-audit {
-          min-height: 160px;
+          min-height: 118px;
           padding: 15px;
           border: 1px solid #e4e6dc;
           border-radius: 14px;

@@ -303,6 +303,23 @@ function parseCompetitionDate(value?: string | null) {
   return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
 }
 
+function competitionRecencyValue(concurso: Concurso) {
+  const extended = concurso as Concurso & {
+    data_ordenacao_iso?: string | null;
+    first_seen_at?: string | null;
+  };
+
+  const candidates = [
+    concurso.data_publicacao_iso,
+    concurso.data,
+    extended.data_ordenacao_iso,
+    extended.first_seen_at,
+  ];
+
+  return candidates.find((value) => parseCompetitionDate(value) !== null) || null;
+}
+
+
 function isPublishedInLast7Days(value?: string | null) {
   const publicationDate = parseCompetitionDate(value);
 
@@ -321,10 +338,11 @@ function isPublishedInLast7Days(value?: string | null) {
 }
 
 export default function CompetitionsDashboard({
-  concursos,
+  concursos: concursosIniciais,
 }: {
   concursos: Concurso[];
 }) {
+  const [concursos, setConcursos] = useState<Concurso[]>(concursosIniciais);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("Todos");
   const [moreCategoriesOpen, setMoreCategoriesOpen] = useState(false);
@@ -340,6 +358,10 @@ export default function CompetitionsDashboard({
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const [analisesMap, setAnalisesMap] = useState<Record<string, AnaliseEstado>>({});
   const { user, session } = useAuth();
+
+  useEffect(() => {
+    setConcursos(concursosIniciais);
+  }, [concursosIniciais]);
 
   // Filtros adicionais
   const [precoMin, setPrecoMin] = useState("");
@@ -443,6 +465,10 @@ export default function CompetitionsDashboard({
                 analise_id: job.analysis_id,
               },
             }));
+
+            if (!isActiveAnalysisStatus(job.status)) {
+              void atualizarConcursoNoEcra(String(job.concurso_id));
+            }
           })
           .catch(() => {});
       });
@@ -514,6 +540,30 @@ export default function CompetitionsDashboard({
       current.includes(service)
         ? current.filter((item) => item !== service)
         : [...current, service],
+    );
+  }
+
+  async function atualizarConcursoNoEcra(id: string) {
+    const token = session?.access_token;
+    const response = await fetch(
+      `${API_URL}/concursos/${id}?fresh=${Date.now()}`,
+      {
+        cache: "no-store",
+        headers: token
+          ? { Authorization: `Bearer ${token}` }
+          : undefined,
+      },
+    );
+
+    if (!response.ok) return;
+
+    const atualizado = (await response.json()) as Concurso;
+    setConcursos((current) =>
+      current.map((item) =>
+        String(item.id) === String(atualizado.id)
+          ? { ...item, ...atualizado }
+          : item,
+      ),
     );
   }
 
@@ -625,7 +675,8 @@ export default function CompetitionsDashboard({
       const matchesStatFilter =
         statFilter === "todos" ||
         (statFilter === "ativos" && item.estado === "aberto") ||
-        (statFilter === "novos" && isPublishedInLast7Days(item.data_publicacao_iso ?? item.data)) ||
+        (statFilter === "novos" &&
+          isPublishedInLast7Days(competitionRecencyValue(item))) ||
         (statFilter === "terminam" &&
           deadlineDate !== null &&
           !Number.isNaN(deadlineDate.getTime()) &&
@@ -645,7 +696,16 @@ export default function CompetitionsDashboard({
       );
     });
 
-    return [...items].sort((a, b) => compareCompetitions(a, b, sort));
+    return [...items].sort((a, b) => {
+      if (sort === "recentes") {
+        const aDate = parseCompetitionDate(competitionRecencyValue(a));
+        const bDate = parseCompetitionDate(competitionRecencyValue(b));
+        const dateDifference =
+          (bDate?.getTime() || 0) - (aDate?.getTime() || 0);
+        if (dateDifference !== 0) return dateDifference;
+      }
+      return compareCompetitions(a, b, sort);
+    });
   }, [
     concursos,
     query,
@@ -666,7 +726,7 @@ export default function CompetitionsDashboard({
   ]);
 
   const newThisWeek = concursos.filter((item) =>
-    isPublishedInLast7Days(item.data_publicacao_iso ?? item.data),
+    isPublishedInLast7Days(competitionRecencyValue(item)),
   ).length;
 
   const active = concursos.filter((item) => item.estado === "aberto").length;
@@ -1178,9 +1238,12 @@ export default function CompetitionsDashboard({
                       concurso.temAnalise
                     }
                     analiseEstado={
-                      analisesMap[String(concurso.id)]?.stage ??
                       analisesMap[String(concurso.id)]?.estado ??
                       concurso.estadoAnalise ??
+                      undefined
+                    }
+                    analiseStage={
+                      analisesMap[String(concurso.id)]?.stage ??
                       undefined
                     }
                     onCriarAnalise={() => criarAnalise(String(concurso.id))}

@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from typing import Any, Iterable
 
 
-VERSION = "intervention-program-v1"
+VERSION = "intervention-program-v3.1"
 
 
 @dataclass(frozen=True)
@@ -33,6 +33,7 @@ THEMES = (
             r"ambito\s+da\s+intervencao",
             r"objetivos?\s+da\s+intervencao",
             r"area\s+de\s+intervencao",
+            r"\bintervencao\b",
         ),
     ),
     ThemeRule(
@@ -187,6 +188,135 @@ def compact(value: object, limit: int = 760) -> str:
     return text[:limit].rstrip(" ,;:-") + "…"
 
 
+def _source_priority(filename: str) -> int:
+    name = normalize(filename)
+    if "programa procedimento" in name or re.search(r"\bpc\b", name):
+        return 130
+    if "caderno encargos" in name or re.search(r"\bce\b", name):
+        return 120
+    if "termos referencia" in name:
+        return 110
+    if "eir" in name:
+        return 35
+    return 80
+
+
+
+
+def _source_role(filename: str) -> str:
+    name = normalize(filename)
+    if "eir" in name or "bim" in name:
+        return "eir"
+    if "termos referencia" in name or "programa tecnico" in name or "programa preliminar" in name:
+        return "terms_reference"
+    if "caderno encargos" in name or re.search(r"\bce\b", name):
+        return "contract_specifications"
+    if "programa procedimento" in name or re.search(r"\bpc\b", name):
+        return "procedure_program"
+    return "other"
+
+
+_ADMIN_MARKERS = (
+    "concorrente",
+    "proposta",
+    "procedimento",
+    "juri",
+    "pontuacao",
+    "fator",
+    "subfator",
+    "anexo",
+    "plataforma",
+    "anogov",
+    "exclusao",
+    "adjudicacao",
+    "experiencia da equipa",
+    "declaracao",
+    "publicidade no jornal",
+    "audiencia previa",
+    "relatorio preliminar",
+)
+
+
+def _theme_accepts_source(theme_key: str, filename: str) -> bool:
+    role = _source_role(filename)
+    if theme_key == "bim_requirements":
+        return role == "eir"
+    if theme_key == "phases_deadlines":
+        return role == "contract_specifications"
+    if theme_key == "technical_team":
+        return False
+
+    # O Programa do Procedimento pode conter uma síntese curta e válida do
+    # objeto/âmbito técnico. É aceite apenas no cartão geral do programa de
+    # intervenção; nunca alimenta automaticamente os temas especializados.
+    if theme_key == "program_intervention":
+        return role in {
+            "procedure_program",
+            "terms_reference",
+            "contract_specifications",
+            "other",
+        }
+
+    if theme_key in {
+        "landscape_public_space",
+        "terrain_modeling",
+        "mobility_access",
+        "green_system",
+        "drainage",
+        "infrastructure_specialties",
+    }:
+        return role in {"terms_reference", "contract_specifications", "other"}
+    return True
+
+
+def _low_quality_sentence(sentence: str) -> bool:
+    raw = compact(sentence, 900)
+    normalized = normalize(raw)
+
+    if not raw or len(raw) < 45:
+        return True
+    if re.search(r"\.{4,}", raw):
+        return True
+    if re.search(r"\b\d+\s*\|\s*\d+\b", raw):
+        return True
+    if len(re.findall(r"\.(?:pdf|dwg|dxf|ifc|rvt|xlsx?)\b", raw, re.I)) >= 2:
+        return True
+    if any(
+        marker in normalized
+        for marker in (
+            "codigos 3 caracteres",
+            "codigos 2 caracteres",
+            "especialidade codigos",
+            "spreadsheet source",
+            "content types xml",
+            "printersettings",
+        )
+    ):
+        return True
+
+    tokens = re.findall(r"\b[A-Za-zÀ-ÿ0-9]+\b", raw)
+    if not tokens:
+        return True
+
+    short_codes = sum(
+        1
+        for token in tokens
+        if token.isupper() and 2 <= len(token) <= 4
+    )
+    if len(tokens) >= 12 and short_codes / len(tokens) > 0.28:
+        return True
+
+    words = [
+        token
+        for token in tokens
+        if re.search(r"[A-Za-zÀ-ÿ]", token)
+    ]
+    if len(words) < 7:
+        return True
+
+    return False
+
+
 def _identity_text(ficha: dict[str, Any]) -> str:
     identificacao = ficha.get("identificacao") or {}
     values = (
@@ -205,6 +335,12 @@ def _document_entries(textos: dict[str, str]) -> list[tuple[str, str, str]]:
         if not isinstance(raw, str) or not raw.strip():
             continue
         entries.append((str(filename), raw, normalize(raw)))
+    entries.sort(
+        key=lambda item: (
+            -_source_priority(item[0]),
+            item[0].casefold(),
+        )
+    )
     return entries
 
 
@@ -220,13 +356,15 @@ def _variant_score(ficha: dict[str, Any], documentos: list[tuple[str, str, str]]
 
 
 def _sentences(raw: str) -> Iterable[str]:
-    for paragraph in re.split(r"\n\s*\n+", raw):
+    for paragraph in re.split(r"\n\s*\n+|(?<=\n)\s*(?=\d+\.\d+)", raw):
         cleaned = compact(paragraph, 1800)
         if not cleaned:
             continue
-        for sentence in re.split(r"(?<=[.!?;:])\s+", cleaned):
+        for sentence in re.split(r"(?<=[.!?;:])\s+|\n+", cleaned):
             sentence = compact(sentence, 520)
-            if 45 <= len(sentence) <= 520:
+            if 45 <= len(sentence) <= 520 and not _low_quality_sentence(
+                sentence
+            ):
                 yield sentence
 
 
@@ -234,22 +372,55 @@ def _theme_items(
     documentos: list[tuple[str, str, str]],
     rule: ThemeRule,
     *,
-    limit: int = 5,
+    limit: int = 3,
 ) -> tuple[list[str], list[str]]:
     items: list[str] = []
     sources: list[str] = []
     seen: set[str] = set()
 
     for filename, raw, _ in documentos:
+        if not _theme_accepts_source(rule.key, filename):
+            continue
         for sentence in _sentences(raw):
             normalized = normalize(sentence)
+            if any(marker in normalized for marker in _ADMIN_MARKERS):
+                continue
             if not any(re.search(pattern, normalized) for pattern in rule.patterns):
                 continue
-            signature = normalized[:220]
+
+            if rule.key == "program_intervention" and not any(
+                marker in normalized
+                for marker in (
+                    "objetivo",
+                    "ambito",
+                    "intervencao",
+                    "pretende",
+                    "visa",
+                    "compreende",
+                    "inclui",
+                )
+            ):
+                continue
+
+            if rule.key == "mobility_access" and not any(
+                marker in normalized
+                for marker in ("circulacao", "acessibilidade", "rede viaria", "pedonal", "ciclovia", "estacionamento", "acesso viario")
+            ):
+                continue
+            if rule.key == "terrain_modeling" and not any(
+                marker in normalized
+                for marker in ("terreno", "terras", "topografia", "cotas", "talude", "terraplenagem")
+            ):
+                continue
+
+            concise = sentence
+            if len(concise) > 260:
+                concise = concise[:257].rstrip(" ,;:-") + "…"
+            signature = normalize(concise)[:220]
             if signature in seen:
                 continue
             seen.add(signature)
-            items.append(sentence)
+            items.append(concise)
             if filename not in sources:
                 sources.append(filename)
             if len(items) >= limit:
@@ -263,8 +434,12 @@ def _summary(
 ) -> tuple[str, str]:
     candidates: list[tuple[int, str, str]] = []
     for filename, raw, _ in documentos:
+        if _source_role(filename) not in {"terms_reference", "contract_specifications", "other"}:
+            continue
         for sentence in _sentences(raw):
             normalized = normalize(sentence)
+            if any(marker in normalized for marker in _ADMIN_MARKERS):
+                continue
             score = 0
             for pattern, weight in LANDSCAPE_SIGNALS:
                 if re.search(pattern, normalized):
@@ -274,7 +449,13 @@ def _summary(
             if "pretende" in normalized or "visa" in normalized:
                 score += 2
             if score >= 6:
-                candidates.append((score, sentence, filename))
+                candidates.append(
+                    (
+                        score + (_source_priority(filename) / 20),
+                        sentence,
+                        filename,
+                    )
+                )
 
     if candidates:
         candidates.sort(key=lambda item: (item[0], len(item[1])), reverse=True)

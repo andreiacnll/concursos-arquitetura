@@ -17,6 +17,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 from zipfile import BadZipFile, ZipFile
 
+import py7zr
 import requests
 from pypdf import PdfReader
 
@@ -46,6 +47,7 @@ from app.company_ai.recommendation_engine import generate_recommendation
 from app.database import (
     analise_job_esta_cancelado,
     atualizar_analise_job,
+    atualizar_dados_concurso,
     atualizar_localizacao_concurso,
     concurso_por_id,
     guardar_analise,
@@ -169,56 +171,167 @@ def _descarregar(url: str, destino: Path) -> Path:
     return caminho
 
 
-def _extrair_zip_seguro(ficheiro_zip: Path, destino: Path) -> None:
+def _validar_membros_arquivo(
+    nomes: list[str],
+    destino: Path,
+) -> None:
     destino_resolvido = destino.resolve()
+    for nome in nomes:
+        alvo = (destino / nome).resolve()
+        if (
+            alvo != destino_resolvido
+            and destino_resolvido not in alvo.parents
+        ):
+            raise WorkerErro(
+                f"Arquivo contém caminho inseguro: {nome}"
+            )
 
+
+def _extrair_zip_seguro(
+    ficheiro_zip: Path,
+    destino: Path,
+) -> None:
     with ZipFile(ficheiro_zip) as zip_file:
-        for membro in zip_file.infolist():
-            alvo = (destino / membro.filename).resolve()
-            if (
-                alvo != destino_resolvido
-                and destino_resolvido not in alvo.parents
-            ):
-                raise WorkerErro(
-                    f"ZIP contem caminho inseguro: {membro.filename}"
-                )
+        _validar_membros_arquivo(
+            [
+                membro.filename
+                for membro in zip_file.infolist()
+            ],
+            destino,
+        )
         zip_file.extractall(destino)
 
 
-def _extrair_archivos_recursivo(origem: Path, destino: Path) -> None:
-    destino.mkdir(parents=True, exist_ok=True)
+def _extrair_7z_seguro(
+    ficheiro_7z: Path,
+    destino: Path,
+) -> None:
+    try:
+        with py7zr.SevenZipFile(
+            ficheiro_7z,
+            mode="r",
+        ) as archive:
+            nomes = list(archive.getnames())
+            _validar_membros_arquivo(
+                nomes,
+                destino,
+            )
+            archive.extractall(path=destino)
+    except py7zr.Bad7zFile as erro:
+        raise WorkerErro(
+            "O pacote de documentos não é um 7z válido."
+        ) from erro
+
+
+def _tipo_arquivo(caminho: Path) -> str:
+    suffix = caminho.suffix.casefold()
+
+    # Os formatos Office Open XML também começam por PK, mas são documentos
+    # lógicos e não arquivos de peças a descompactar recursivamente.
+    if suffix in {
+        ".docx", ".docm",
+        ".xlsx", ".xlsm",
+        ".pptx", ".pptm",
+    }:
+        return ""
 
     try:
-        header = origem.read_bytes()[:4]
+        header = caminho.read_bytes()[:8]
     except OSError:
         header = b""
 
-    if origem.suffix.lower() == ".pdf" and header.startswith(b"%PDF"):
-        shutil.copy2(origem, destino / origem.name)
+    if header.startswith(b"PK"):
+        return "zip"
+    if header.startswith(b"7z\xbc\xaf'\x1c"):
+        return "7z"
+
+    if suffix == ".zip":
+        return "zip"
+    if suffix == ".7z":
+        return "7z"
+    return ""
+
+
+def _extrair_arquivo_seguro(
+    arquivo: Path,
+    destino: Path,
+) -> None:
+    tipo = _tipo_arquivo(arquivo)
+    if tipo == "zip":
+        try:
+            _extrair_zip_seguro(
+                arquivo,
+                destino,
+            )
+        except BadZipFile as erro:
+            raise WorkerErro(
+                "O pacote de documentos não é um ZIP válido."
+            ) from erro
         return
+    if tipo == "7z":
+        _extrair_7z_seguro(
+            arquivo,
+            destino,
+        )
+        return
+    raise WorkerErro(
+        "O pacote de documentos não é ZIP nem 7z."
+    )
+
+
+def _extrair_archivos_recursivo(
+    origem: Path,
+    destino: Path,
+) -> None:
+    destino.mkdir(parents=True, exist_ok=True)
 
     try:
-        _extrair_zip_seguro(origem, destino)
-    except BadZipFile as erro:
-        raise WorkerErro("O pacote de documentos nao e um ZIP valido.") from erro
+        header = origem.read_bytes()[:8]
+    except OSError:
+        header = b""
+
+    if (
+        origem.suffix.lower() == ".pdf"
+        and header.startswith(b"%PDF")
+    ):
+        shutil.copy2(
+            origem,
+            destino / origem.name,
+        )
+        return
+
+    _extrair_arquivo_seguro(
+        origem,
+        destino,
+    )
 
     vistos: set[Path] = set()
     while True:
-        zips = [
+        arquivos = [
             ficheiro
-            for ficheiro in destino.rglob("*.zip")
-            if ficheiro not in vistos
+            for ficheiro in destino.rglob("*")
+            if (
+                ficheiro.is_file()
+                and ficheiro not in vistos
+                and _tipo_arquivo(ficheiro)
+            )
         ]
-        if not zips:
+        if not arquivos:
             break
 
-        for zip_interno in zips:
-            vistos.add(zip_interno)
-            nova_pasta = zip_interno.parent / zip_interno.stem
+        for arquivo_interno in arquivos:
+            vistos.add(arquivo_interno)
+            nova_pasta = (
+                arquivo_interno.parent
+                / arquivo_interno.stem
+            )
             nova_pasta.mkdir(exist_ok=True)
             try:
-                _extrair_zip_seguro(zip_interno, nova_pasta)
-            except BadZipFile:
+                _extrair_arquivo_seguro(
+                    arquivo_interno,
+                    nova_pasta,
+                )
+            except WorkerErro:
                 continue
 
 
@@ -237,6 +350,11 @@ def _extrair_texto_pdf(caminho: Path) -> str:
 
 
 def _extrair_textos(pasta: Path) -> dict[str, str]:
+    from app.analise.common_project_extractor import (
+        DOCX_EXTENSIONS,
+        extract_docx_text,
+    )
+
     textos: dict[str, str] = {}
     for pdf in pasta.rglob("*.pdf"):
         texto = _extrair_texto_pdf(pdf)
@@ -246,9 +364,19 @@ def _extrair_textos(pasta: Path) -> dict[str, str]:
     for ficheiro in pasta.rglob("*"):
         if not ficheiro.is_file():
             continue
-        if ficheiro.suffix.casefold() not in SPREADSHEET_EXTENSIONS:
-            continue
+
+        suffix = ficheiro.suffix.casefold()
         relative = str(ficheiro.relative_to(pasta))
+
+        if suffix in DOCX_EXTENSIONS:
+            texto = extract_docx_text(ficheiro)
+            if texto:
+                textos[relative] = texto
+            continue
+
+        if suffix not in SPREADSHEET_EXTENSIONS:
+            continue
+
         try:
             texto, structured = extract_spreadsheet_text(
                 ficheiro,
@@ -285,7 +413,7 @@ def _classificar_documentos(pasta: Path) -> tuple[list[dict], dict]:
     for ficheiro in pasta.rglob("*"):
         if not ficheiro.is_file():
             continue
-        if ficheiro.suffix.lower() in {".zip"}:
+        if ficheiro.suffix.lower() in {".zip", ".7z"}:
             continue
 
         nome = str(ficheiro.relative_to(pasta))
@@ -1410,7 +1538,7 @@ def _factor_texts(values: object, limite: int = 12) -> list[str]:
 
 def _enriquecer_ficha_com_empresa(ficha: dict, company_id: int | None) -> dict:
     ficha["analysis_schema_version"] = "2026-08-company-analysis-v2"
-    ficha["recommendation_algorithm_version"] = "company-intelligence-current"
+    ficha["recommendation_algorithm_version"] = "company-intelligence-award-fit-v15.7"
     ficha["updated_at"] = datetime.utcnow().isoformat() + "Z"
     if company_id is None:
         ficha["company_profile_version"] = None
@@ -1487,6 +1615,13 @@ def _enriquecer_ficha_com_empresa(ficha: dict, company_id: int | None) -> dict:
     )
     preferences = company_profile.get("preferences") or {}
     strategy = company_profile.get("strategy") or {}
+    from app.analise.procedure_analysis import assess_company_award_fit
+
+    award_criteria_fit = assess_company_award_fit(
+        ficha.get("procedure_analysis") or {},
+        company_profile,
+        team_context,
+    )
     projetos_relevantes = _extrair_projectos_relevantes(
         company_profile,
         competition_context,
@@ -1507,10 +1642,35 @@ def _enriquecer_ficha_com_empresa(ficha: dict, company_id: int | None) -> dict:
     )
     if compatibility.score is not None:
         score_compatibilidade = int(compatibility.score)
+
+    score_antes_criterios = score_compatibilidade
+    criterio_penalty = int(award_criteria_fit.get("penalty") or 0)
+    if criterio_penalty > 0:
+        score_compatibilidade = max(0, score_compatibilidade - criterio_penalty)
+        gaps.append({
+            "field": "Experiência diretamente pontuada",
+            "severity": "high" if criterio_penalty >= 18 else "medium",
+            "explanation": award_criteria_fit.get("explanation"),
+            "source": "procedure_analysis.award_criteria",
+        })
+
     decisao = _decisao_final(score_compatibilidade, gaps, missing)
     recomendacao_exp = dict(compatibility.recommendation or {})
-    if recomendacao_exp.get("decision"):
+    if recomendacao_exp.get("decision") and criterio_penalty == 0:
         decisao = str(recomendacao_exp["decision"])
+    elif criterio_penalty >= 18:
+        decisao = "Concorrer apenas com reforço comprovado da equipa ou do portefólio"
+    elif criterio_penalty > 0 and score_compatibilidade < 55:
+        decisao = "Compatibilidade condicionada pela experiência pontuada"
+
+    adjusted_explanation = _texto_limpo(recomendacao_exp.get("explanation"))
+    if award_criteria_fit.get("active"):
+        award_explanation = _texto_limpo(award_criteria_fit.get("explanation"))
+        adjusted_explanation = " ".join(
+            part for part in (adjusted_explanation, award_explanation) if part
+        )
+    recomendacao_exp["decision"] = decisao
+    recomendacao_exp["explanation"] = adjusted_explanation
 
     ficha["analise_concurso"] = {
         "objeto": ficha.get("programa", {}).get("descricao"),
@@ -1555,6 +1715,11 @@ def _enriquecer_ficha_com_empresa(ficha: dict, company_id: int | None) -> dict:
             "reasons": list(compatibility.confidence_reasons),
         },
         "experience_summary": list(compatibility.experience_summary),
+        "award_criteria_fit": {
+            **award_criteria_fit,
+            "score_before_penalty": score_antes_criterios,
+            "score_after_penalty": score_compatibilidade,
+        },
         "experiencia_semelhante_encontrada": projetos_relevantes,
         "servicos_compativeis": _filtrar_relevantes(
             services,
@@ -1607,8 +1772,14 @@ def _enriquecer_ficha_com_empresa(ficha: dict, company_id: int | None) -> dict:
     ficha["company_matching"] = {
         "company_id": company_id,
         "competition_id": competition_context.get("competition_id"),
-        "score": compatibility.score,
+        "score": score_compatibilidade,
+        "source_score": compatibility.score,
         "score_compatibilidade": score_compatibilidade,
+        "award_criteria_fit": {
+            **award_criteria_fit,
+            "score_before_penalty": score_antes_criterios,
+            "score_after_penalty": score_compatibilidade,
+        },
         "compatibility_breakdown": list(
             compatibility.compatibility_breakdown
         ),
@@ -1622,14 +1793,14 @@ def _enriquecer_ficha_com_empresa(ficha: dict, company_id: int | None) -> dict:
         "weaknesses": list(compatibility.weaknesses),
         "strategic_fit": dict(compatibility.strategic_fit),
         "missing_information": missing,
-        "recommendation": dict(compatibility.recommendation),
+        "recommendation": recomendacao_exp,
         "confidence": {
             "level": compatibility.confidence,
             "reasons": list(compatibility.confidence_reasons),
         },
         "evidence": list(compatibility.evidence),
         "company_profile_hash": company_context_hash,
-        "analysis_schema_version": "company_matching_v1",
+        "analysis_schema_version": "company_matching_v15.7",
         "updated_at": datetime.utcnow().isoformat() + "Z",
     }
     ficha["recomendacao_final"] = {
@@ -1640,8 +1811,16 @@ def _enriquecer_ficha_com_empresa(ficha: dict, company_id: int | None) -> dict:
             and str(compatibility.confidence).lower() not in {"baixa", "low"}
             else compatibility.confidence
         ),
-        "explicacao": recomendacao_exp.get("explanation"),
-        "riscos_principais": list(recomendacao_exp.get("main_risks") or []),
+        "explicacao": adjusted_explanation,
+        "riscos_principais": _lista_unica_contexto(
+            list(recomendacao_exp.get("main_risks") or [])
+            + [
+                item.get("name")
+                for item in award_criteria_fit.get("missing_requirements") or []
+                if isinstance(item, dict) and item.get("name")
+            ],
+            limite=8,
+        ),
         "status_motor_recomendacao": recommendation.status,
         "motivos": recommendation.reasons,
         "dados_insuficientes": missing,
@@ -2129,7 +2308,12 @@ def _copiar_documentos_existentes(
     if not origem.exists():
         return False
 
-    extensoes = {".pdf", *SPREADSHEET_EXTENSIONS}
+    extensoes = {
+        ".pdf",
+        ".docx",
+        ".docm",
+        *SPREADSHEET_EXTENSIONS,
+    }
     fontes = [
         ficheiro
         for ficheiro in origem.rglob("*")
@@ -2158,12 +2342,11 @@ def _cache_plataforma_dir(concurso: dict) -> Path:
 
 def _copiar_documento_cache(documento_path: Path, destino: Path) -> None:
     destino.mkdir(parents=True, exist_ok=True)
-    try:
-        header = documento_path.read_bytes()[:4]
-    except OSError:
-        header = b""
-    if documento_path.suffix.lower() == ".zip" or header.startswith(b"PK"):
-        _extrair_archivos_recursivo(documento_path, destino)
+    if _tipo_arquivo(documento_path):
+        _extrair_archivos_recursivo(
+            documento_path,
+            destino,
+        )
         return
     alvo = destino / documento_path.name
     shutil.copy2(documento_path, alvo)
@@ -2418,6 +2601,561 @@ def _base_announcement_metadata(concurso: dict) -> dict:
             "O anuncio BASE nao substitui Programa do Procedimento, Caderno de Encargos, Programa Preliminar ou anexos tecnicos.",
         ],
     }
+
+
+
+def _valor_confirmado(
+    item: object,
+) -> bool:
+    if not isinstance(item, dict):
+        return False
+    if item.get("confirmed") is False:
+        return False
+    evidence = item.get("evidence")
+    if isinstance(evidence, dict):
+        status = _sem_acentos(
+            _texto_limpo(
+                evidence.get("status")
+            )
+        ).casefold()
+        if status in {
+            "por validar",
+            "nao identificado",
+            "incerto",
+        }:
+            return False
+    return True
+
+
+def _data_encontrada(
+    valor: object,
+) -> tuple[str, str] | None:
+    texto = _texto_limpo(valor)
+    if not texto:
+        return None
+
+    meses = {
+        "janeiro": 1,
+        "fevereiro": 2,
+        "marco": 3,
+        "abril": 4,
+        "maio": 5,
+        "junho": 6,
+        "julho": 7,
+        "agosto": 8,
+        "setembro": 9,
+        "outubro": 10,
+        "novembro": 11,
+        "dezembro": 12,
+    }
+
+    texto_normalizado = _sem_acentos(
+        texto
+    ).casefold()
+
+    textual = re.search(
+        (
+            r"\b(\d{1,2})(?:\.?\s*[ºo])?\s+de\s+"
+            r"(janeiro|fevereiro|marco|abril|maio|junho|julho|"
+            r"agosto|setembro|outubro|novembro|dezembro)\s+de\s+"
+            r"(\d{4})"
+            r"(?:.*?\b(?:as|pelas|ate as|até às)\s+"
+            r"(\d{1,2})[:h.](\d{2}))?"
+        ),
+        texto_normalizado,
+    )
+    if textual:
+        dia, mes_nome, ano, hora, minuto = textual.groups()
+        try:
+            parsed = datetime(
+                int(ano),
+                meses[mes_nome],
+                int(dia),
+                int(hora or 0),
+                int(minuto or 0),
+            )
+        except (KeyError, ValueError):
+            parsed = None
+        if parsed is not None:
+            publicacao = parsed.strftime("%d/%m/%Y")
+            entrega = parsed.strftime("%d-%m-%Y")
+            if hora and minuto:
+                entrega += parsed.strftime(" %H:%M")
+            return publicacao, entrega
+
+    padroes = (
+        (
+            r"\b(\d{4})[./-](\d{2})[./-](\d{2})(?:[T\s]+(\d{2})[:h.](\d{2}))?",
+            "ymd",
+        ),
+        (
+            r"\b(\d{1,2})[./-](\d{1,2})[./-](\d{4})(?:\s+(\d{1,2})[:h.](\d{2}))?",
+            "dmy",
+        ),
+    )
+    for padrao, ordem in padroes:
+        match = re.search(
+            padrao,
+            texto,
+        )
+        if not match:
+            continue
+
+        if ordem == "ymd":
+            ano, mes, dia, hora, minuto = (
+                match.group(1),
+                match.group(2),
+                match.group(3),
+                match.group(4),
+                match.group(5),
+            )
+        else:
+            dia, mes, ano, hora, minuto = (
+                match.group(1),
+                match.group(2),
+                match.group(3),
+                match.group(4),
+                match.group(5),
+            )
+
+        try:
+            parsed = datetime(
+                int(ano),
+                int(mes),
+                int(dia),
+                int(hora or 0),
+                int(minuto or 0),
+            )
+        except ValueError:
+            continue
+
+        publicacao = parsed.strftime(
+            "%d/%m/%Y"
+        )
+        entrega = parsed.strftime(
+            "%d-%m-%Y"
+        )
+        if hora and minuto:
+            entrega += parsed.strftime(
+                " %H:%M"
+            )
+        return publicacao, entrega
+
+    return None
+
+def _texto_util_extraido(
+    valor: object,
+) -> str:
+    texto = _texto_limpo(valor)
+    normalizado = _sem_acentos(
+        texto
+    ).casefold()
+    if not texto:
+        return ""
+    if any(
+        marcador in normalizado
+        for marcador in (
+            "nao identificado",
+            "por confirmar",
+            "por validar",
+            "sem data",
+            "desconhecido",
+        )
+    ):
+        return ""
+    return texto
+
+
+def _campos_concurso_extraidos(
+    concurso: dict,
+    ficha: dict,
+) -> dict[str, str | None]:
+    insights = (
+        ficha.get("document_insights")
+        if isinstance(
+            ficha.get("document_insights"),
+            dict,
+        )
+        else {}
+    )
+    timeline = (
+        insights.get("timeline")
+        if isinstance(
+            insights.get("timeline"),
+            list,
+        )
+        else []
+    )
+
+    data_publicacao = ""
+    data_entrega = ""
+
+    for item in timeline:
+        if (
+            not isinstance(item, dict)
+            or not _valor_confirmado(item)
+        ):
+            continue
+
+        tipo = _sem_acentos(
+            _texto_limpo(
+                item.get("type")
+                or item.get("tipo")
+            )
+        ).casefold()
+        value = (
+            item.get("date")
+            or item.get("value")
+            or item.get("data")
+        )
+        parsed = _data_encontrada(
+            value
+        )
+        if not parsed:
+            continue
+
+        publicacao, entrega = parsed
+        if (
+            not data_publicacao
+            and "public" in tipo
+        ):
+            data_publicacao = publicacao
+
+        if (
+            not data_entrega
+            and any(
+                marker in tipo
+                for marker in (
+                    "entrega",
+                    "proposta",
+                    "submiss",
+                    "candidatura",
+                    "rececao",
+                )
+            )
+        ):
+            data_entrega = entrega
+
+    procedure_summary = (
+        insights.get("procedure_summary")
+        if isinstance(
+            insights.get("procedure_summary"),
+            dict,
+        )
+        else {}
+    )
+    if not data_entrega:
+        deadline = procedure_summary.get(
+            "submission_deadline"
+        )
+        if isinstance(deadline, dict):
+            parsed = _data_encontrada(
+                deadline.get("value")
+            )
+            if parsed and _valor_confirmado(
+                {
+                    "evidence": deadline,
+                }
+            ):
+                data_entrega = parsed[1]
+
+    extraction = (
+        ficha.get("design_competition_extraction")
+        if isinstance(
+            ficha.get("design_competition_extraction"),
+            dict,
+        )
+        else {}
+    )
+    extraction_facts = (
+        extraction.get("facts")
+        if isinstance(
+            extraction.get("facts"),
+            dict,
+        )
+        else {}
+    )
+
+    def fact_value(key: str) -> object:
+        item = extraction_facts.get(key)
+        if isinstance(item, dict):
+            return item.get("value")
+        return item
+
+    if not data_publicacao:
+        for candidate in (
+            fact_value("publication_date"),
+            fact_value("announcement_publication_date"),
+            fact_value("procedure_publication_date"),
+        ):
+            parsed = _data_encontrada(candidate)
+            if parsed:
+                data_publicacao = parsed[0]
+                break
+
+    if not data_entrega:
+        for candidate in (
+            fact_value("submission_deadline"),
+            fact_value("proposal_deadline"),
+            fact_value("application_deadline"),
+        ):
+            parsed = _data_encontrada(candidate)
+            if parsed:
+                data_entrega = parsed[1]
+                break
+
+    identificacao = (
+        ficha.get("identificacao")
+        if isinstance(
+            ficha.get("identificacao"),
+            dict,
+        )
+        else {}
+    )
+    if not data_publicacao:
+        for candidate in (
+            identificacao.get("data_publicacao"),
+            identificacao.get("data"),
+            ficha.get("data_publicacao"),
+        ):
+            parsed = _data_encontrada(candidate)
+            if parsed:
+                data_publicacao = parsed[0]
+                break
+
+    if not data_entrega:
+        for candidate in (
+            identificacao.get("data_entrega_propostas"),
+            identificacao.get("prazo_entrega"),
+            ficha.get("data_entrega_propostas"),
+        ):
+            parsed = _data_encontrada(candidate)
+            if parsed:
+                data_entrega = parsed[1]
+                break
+
+    tipo_procedimento = _texto_util_extraido(
+        identificacao.get(
+            "tipo_procedimento"
+        )
+    )
+
+    economia = (
+        ficha.get("economia")
+        if isinstance(
+            ficha.get("economia"),
+            dict,
+        )
+        else {}
+    )
+    base_price_entry = procedure_summary.get(
+        "base_price"
+    )
+    base_price_value = (
+        base_price_entry.get("value")
+        if isinstance(
+            base_price_entry,
+            dict,
+        )
+        else ""
+    )
+    preco_base = _texto_util_extraido(
+        economia.get("valor_procedimento")
+        or base_price_value
+    )
+
+    criterios = (
+        ficha.get("criterios")
+        if isinstance(
+            ficha.get("criterios"),
+            dict,
+        )
+        else {}
+    )
+    criterio_tipo = _texto_util_extraido(
+        criterios.get(
+            "criterio_adjudicacao"
+        )
+    )
+    criterio_resumo = _texto_util_extraido(
+        criterios.get("resumo")
+    )
+    criterio_detalhe = _texto_util_extraido(
+        criterios.get("detalhe")
+    )
+
+    percentagens = (
+        criterios.get("percentagens")
+        if isinstance(
+            criterios.get("percentagens"),
+            list,
+        )
+        else []
+    )
+    if not criterio_tipo and percentagens:
+        fatores = []
+        for item in percentagens:
+            if not isinstance(item, dict):
+                continue
+            fator = _texto_util_extraido(
+                item.get("criterio")
+            )
+            if fator and fator not in fatores:
+                fatores.append(fator)
+        if fatores:
+            criterio_tipo = " + ".join(
+                fatores[:4]
+            )
+
+    entregaveis_value = ficha.get(
+        "entregaveis"
+    )
+    if isinstance(entregaveis_value, dict):
+        principais = entregaveis_value.get(
+            "principais"
+        )
+        if isinstance(principais, list):
+            entregaveis = json.dumps(
+                principais,
+                ensure_ascii=False,
+            )
+        else:
+            entregaveis = _texto_util_extraido(
+                principais
+            )
+    elif isinstance(entregaveis_value, list):
+        entregaveis = json.dumps(
+            entregaveis_value,
+            ensure_ascii=False,
+        )
+    else:
+        entregaveis = _texto_util_extraido(
+            entregaveis_value
+        )
+
+    current_type = _sem_acentos(
+        _texto_limpo(
+            concurso.get(
+                "tipo_procedimento"
+            )
+        )
+    ).casefold()
+    generic_types = {
+        "",
+        "concurso publico",
+        "procedimento de contratacao publica",
+        "concurso de arquitetura",
+    }
+
+    return {
+        "data": (
+            data_publicacao
+            if not _texto_limpo(
+                concurso.get("data")
+            )
+            else None
+        ),
+        "data_entrega_propostas": (
+            data_entrega
+            if not _texto_limpo(
+                concurso.get(
+                    "data_entrega_propostas"
+                )
+            )
+            else None
+        ),
+        "preco_base": (
+            preco_base
+            if not _texto_limpo(
+                concurso.get("preco_base")
+            )
+            else None
+        ),
+        "tipo_procedimento": (
+            tipo_procedimento
+            if (
+                tipo_procedimento
+                and current_type
+                in generic_types
+            )
+            else None
+        ),
+        "criterio_tipo": (
+            criterio_tipo
+            if (
+                criterio_tipo
+                and (
+                    not _texto_limpo(concurso.get("criterio_tipo"))
+                    or (
+                        "%" in criterio_resumo
+                        and "%" not in _texto_limpo(
+                            concurso.get("criterio_resumo")
+                        )
+                    )
+                )
+            )
+            else None
+        ),
+        "criterio_resumo": (
+            criterio_resumo
+            if (
+                criterio_resumo
+                and (
+                    not _texto_limpo(concurso.get("criterio_resumo"))
+                    or (
+                        "%" in criterio_resumo
+                        and "%" not in _texto_limpo(
+                            concurso.get("criterio_resumo")
+                        )
+                    )
+                )
+            )
+            else None
+        ),
+        "criterio_detalhe": (
+            criterio_detalhe
+            if (
+                criterio_detalhe
+                and (
+                    not _texto_limpo(concurso.get("criterio_detalhe"))
+                    or "%" in criterio_resumo
+                )
+            )
+            else None
+        ),
+        "entregaveis": (
+            entregaveis
+            if (
+                entregaveis
+                and (
+                    not _texto_limpo(concurso.get("entregaveis"))
+                    or _texto_limpo(concurso.get("entregaveis")) in {"[]", "{}"}
+                    or _texto_limpo(concurso.get("entregaveis")).startswith("{")
+                )
+            )
+            else None
+        ),
+    }
+
+
+def _atualizar_concurso_com_ficha(
+    concurso: dict,
+    ficha: dict,
+) -> None:
+    campos = _campos_concurso_extraidos(
+        concurso,
+        ficha,
+    )
+    if not any(
+        value
+        for value in campos.values()
+    ):
+        return
+
+    atualizar_dados_concurso(
+        link=concurso.get("link"),
+        **campos,
+    )
 
 
 def _criar_base_announcement(destino: Path, concurso: dict) -> None:
@@ -2684,9 +3422,73 @@ def processar_job(job: dict) -> bool:
             "source_platform_status",
             {},
         )
+
+        try:
+            from .common_project_extractor import (
+                apply_common_project_extraction,
+            )
+
+            common_project = apply_common_project_extraction(
+                ficha=ficha,
+                textos=textos,
+                concurso=concurso,
+            )
+        except Exception as erro:
+            common_project = {
+                "active": False,
+                "version": "common-project-extractor-v1",
+                "warnings": [f"{type(erro).__name__}: {erro}"],
+            }
+
+        resumo_documentos["common_project_extraction"] = (
+            common_project
+        )
+
+        try:
+            from .intervention_program import (
+                apply_intervention_program,
+            )
+
+            early_intervention = apply_intervention_program(
+                ficha=ficha,
+                textos=textos,
+            )
+            if early_intervention.get("active"):
+                resumo_documentos["intervention_program"] = (
+                    early_intervention
+                )
+        except Exception:
+            early_intervention = {"active": False}
+
+        try:
+            from .procedure_analysis import (
+                apply_procedure_analysis,
+            )
+
+            procedure_analysis = apply_procedure_analysis(
+                ficha=ficha,
+                textos=textos,
+                concurso=concurso,
+            )
+        except Exception as erro:
+            procedure_analysis = {
+                "family": "project_services",
+                "active": False,
+                "version": "procedure-analysis-v15.4",
+                "warnings": [f"{type(erro).__name__}: {erro}"],
+            }
+
+        resumo_documentos["procedure_analysis"] = (
+            procedure_analysis
+        )
+
         ficha = _enriquecer_ficha_com_empresa(
             ficha,
             job.get("company_id"),
+        )
+        _atualizar_concurso_com_ficha(
+            concurso,
+            ficha,
         )
         atualizar_analise_job(
             job_id,

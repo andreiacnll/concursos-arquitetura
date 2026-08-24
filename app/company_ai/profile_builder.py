@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from .company_extractor import CompanyExtractionResult, ExtractedFact
+from .intelligence_builder import classificar_tipologia_projeto
 from .models import CompanyIdentity, CompanyProfile, CompanyProjectExperience
 
 
@@ -123,6 +124,7 @@ def _adicionar_lista_existente(
 def _adicionar_project_typologies(
     existentes: list[CompanyProjectExperience],
     typologies: list[str],
+    source: str = "",
 ) -> list[CompanyProjectExperience]:
     resultados = [item.model_copy(deep=True) for item in existentes]
     vistos = {
@@ -139,10 +141,14 @@ def _adicionar_project_typologies(
         if chave in vistos:
             continue
         vistos.add(chave)
+        tipologia = classificar_tipologia_projeto(texto) or texto
         resultados.append(
             CompanyProjectExperience(
                 name=texto,
-                typology=texto,
+                typology=tipologia,
+                normalized_typology=tipologia,
+                original_typology=texto,
+                source=source,
             )
         )
 
@@ -152,6 +158,7 @@ def _adicionar_project_typologies(
 def _adicionar_project_names(
     existentes: list[CompanyProjectExperience],
     project_names: list[str],
+    source: str = "",
 ) -> list[CompanyProjectExperience]:
     resultados = [item.model_copy(deep=True) for item in existentes]
     vistos = {
@@ -168,7 +175,16 @@ def _adicionar_project_names(
         if chave in vistos:
             continue
         vistos.add(chave)
-        resultados.append(CompanyProjectExperience(name=texto))
+        tipologia = classificar_tipologia_projeto(texto)
+        resultados.append(
+            CompanyProjectExperience(
+                name=texto,
+                typology=tipologia,
+                normalized_typology=tipologia,
+                original_typology=tipologia,
+                source=source,
+            )
+        )
 
     return resultados
 
@@ -304,11 +320,13 @@ def apply_extraction_to_profile(
             perfil.project_experience = _adicionar_project_typologies(
                 perfil.project_experience,
                 _valor_em_lista(fact),
+                fact.source,
             )
         elif fact.field == "projects.items":
             perfil.project_experience = _adicionar_project_names(
                 perfil.project_experience,
                 _valor_em_lista(fact),
+                fact.source,
             )
 
     perfil = _atualizar_descricao_sintetica(perfil)

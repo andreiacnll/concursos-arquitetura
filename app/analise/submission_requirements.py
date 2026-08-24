@@ -43,6 +43,9 @@ SECTION_TITLES = {
         r"documentos?\s+do\s+concorrente",
         r"documentos?\s+de\s+participa[cç][aã]o",
         r"documentos?\s+administrativos?\s+do\s+concorrente",
+        r"documentos?\s+que\s+constituem\s+a\s+proposta",
+        r"documentos?\s+da\s+proposta",
+        r"elementos?\s+que\s+constituem\s+a\s+proposta",
     ),
     "design": (
         r"documentos?\s+que\s+materializam\s+os\s+trabalhos?\s+de\s+conce[cç][aã]o",

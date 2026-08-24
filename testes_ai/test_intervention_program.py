@@ -37,7 +37,8 @@ class InterventionProgramTests(unittest.TestCase):
         self.assertEqual(ficha["analysis_variant"], "intervention_program")
         self.assertTrue(result["themes"]["drainage"]["confirmed"])
         self.assertTrue(result["themes"]["bim_requirements"]["confirmed"])
-        self.assertTrue(result["themes"]["technical_team"]["confirmed"])
+        # A equipa técnica é extraída no módulo de candidatura, não no programa técnico.
+        self.assertFalse(result["themes"]["technical_team"]["confirmed"])
 
     def test_school_functional_program_is_not_relabelled(self) -> None:
         ficha = {

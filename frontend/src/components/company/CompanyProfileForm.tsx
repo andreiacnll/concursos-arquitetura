@@ -4,6 +4,7 @@ import { Building2, Loader2, Save, PencilLine, X } from "lucide-react";
 import CompanyInformationSection from "./CompanyInformationSection";
 import CompanyExperienceCards from "./CompanyExperienceCards";
 import CompanyKnowledgeSection from "./CompanyKnowledgeSection";
+import CompanyCVSection from "./CompanyCVSection";
 import {
   CompanyProfile,
   isCompanyProfileEmpty,
@@ -172,6 +173,8 @@ export default function CompanyProfileForm({
       />
 
       <CompanyExperienceCards profile={profile} />
+
+      <CompanyCVSection profile={profile} onChange={onChange} />
 
       <CompanyKnowledgeSection profile={profile} />
     </div>
