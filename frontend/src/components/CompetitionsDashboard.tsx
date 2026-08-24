@@ -64,6 +64,59 @@ type AnaliseEstado = {
   analise_id?: number | null;
 };
 
+type ResultsTab = "todos" | "historico" | "favoritos";
+
+type CompetitionListResponse = {
+  resultados?: Concurso[];
+  pagina?: number;
+  total_paginas?: number;
+};
+
+function mergeCompetitions(...groups: Concurso[][]): Concurso[] {
+  const byId = new Map<string, Concurso>();
+
+  for (const group of groups) {
+    for (const item of group) {
+      byId.set(String(item.id), {
+        ...(byId.get(String(item.id)) || {}),
+        ...item,
+      });
+    }
+  }
+
+  return Array.from(byId.values());
+}
+
+async function fetchCompetitionPeriod(endpoint: string): Promise<Concurso[]> {
+  const output: Concurso[] = [];
+  let page = 1;
+  let totalPages = 1;
+
+  do {
+    const separator = endpoint.includes("?") ? "&" : "?";
+    const response = await fetch(
+      `${API_URL}/${endpoint}${separator}estado=todos&apenas_relevantes=true&limite=100&pagina=${page}`,
+      { cache: "no-store" },
+    );
+
+    if (!response.ok) throw new Error("Não foi possível carregar concursos.");
+
+    const payload = (await response.json()) as CompetitionListResponse | Concurso[];
+    const resultados = Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload.resultados)
+        ? payload.resultados
+        : [];
+
+    output.push(...resultados);
+    totalPages = Array.isArray(payload) ? page : Number(payload.total_paginas || page);
+    page += 1;
+  } while (page <= totalPages);
+
+  return output;
+}
+
+
 function parseDataEntrega(valor?: string | null) {
   if (!valor) return null;
 
@@ -343,6 +396,7 @@ export default function CompetitionsDashboard({
   concursos: Concurso[];
 }) {
   const [concursos, setConcursos] = useState<Concurso[]>(concursosIniciais);
+  const [historicalConcursos, setHistoricalConcursos] = useState<Concurso[]>([]);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("Todos");
   const [moreCategoriesOpen, setMoreCategoriesOpen] = useState(false);
@@ -351,7 +405,7 @@ export default function CompetitionsDashboard({
   const [selectedProcedures, setSelectedProcedures] = useState<string[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [view, setView] = useState<"grid" | "list">("grid");
-  const [activeTab, setActiveTab] = useState<"todos" | "favoritos">("todos");
+  const [activeTab, setActiveTab] = useState<ResultsTab>("todos");
   const [statFilter, setStatFilter] = useState<
     "todos" | "ativos" | "novos" | "terminam" | "entidades"
   >("todos");
@@ -363,15 +417,47 @@ export default function CompetitionsDashboard({
     setConcursos(concursosIniciais);
   }, [concursosIniciais]);
 
+  useEffect(() => {
+    let mounted = true;
+
+    fetchCompetitionPeriod("historico")
+      .then((items) => {
+        if (mounted) setHistoricalConcursos(items);
+      })
+      .catch(() => {
+        if (mounted) setHistoricalConcursos([]);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   // Filtros adicionais
   const [precoMin, setPrecoMin] = useState("");
   const [precoMax, setPrecoMax] = useState("");
   const [entidadeQuery, setEntidadeQuery] = useState("");
   const [prazoFilter, setPrazoFilter] = useState<"todos" | "7" | "15" | "30">("todos");
 
+  const allConcursos = useMemo(
+    () => mergeCompetitions(concursos, historicalConcursos),
+    [concursos, historicalConcursos],
+  );
+
+  const favoriteConcursos = useMemo(
+    () => allConcursos.filter((item) => favoriteIds.includes(String(item.id))),
+    [allConcursos, favoriteIds],
+  );
+
+  const tabConcursos = useMemo(() => {
+    if (activeTab === "historico") return historicalConcursos;
+    if (activeTab === "favoritos") return favoriteConcursos;
+    return concursos;
+  }, [activeTab, concursos, favoriteConcursos, historicalConcursos]);
+
   const priceRange = useMemo(
-    () => getCompetitionPriceRange(concursos),
-    [concursos],
+    () => getCompetitionPriceRange(tabConcursos),
+    [tabConcursos],
   );
   const priceScaleMin = priceRange ? Math.min(0, priceRange.min) : 0;
   const selectedPriceMin = priceRange
@@ -618,21 +704,18 @@ export default function CompetitionsDashboard({
     () =>
       Array.from(
         new Set(
-          concursos
+          tabConcursos
             .map((item) => item.distrito)
             .filter((item): item is string => Boolean(item)),
         ),
       ).sort((a, b) => a.localeCompare(b, "pt")),
-    [concursos],
+    [tabConcursos],
   );
 
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
-    const items = concursos.filter((item) => {
-      const matchesFavorites =
-        activeTab === "todos" || favoriteIds.includes(String(item.id));
-
+    const items = tabConcursos.filter((item) => {
       const haystack = [
         item.titulo,
         item.entidade,
@@ -685,7 +768,6 @@ export default function CompetitionsDashboard({
         (statFilter === "entidades" && Boolean(item.entidade));
 
       return (
-        matchesFavorites &&
         matchesQuery &&
         matchesCategory &&
         matchesDistrict &&
@@ -707,7 +789,7 @@ export default function CompetitionsDashboard({
       return compareCompetitions(a, b, sort);
     });
   }, [
-    concursos,
+    tabConcursos,
     query,
     category,
     district,
@@ -972,7 +1054,7 @@ export default function CompetitionsDashboard({
       <section id="concursos" className="listing-section">
         <div className="site-container listing-shell">
           <CompetitionFiltersSidebar
-            items={concursos}
+            items={tabConcursos}
             districts={districts}
             filters={filtersState}
             onChange={(next) => {
@@ -1163,6 +1245,18 @@ export default function CompetitionsDashboard({
                     onClick={() => setActiveTab("todos")}
                   >
                     Todos
+                    <span>{concursos.length}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === "historico"}
+                    className={activeTab === "historico" ? "active" : ""}
+                    onClick={() => setActiveTab("historico")}
+                  >
+                    Histórico
+                    <span>{historicalConcursos.length}</span>
                   </button>
 
                   <button
@@ -1181,6 +1275,8 @@ export default function CompetitionsDashboard({
                   <strong>{filtered.length}</strong>{" "}
                   {activeTab === "favoritos"
                     ? "favoritos encontrados"
+                    : activeTab === "historico"
+                      ? "concursos históricos encontrados"
                     : "concursos encontrados"}
                 </p>
               </div>
@@ -1247,6 +1343,11 @@ export default function CompetitionsDashboard({
                       undefined
                     }
                     onCriarAnalise={() => criarAnalise(String(concurso.id))}
+                    badge={
+                      concurso.estado === "encerrado" ? (
+                        <span className="freshness-badge">Encerrado</span>
+                      ) : undefined
+                    }
                   />
                 ))}
               </div>
@@ -1256,11 +1357,15 @@ export default function CompetitionsDashboard({
                 <h2>
                   {activeTab === "favoritos"
                     ? "Ainda não tens favoritos"
+                    : activeTab === "historico"
+                      ? "Não encontrámos concursos no histórico"
                     : "Não encontrámos concursos"}
                 </h2>
                 <p>
                   {activeTab === "favoritos"
                     ? "Clica na bandeirinha de um concurso para o guardar aqui."
+                    : activeTab === "historico"
+                      ? "Os concursos relevantes encerrados aparecem aqui; experimenta alterar a pesquisa ou os filtros."
                     : "Experimenta alterar a pesquisa ou os filtros selecionados."}
                 </p>
               </div>

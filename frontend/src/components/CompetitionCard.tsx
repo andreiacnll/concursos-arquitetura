@@ -395,6 +395,7 @@ export default function CompetitionCard({
   analiseEstado,
   analiseStage,
   onCriarAnalise,
+  badge,
 }: {
   concurso: Concurso;
   index: number;
@@ -404,6 +405,7 @@ export default function CompetitionCard({
   analiseEstado?: string;
   analiseStage?: string;
   onCriarAnalise?: () => Promise<void>;
+  badge?: ReactNode;
 }) {
   const [showConfirmacao, setShowConfirmacao] = useState(false);
   const { user } = useAuth();
@@ -427,6 +429,7 @@ export default function CompetitionCard({
         isFavorite={isFavorite}
         onToggleFavorite={onToggleFavorite}
         showFavoriteButton={Boolean(user)}
+        badge={badge}
         actions={
           <>
             <a
