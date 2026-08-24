@@ -214,8 +214,12 @@ def _verificar_integridade(caminho: Path) -> None:
         )
 
 
-def _obter_contagens(caminho: Path) -> dict[str, int]:
+def _obter_contagens(
+    caminho: Path,
+    tabelas_alvo: tuple[str, ...] | None = None,
+) -> dict[str, int]:
     contagens: dict[str, int] = {}
+    tabelas_para_contar = tabelas_alvo or TABLES_TO_COUNT
 
     with closing(sqlite3.connect(caminho)) as conn:
         tabelas = {
@@ -225,7 +229,7 @@ def _obter_contagens(caminho: Path) -> dict[str, int]:
             ).fetchall()
         }
 
-        for tabela in TABLES_TO_COUNT:
+        for tabela in tabelas_para_contar:
             if tabela not in tabelas:
                 contagens[tabela] = -1
                 continue
@@ -265,6 +269,54 @@ def _normalizar_contagens(valor) -> dict[str, int]:
         str(chave): int(contagem)
         for chave, contagem in valor.items()
     }
+
+
+def _tabelas_para_validar_snapshot(
+    contagens_esperadas: dict[str, int],
+) -> tuple[str, ...]:
+    """Conta tabelas atuais e todas as tabelas presentes na metadata.
+
+    Snapshots antigos podem ter metadata com menos tabelas do que a versão
+    atual da aplicação conhece. Isso não torna o snapshot inválido: a
+    validação forte é comparar todas as contagens declaradas pela metadata.
+    """
+
+    return tuple(
+        dict.fromkeys(
+            [
+                *TABLES_TO_COUNT,
+                *contagens_esperadas.keys(),
+            ]
+        )
+    )
+
+
+def _validar_contagens_snapshot(
+    contagens_reais: dict[str, int],
+    contagens_esperadas: dict[str, int],
+) -> None:
+    if not contagens_esperadas:
+        return
+
+    divergencias = {
+        tabela: {
+            "metadata": esperada,
+            "snapshot": contagens_reais.get(tabela),
+        }
+        for tabela, esperada in contagens_esperadas.items()
+        if contagens_reais.get(tabela) != esperada
+    }
+
+    if divergencias:
+        detalhe = json.dumps(
+            divergencias,
+            ensure_ascii=False,
+            sort_keys=True,
+        )
+        raise RuntimeError(
+            "As contagens do snapshot remoto não correspondem "
+            f"aos metadados guardados: {detalhe}"
+        )
 
 
 def restaurar_snapshot_se_ativo(db_path: Path | str) -> bool:
@@ -342,16 +394,14 @@ def restaurar_snapshot_se_ativo(db_path: Path | str) -> bool:
             os.fsync(ficheiro.fileno())
 
         _verificar_integridade(caminho_tmp)
-        contagens_reais = _obter_contagens(caminho_tmp)
-
-        if (
-            contagens_esperadas
-            and contagens_reais != contagens_esperadas
-        ):
-            raise RuntimeError(
-                "As contagens do snapshot remoto não correspondem "
-                "aos metadados guardados."
-            )
+        contagens_reais = _obter_contagens(
+            caminho_tmp,
+            _tabelas_para_validar_snapshot(contagens_esperadas),
+        )
+        _validar_contagens_snapshot(
+            contagens_reais,
+            contagens_esperadas,
+        )
 
         if (
             caminho_db.exists()
