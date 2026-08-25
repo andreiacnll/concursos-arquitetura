@@ -85,21 +85,44 @@ function compareRecommendations(
   return bTime - aTime;
 }
 
+type RecommendationListProps = {
+  filters?: CompetitionFiltersState;
+  recommendations?: RecommendationCardType[];
+  favoriteIds?: number[];
+  analysisJobs?: Record<number, AnalysisJobState>;
+  loading?: boolean;
+};
+
 export default function RecommendationList({
   filters,
-}: {
-  filters?: CompetitionFiltersState;
-}) {
-  const [recommendations, setRecommendations] = useState<RecommendationCardType[]>([]);
-  const [state, setState] = useState<LoadingState>("idle");
+  recommendations: providedRecommendations,
+  favoriteIds: providedFavoriteIds,
+  analysisJobs: providedAnalysisJobs,
+  loading: providedLoading = false,
+}: RecommendationListProps) {
+  const receivesRecommendations = providedRecommendations !== undefined;
+  const receivesFavoriteIds = providedFavoriteIds !== undefined;
+  const receivesAnalysisJobs = providedAnalysisJobs !== undefined;
+  const [recommendations, setRecommendations] = useState<RecommendationCardType[]>(
+    providedRecommendations ?? [],
+  );
+  const [state, setState] = useState<LoadingState>(
+    providedLoading ? "loading" : receivesRecommendations ? "success" : "idle",
+  );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
+  const [favoriteIds, setFavoriteIds] = useState<Set<number>>(
+    () => new Set(providedFavoriteIds ?? []),
+  );
   const [sortBy, setSortBy] = useState<RecommendationSort>("score");
   const [onlyScore50, setOnlyScore50] = useState(true);
-  const [analysisJobs, setAnalysisJobs] = useState<Record<number, AnalysisJobState>>({});
+  const [analysisJobsMap, setAnalysisJobsMap] = useState<Record<number, AnalysisJobState>>(
+    providedAnalysisJobs ?? {},
+  );
   const { session } = useAuth();
 
   const fetchRecommendations = useCallback(async () => {
+    if (receivesRecommendations) return;
+
     const token = session?.access_token;
     if (!token) {
       setState("idle");
@@ -133,9 +156,11 @@ export default function RecommendationList({
       setErrorMessage(message);
       setState("error");
     }
-  }, [session?.access_token]);
+  }, [receivesRecommendations, session?.access_token]);
 
   const fetchFavorites = useCallback(async () => {
+    if (receivesFavoriteIds) return;
+
     const token = session?.access_token;
     if (!token) return;
 
@@ -154,9 +179,11 @@ export default function RecommendationList({
     } catch {
       // Favorite state is helpful, but recommendations can render without it.
     }
-  }, [session?.access_token]);
+  }, [receivesFavoriteIds, session?.access_token]);
 
   const fetchAnalyses = useCallback(async () => {
+    if (receivesAnalysisJobs) return;
+
     const token = session?.access_token;
     if (!token) return;
     try {
@@ -170,11 +197,28 @@ export default function RecommendationList({
         const job = normalizeAnalysisJob(item);
         if (job) map[job.concurso_id] = job;
       }
-      setAnalysisJobs(map);
+      setAnalysisJobsMap(map);
     } catch {
       // Analysis state is reconciled best-effort.
     }
-  }, [session?.access_token]);
+  }, [receivesAnalysisJobs, session?.access_token]);
+
+  useEffect(() => {
+    if (providedRecommendations === undefined) return;
+    setRecommendations(providedRecommendations);
+    setState(providedLoading ? "loading" : "success");
+    setErrorMessage(null);
+  }, [providedLoading, providedRecommendations]);
+
+  useEffect(() => {
+    if (providedFavoriteIds === undefined) return;
+    setFavoriteIds(new Set(providedFavoriteIds));
+  }, [providedFavoriteIds]);
+
+  useEffect(() => {
+    if (providedAnalysisJobs === undefined) return;
+    setAnalysisJobsMap(providedAnalysisJobs);
+  }, [providedAnalysisJobs]);
 
   useEffect(() => {
     if (session?.access_token) {
@@ -188,7 +232,7 @@ export default function RecommendationList({
   useEffect(() => {
     const token = session?.access_token;
     if (!token) return;
-    const active = Object.values(analysisJobs).filter((job) =>
+    const active = Object.values(analysisJobsMap).filter((job) =>
       isActiveAnalysisStatus(job.status),
     );
     if (active.length === 0) return;
@@ -197,7 +241,7 @@ export default function RecommendationList({
       active.forEach((job) => {
         fetchAnalysisJobState(token, job.job_id)
           .then((state) => {
-            setAnalysisJobs((current) => ({
+            setAnalysisJobsMap((current) => ({
               ...current,
               [state.concurso_id]: state,
             }));
@@ -206,7 +250,7 @@ export default function RecommendationList({
       });
     }, ANALYSIS_POLL_INTERVAL_MS);
     return () => window.clearInterval(timer);
-  }, [analysisJobs, session?.access_token]);
+  }, [analysisJobsMap, session?.access_token]);
 
   const visibleRecommendations = useMemo(() => {
     const deduped = Array.from(
@@ -286,7 +330,7 @@ export default function RecommendationList({
     }
     const job = normalizeAnalysisJob(await response.json());
     if (job) {
-      setAnalysisJobs((current) => ({
+      setAnalysisJobsMap((current) => ({
         ...current,
         [job.concurso_id]: job,
       }));
@@ -447,7 +491,7 @@ export default function RecommendationList({
               index={rec.competition_id}
               isFavorite={favoriteIds.has(rec.competition_id)}
               onToggleFavorite={() => toggleFavorite(rec.competition_id)}
-              analysisState={analysisJobs[rec.competition_id] ?? null}
+              analysisState={analysisJobsMap[rec.competition_id] ?? null}
               onCreateAnalysis={() => createAnalysis(rec.competition_id)}
             />
           ))}

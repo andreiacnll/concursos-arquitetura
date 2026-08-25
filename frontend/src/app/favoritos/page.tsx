@@ -8,12 +8,14 @@ import { Bell, Filter, Heart, Star, Sparkles, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import AnalysisConfirmationModal from "@/components/analises/AnalysisConfirmationModal";
 import RecommendationList from "@/components/recommendations/RecommendationList";
+import type { RecommendationCard as RecommendationCardType } from "@/components/recommendations/recommendation-types";
 import { API_URL } from "@/lib/api";
 import {
   ANALYSIS_POLL_INTERVAL_MS,
   fetchAnalysisJobState,
   isActiveAnalysisStatus,
   normalizeAnalysisJob,
+  type AnalysisJobState,
 } from "@/lib/analysis-jobs";
 import CompetitionFiltersSidebar from "@/components/CompetitionFiltersSidebar";
 import {
@@ -58,10 +60,7 @@ type AlertaSubscricao = {
   ativo: boolean | number;
 };
 
-type RecommendationScore = {
-  competition_id: number;
-  compatibility_score?: number | null;
-};
+type RecommendationScore = Pick<RecommendationCardType, "competition_id" | "compatibility_score">;
 
 export default function FavoritosPage() {
 
@@ -78,6 +77,10 @@ export default function FavoritosPage() {
   const [recommendationScores, setRecommendationScores] = useState<
     Map<number, number>
   >(new Map());
+  const [recommendationCards, setRecommendationCards] = useState<RecommendationCardType[]>([]);
+  const [recommendationAnalysisJobs, setRecommendationAnalysisJobs] = useState<
+    Record<number, AnalysisJobState>
+  >({});
 
   // Redirecionar se não autenticado
   useEffect(() => {
@@ -90,6 +93,8 @@ export default function FavoritosPage() {
     const token = session?.access_token;
     if (!token) {
       setRecommendationScores(new Map());
+      setRecommendationCards([]);
+      setRecommendationAnalysisJobs({});
       return;
     }
 
@@ -124,13 +129,21 @@ export default function FavoritosPage() {
             : Promise.resolve([]),
         ]);
       })
-      .then(([favoritosData, analisesData, alertasData, recommendationCards]) => {
+      .then(([favoritosData, analisesData, alertasData, recommendationCardsData]) => {
         const jobs = (analisesData.analises ?? []) as AnaliseJob[];
-        const jobsMap = new Map(
-          jobs.map((job) => [job.concurso_id, normalizeAnalysisJob(job)]),
-        );
+        const jobsMap = new Map<number, AnalysisJobState>();
+        const analysisJobsByCompetition: Record<number, AnalysisJobState> = {};
+        for (const item of jobs) {
+          const job = normalizeAnalysisJob(item);
+          if (!job) continue;
+          jobsMap.set(job.concurso_id, job);
+          analysisJobsByCompetition[job.concurso_id] = job;
+        }
+        const cards = Array.isArray(recommendationCardsData)
+          ? (recommendationCardsData as RecommendationCardType[])
+          : [];
         const scoresMap = new Map<number, number>();
-        for (const card of Array.isArray(recommendationCards) ? (recommendationCards as RecommendationScore[]) : []) {
+        for (const card of cards as RecommendationScore[]) {
           if (typeof card?.competition_id === "number" && typeof card?.compatibility_score === "number") {
             scoresMap.set(card.competition_id, card.compatibility_score);
           }
@@ -162,12 +175,16 @@ export default function FavoritosPage() {
           })),
         );
         setRecommendationScores(scoresMap);
+        setRecommendationCards(cards);
+        setRecommendationAnalysisJobs(analysisJobsByCompetition);
         setLoading(false);
       })
       .catch(() => {
         setFavoritos([]);
         setLoading(false);
         setRecommendationScores(new Map());
+        setRecommendationCards([]);
+        setRecommendationAnalysisJobs({});
       });
   }, [session?.access_token]);
 
@@ -186,6 +203,10 @@ export default function FavoritosPage() {
         if (!fav.analise_job_id) return;
         fetchAnalysisJobState(token, fav.analise_job_id)
           .then((job) => {
+            setRecommendationAnalysisJobs((current) => ({
+              ...current,
+              [job.concurso_id]: job,
+            }));
             setFavoritos((current) =>
               current.map((item) =>
                 item.concurso_id === job.concurso_id
@@ -274,6 +295,13 @@ export default function FavoritosPage() {
     }
 
     const job = normalizeAnalysisJob(await response.json());
+    if (job) {
+      setRecommendationAnalysisJobs((current) => ({
+        ...current,
+        [job.concurso_id]: job,
+      }));
+    }
+
     setFavoritos((current) =>
       current.map((item) =>
         item.concurso_id === favorito.concurso_id
@@ -582,7 +610,13 @@ export default function FavoritosPage() {
           </div>
         )}
 
-        <RecommendationList filters={filters} />
+        <RecommendationList
+          filters={filters}
+          recommendations={recommendationCards}
+          favoriteIds={favoritos.map((fav) => fav.concurso_id)}
+          analysisJobs={recommendationAnalysisJobs}
+          loading={loading}
+        />
           </div>
         </div>
 

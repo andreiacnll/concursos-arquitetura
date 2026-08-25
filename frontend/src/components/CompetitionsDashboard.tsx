@@ -811,7 +811,7 @@ export default function CompetitionsDashboard({
     isPublishedInLast7Days(competitionRecencyValue(item)),
   ).length;
 
-  const active = concursos.filter((item) => item.estado === "aberto").length;
+  const currentCount = concursos.length;
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -995,13 +995,13 @@ export default function CompetitionsDashboard({
               type="button"
               className={`stat ${statFilter === "ativos" ? "active" : ""}`}
               onClick={() => applyStatFilter("ativos")}
-              title="Ver todos os concursos ativos"
+              title="Ver todos os concursos atuais"
               aria-pressed={statFilter === "ativos"}
             >
               <Building2 />
               <div>
-                <strong>{active || concursos.length}</strong>
-                <span>Concursos ativos</span>
+                <strong>{currentCount}</strong>
+                <span>Concursos atuais</span>
               </div>
             </button>
 
