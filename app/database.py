@@ -167,6 +167,7 @@ def atualizar_dados_concurso(
     criterio_tipo=None,
     criterio_resumo=None,
     criterio_detalhe=None,
+    link_anuncio_dr=None,
 ):
     """
     Atualiza os dados complementares de um concurso existente.
@@ -194,6 +195,9 @@ def atualizar_dados_concurso(
     )
     criterio_detalhe = _texto_ou_none(
         criterio_detalhe
+    )
+    link_anuncio_dr = _texto_ou_none(
+        link_anuncio_dr
     )
 
     conn = sqlite3.connect(DB_NAME)
@@ -230,6 +234,10 @@ def atualizar_dados_concurso(
             criterio_detalhe = COALESCE(
                 ?,
                 criterio_detalhe
+            ),
+            link_anuncio_dr = COALESCE(
+                ?,
+                link_anuncio_dr
             )
         WHERE link = ?
         """,
@@ -244,6 +252,7 @@ def atualizar_dados_concurso(
             criterio_tipo,
             criterio_resumo,
             criterio_detalhe,
+            link_anuncio_dr,
             link,
         ),
     )
