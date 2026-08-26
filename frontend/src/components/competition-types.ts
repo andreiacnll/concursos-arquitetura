@@ -1,6 +1,9 @@
 export type Concurso = {
   data_fim_calculada?: string;
+  data_entrega_propostas?: string;
   data_publicacao_iso?: string;
+  first_seen_at?: string | null;
+  last_seen_at?: string | null;
   id: number;
   titulo: string;
   entidade: string;
@@ -9,6 +12,8 @@ export type Concurso = {
   relevante: number;
   data_limite: string | null;
   preco_base: string | null;
+  valor_procedimento?: string | number | null;
+  valor_obra?: string | number | null;
   estado: "aberto" | "encerrado" | "sem_prazo";
   distrito?: string | null;
   municipio?: string | null;
@@ -17,5 +22,18 @@ export type Concurso = {
   criterio_tipo?: string | null;
   criterio_resumo?: string | null;
   criterio_detalhe?: string | null;
+  criterio_fatores?: string | null;
+  criterio_estado?: "confirmado" | "por_confirmar" | "em_validacao" | null;
   entregaveis?: string | null;
+  fonte?: string | null;
+  referencia_fonte?: string | null;
+  estado_fonte?: string | null;
+  link_pecas?: string | null;
+  temAnalise?: boolean;
+  estadoAnalise?: string | null;
+  analiseId?: number | null;
+  analiseTipo?: string | null;
+  progressoAnalise?: number | null;
+  scoreAnalise?: number | null;
+  updatedAtAnalise?: string | null;
 };

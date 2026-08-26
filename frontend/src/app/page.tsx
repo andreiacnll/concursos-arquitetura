@@ -1,10 +1,9 @@
 import CompetitionsDashboard from "@/components/CompetitionsDashboard";
-import Navbar from "@/components/Navbar";
+import PublicLayout from "@/components/layout/PublicLayout";
 import type { Concurso } from "@/components/competition-types";
+import { API_URL } from "@/lib/api";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "https://concursos-arquitetura.onrender.com";
+export const dynamic = "force-dynamic";
 
 async function getConcursos(): Promise<Concurso[]> {
   try {
@@ -33,9 +32,8 @@ export default async function Home() {
   const concursos = await getConcursos();
 
   return (
-    <main>
-      <Navbar />
+    <PublicLayout>
       <CompetitionsDashboard concursos={concursos} />
-    </main>
+    </PublicLayout>
   );
 }

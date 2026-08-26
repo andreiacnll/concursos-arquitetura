@@ -19,3 +19,34 @@ frontend/.env.local
 .venv/
 frontend/node_modules/
 frontend/.next/
+
+# Python
+__pycache__/
+*.pyc
+
+# Next
+frontend/node_modules/
+frontend/.next/
+
+# Documentos extraídos
+analise_documentos/*/pecas_procedimentais/extraido/
+
+# Bases de dados grandes
+*.db
+*.backup
+*.sqlite
+
+
+# Documentos temporários dos concursos (usados durante análise)
+analise_documentos/*/pecas.zip
+analise_documentos/*/pecas_procedimentais/
+analise_documentos/*/extraido/
+analise_documentos/*/pecas_download/
+analise_documentos/*/pecas_download
+
+# backups locais
+*.backup*
+*_backup*
+*.old.*
+*.before*
+src_backup_*

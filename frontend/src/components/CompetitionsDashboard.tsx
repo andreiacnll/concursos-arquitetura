@@ -7,14 +7,30 @@ import {
   ChevronDown,
   Filter,
   Grid2X2,
-  Landmark,
   List,
   Clock3,
   Search,
   SlidersHorizontal,
 } from "lucide-react";
 import CompetitionCard from "./CompetitionCard";
+import CompetitionFiltersSidebar from "./CompetitionFiltersSidebar";
 import type { Concurso } from "./competition-types";
+import { useAuth } from "@/context/AuthContext";
+import { API_URL } from "@/lib/api";
+import {
+  ANALYSIS_POLL_INTERVAL_MS,
+  fetchAnalysisJobState,
+  isActiveAnalysisStatus,
+  normalizeAnalysisJob,
+} from "@/lib/analysis-jobs";
+import {
+  compareCompetitions,
+  DEFAULT_COMPETITION_FILTERS,
+  getCompetitionPriceRange,
+  hasActiveCompetitionFilters,
+  matchesAdvancedFilters,
+  type CompetitionSort,
+} from "./competition-filters";
 
 const categories = [
   "Todos",
@@ -32,6 +48,115 @@ const moreCategories = [
   "Mobilidade",
   "Outros",
 ];
+
+type AnaliseResumo = {
+  id?: number;
+  concurso_id: number;
+  estado: string;
+};
+
+type AnaliseEstado = {
+  tem_analise: boolean;
+  estado: string | null;
+  stage?: string | null;
+  job_id?: number | null;
+  analise_id?: number | null;
+};
+
+type ResultsTab = "todos" | "historico" | "favoritos";
+
+type CompetitionListResponse = {
+  resultados?: Concurso[];
+  pagina?: number;
+  total_paginas?: number;
+};
+
+function mergeCompetitions(...groups: Concurso[][]): Concurso[] {
+  const byId = new Map<string, Concurso>();
+
+  for (const group of groups) {
+    for (const item of group) {
+      byId.set(String(item.id), {
+        ...(byId.get(String(item.id)) || {}),
+        ...item,
+      });
+    }
+  }
+
+  return Array.from(byId.values());
+}
+
+async function fetchCompetitionPeriod(endpoint: string): Promise<Concurso[]> {
+  const output: Concurso[] = [];
+  let page = 1;
+  let totalPages = 1;
+
+  do {
+    const separator = endpoint.includes("?") ? "&" : "?";
+    const response = await fetch(
+      `${API_URL}/${endpoint}${separator}estado=todos&apenas_relevantes=true&limite=100&pagina=${page}`,
+      { cache: "no-store" },
+    );
+
+    if (!response.ok) throw new Error("Não foi possível carregar concursos.");
+
+    const payload = (await response.json()) as CompetitionListResponse | Concurso[];
+    const resultados = Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload.resultados)
+        ? payload.resultados
+        : [];
+
+    output.push(...resultados);
+    totalPages = Array.isArray(payload) ? page : Number(payload.total_paginas || page);
+    page += 1;
+  } while (page <= totalPages);
+
+  return output;
+}
+
+
+function parseDataEntrega(valor?: string | null) {
+  if (!valor) return null;
+
+  const cleanValue = String(valor).trim();
+
+  // API: YYYY-MM-DD
+  const iso = cleanValue.match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+  if (iso) {
+    const [, ano, mes, dia] = iso;
+
+    return new Date(
+      Number(ano),
+      Number(mes) - 1,
+      Number(dia),
+      12,
+      0,
+      0,
+      0,
+    );
+  }
+
+  // Portugal: DD-MM-YYYY / DD/MM/YYYY / DD.MM.YYYY
+  const pt = cleanValue.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/);
+
+  if (pt) {
+    const [, dia, mes, ano] = pt;
+
+    return new Date(
+      Number(ano),
+      Number(mes) - 1,
+      Number(dia),
+      12,
+      0,
+      0,
+      0,
+    );
+  }
+
+  return null;
+}
 
 function categoryForTitle(title: string) {
   const text = title.toLowerCase();
@@ -84,8 +209,13 @@ function categoryForTitle(title: string) {
   return "Outros";
 }
 
-function uniqueCount(values: Array<string | null | undefined>) {
-  return new Set(values.filter(Boolean)).size;
+function formatPriceFilter(value: number) {
+  return new Intl.NumberFormat("pt-PT", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(value);
 }
 
 const procedureOptions = [
@@ -221,6 +351,23 @@ function parseCompetitionDate(value?: string | null) {
   return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
 }
 
+function competitionRecencyValue(concurso: Concurso) {
+  const extended = concurso as Concurso & {
+    data_ordenacao_iso?: string | null;
+    first_seen_at?: string | null;
+  };
+
+  const candidates = [
+    concurso.data_publicacao_iso,
+    concurso.data,
+    extended.data_ordenacao_iso,
+    extended.first_seen_at,
+  ];
+
+  return candidates.find((value) => parseCompetitionDate(value) !== null) || null;
+}
+
+
 function isPublishedInLast7Days(value?: string | null) {
   const publicationDate = parseCompetitionDate(value);
 
@@ -239,57 +386,226 @@ function isPublishedInLast7Days(value?: string | null) {
 }
 
 export default function CompetitionsDashboard({
-  concursos,
+  concursos: concursosIniciais,
 }: {
   concursos: Concurso[];
 }) {
+  const [concursos, setConcursos] = useState<Concurso[]>(concursosIniciais);
+  const [historicalConcursos, setHistoricalConcursos] = useState<Concurso[]>([]);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("Todos");
   const [moreCategoriesOpen, setMoreCategoriesOpen] = useState(false);
   const [district, setDistrict] = useState("Todos os distritos");
-  const [sort, setSort] = useState("recentes");
+  const [sort, setSort] = useState<CompetitionSort>("recentes");
   const [selectedProcedures, setSelectedProcedures] = useState<string[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [view, setView] = useState<"grid" | "list">("grid");
-  const [activeTab, setActiveTab] = useState<"todos" | "favoritos">("todos");
+  const [activeTab, setActiveTab] = useState<ResultsTab>("todos");
   const [statFilter, setStatFilter] = useState<
-    "todos" | "ativos" | "novos" | "terminam" | "entidades"
+    "todos" | "ativos" | "novos" | "terminam"
   >("todos");
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
-  const [favoritesLoaded, setFavoritesLoaded] = useState(false);
+  const [analisesMap, setAnalisesMap] = useState<Record<string, AnaliseEstado>>({});
+  const { user, session } = useAuth();
 
   useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem("concursos-favoritos");
-      const parsed = stored ? JSON.parse(stored) : [];
+    setConcursos(concursosIniciais);
+  }, [concursosIniciais]);
 
-      if (Array.isArray(parsed)) {
-        setFavoriteIds(parsed.map(String));
-      }
-    } catch {
-      setFavoriteIds([]);
-    } finally {
-      setFavoritesLoaded(true);
-    }
+  useEffect(() => {
+    let mounted = true;
+
+    fetchCompetitionPeriod("historico")
+      .then((items) => {
+        if (mounted) setHistoricalConcursos(items);
+      })
+      .catch(() => {
+        if (mounted) setHistoricalConcursos([]);
+      });
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  useEffect(() => {
-    if (!favoritesLoaded) return;
+  // Filtros adicionais
+  const [precoMin, setPrecoMin] = useState("");
+  const [precoMax, setPrecoMax] = useState("");
+  const [entidadeQuery, setEntidadeQuery] = useState("");
+  const [prazoFilter, setPrazoFilter] = useState<"todos" | "7" | "15" | "30">("todos");
 
-    window.localStorage.setItem(
-      "concursos-favoritos",
-      JSON.stringify(favoriteIds),
+  const allConcursos = useMemo(
+    () => mergeCompetitions(concursos, historicalConcursos),
+    [concursos, historicalConcursos],
+  );
+
+  const favoriteConcursos = useMemo(
+    () => allConcursos.filter((item) => favoriteIds.includes(String(item.id))),
+    [allConcursos, favoriteIds],
+  );
+
+  const tabConcursos = useMemo(() => {
+    if (activeTab === "historico") return historicalConcursos;
+    if (activeTab === "favoritos") return favoriteConcursos;
+    return concursos;
+  }, [activeTab, concursos, favoriteConcursos, historicalConcursos]);
+
+  const priceRange = useMemo(
+    () => getCompetitionPriceRange(tabConcursos),
+    [tabConcursos],
+  );
+  const priceScaleMin = priceRange ? Math.min(0, priceRange.min) : 0;
+  const selectedPriceMin = priceRange
+    ? Math.max(
+        priceScaleMin,
+        Math.min(Number(precoMin || priceScaleMin), priceRange.max),
+      )
+    : 0;
+  const selectedPriceMax = priceRange
+    ? Math.max(
+        selectedPriceMin,
+        Math.min(Number(precoMax || priceRange.max), priceRange.max),
+      )
+    : 0;
+
+  useEffect(() => {
+    const map: Record<string, AnaliseEstado> = {};
+    concursos.forEach((concurso) => {
+      if (concurso.temAnalise) {
+        map[String(concurso.id)] = {
+          tem_analise: true,
+          estado: concurso.estadoAnalise ?? "concluida",
+          analise_id: concurso.analiseId,
+        };
+      }
+    });
+    setAnalisesMap(map);
+  }, [concursos]);
+
+  useEffect(() => {
+    const token = session?.access_token;
+    if (!token) return;
+
+    const carregarAnalises = () => fetch(`${API_URL}/analises`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Não foi possível carregar as análises.");
+        return res.json();
+      })
+      .then((dados: unknown) => {
+        let lista: AnaliseResumo[] = [];
+        if (Array.isArray(dados)) lista = dados as AnaliseResumo[];
+        else if (dados && typeof dados === 'object') {
+          const obj = dados as Record<string, unknown>;
+          lista = (obj.analises || obj.items || obj.resultados || []) as AnaliseResumo[];
+        }
+        const map: Record<string, AnaliseEstado> = {};
+        lista.forEach((a) => {
+          const job = normalizeAnalysisJob(a);
+          map[String(a.concurso_id)] = {
+            tem_analise: true,
+            estado: job?.status || a.estado || "aguarda",
+            stage: job?.stage || null,
+            job_id: job?.job_id || null,
+            analise_id: job?.analysis_id || a.id,
+          };
+        });
+        setAnalisesMap(map);
+      })
+      .catch(() => {});
+
+    carregarAnalises();
+
+    const onFocus = () => carregarAnalises();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [session?.access_token]);
+
+  useEffect(() => {
+    const token = session?.access_token;
+    if (!token) return;
+
+    const activeJobs = Object.values(analisesMap).filter(
+      (item) => item.job_id && isActiveAnalysisStatus(item.estado),
     );
-  }, [favoriteIds, favoritesLoaded]);
+    if (activeJobs.length === 0) return;
+
+    const timer = window.setInterval(() => {
+      activeJobs.forEach((item) => {
+        if (!item.job_id) return;
+        fetchAnalysisJobState(token, item.job_id)
+          .then((job) => {
+            setAnalisesMap((current) => ({
+              ...current,
+              [String(job.concurso_id)]: {
+                tem_analise: true,
+                estado: job.status,
+                stage: job.stage,
+                job_id: job.job_id,
+                analise_id: job.analysis_id,
+              },
+            }));
+
+            if (!isActiveAnalysisStatus(job.status)) {
+              void atualizarConcursoNoEcra(String(job.concurso_id));
+            }
+          })
+          .catch(() => {});
+      });
+    }, ANALYSIS_POLL_INTERVAL_MS);
+
+    return () => window.clearInterval(timer);
+  }, [analisesMap, session?.access_token]);
+
+  useEffect(() => {
+    const token = session?.access_token;
+    if (!token) return;
+
+    fetch(`${API_URL}/favoritos`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Não foi possível carregar os favoritos.");
+        return res.json();
+      })
+      .then((dados: { favoritos?: Array<{ concurso_id: number }> }) => {
+        setFavoriteIds(
+          (dados.favoritos ?? []).map((favorito) =>
+            String(favorito.concurso_id),
+          ),
+        );
+      })
+      .catch(() => {});
+  }, [session?.access_token]);
 
   function toggleFavorite(id: Concurso["id"]) {
+    const token = session?.access_token;
+    if (!user || !token) return;
+
     const favoriteId = String(id);
+    const isAdding = !favoriteIds.includes(favoriteId);
 
     setFavoriteIds((current) =>
-      current.includes(favoriteId)
-        ? current.filter((item) => item !== favoriteId)
-        : [...current, favoriteId],
+      isAdding
+        ? [...current, favoriteId]
+        : current.filter((item) => item !== favoriteId),
     );
+
+    fetch(`${API_URL}/favoritos/${favoriteId}`, {
+      method: isAdding ? "POST" : "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Não foi possível atualizar o favorito.");
+      })
+      .catch(() => {
+        setFavoriteIds((current) =>
+          isAdding
+            ? current.filter((item) => item !== favoriteId)
+            : [...current, favoriteId],
+        );
+      });
   }
 
   function toggleProcedure(procedure: string) {
@@ -308,33 +624,93 @@ export default function CompetitionsDashboard({
     );
   }
 
+  async function atualizarConcursoNoEcra(id: string) {
+    const token = session?.access_token;
+    const response = await fetch(
+      `${API_URL}/concursos/${id}?fresh=${Date.now()}`,
+      {
+        cache: "no-store",
+        headers: token
+          ? { Authorization: `Bearer ${token}` }
+          : undefined,
+      },
+    );
+
+    if (!response.ok) return;
+
+    const atualizado = (await response.json()) as Concurso;
+    setConcursos((current) =>
+      current.map((item) =>
+        String(item.id) === String(atualizado.id)
+          ? { ...item, ...atualizado }
+          : item,
+      ),
+    );
+  }
+
+  async function criarAnalise(id: string) {
+    const token = session?.access_token;
+    if (!token) {
+      throw new Error("A sessão terminou. Volta a iniciar sessão.");
+    }
+
+    const response = await fetch(`${API_URL}/analises/criar`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ concurso_id: Number(id) }),
+    });
+
+    if (!response.ok) {
+      const dados = await response.json().catch(() => null);
+      throw new Error(
+        dados?.detail || "Não foi possível colocar a análise na fila.",
+      );
+    }
+
+    const job = normalizeAnalysisJob(await response.json());
+    setAnalisesMap((current) => ({
+      ...current,
+      [id]: {
+        tem_analise: true,
+        estado: job?.status || "queued",
+        stage: job?.stage || "queued",
+        job_id: job?.job_id || null,
+        analise_id: job?.analysis_id || null,
+      },
+    }));
+  }
+
   function clearFilters() {
     setQuery("");
     setCategory("Todos");
     setDistrict("Todos os distritos");
     setSelectedProcedures([]);
     setSelectedServices([]);
+    setPrecoMin("");
+    setPrecoMax("");
+    setEntidadeQuery("");
+    setPrazoFilter("todos");
   }
 
   const districts = useMemo(
     () =>
       Array.from(
         new Set(
-          concursos
+          tabConcursos
             .map((item) => item.distrito)
             .filter((item): item is string => Boolean(item)),
         ),
       ).sort((a, b) => a.localeCompare(b, "pt")),
-    [concursos],
+    [tabConcursos],
   );
 
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
-    const items = concursos.filter((item) => {
-      const matchesFavorites =
-        activeTab === "todos" || favoriteIds.includes(String(item.id));
-
+    const items = tabConcursos.filter((item) => {
       const haystack = [
         item.titulo,
         item.entidade,
@@ -356,10 +732,16 @@ export default function CompetitionsDashboard({
         selectedProcedures,
       );
       const matchesSelectedService = matchesService(item, selectedServices);
+      const matchesAdditional = matchesAdvancedFilters(item, {
+        precoMin: precoMin === "" ? "" : String(selectedPriceMin),
+        precoMax: precoMax === "" ? "" : String(selectedPriceMax),
+        entidadeQuery,
+        prazoFilter,
+      });
 
-      const deadlineDate = item.data_fim_calculada
-        ? new Date(item.data_fim_calculada)
-        : null;
+      const deadlineDate = parseDataEntrega(
+        item.data_fim_calculada,
+      );
 
       const todayFilter = new Date();
       todayFilter.setHours(0, 0, 0, 0);
@@ -371,40 +753,38 @@ export default function CompetitionsDashboard({
       const matchesStatFilter =
         statFilter === "todos" ||
         (statFilter === "ativos" && item.estado === "aberto") ||
-        (statFilter === "novos" && isPublishedInLast7Days(item.data_publicacao_iso ?? item.data)) ||
+        (statFilter === "novos" &&
+          isPublishedInLast7Days(competitionRecencyValue(item))) ||
         (statFilter === "terminam" &&
           deadlineDate !== null &&
           !Number.isNaN(deadlineDate.getTime()) &&
           deadlineDate >= todayFilter &&
           deadlineDate <= sevenDaysAheadFilter) ||
-        (statFilter === "entidades" && Boolean(item.entidade));
+        false;
 
       return (
-        matchesFavorites &&
         matchesQuery &&
         matchesCategory &&
         matchesDistrict &&
         matchesSelectedProcedure &&
         matchesSelectedService &&
+        matchesAdditional &&
         matchesStatFilter
       );
     });
 
     return [...items].sort((a, b) => {
-      const parsedDateA = parseCompetitionDate(
-        a.data_publicacao_iso ?? a.data,
-      );
-      const parsedDateB = parseCompetitionDate(
-        b.data_publicacao_iso ?? b.data,
-      );
-
-      const dateA = parsedDateA?.getTime() ?? 0;
-      const dateB = parsedDateB?.getTime() ?? 0;
-
-      return sort === "antigos" ? dateA - dateB : dateB - dateA;
+      if (sort === "recentes") {
+        const aDate = parseCompetitionDate(competitionRecencyValue(a));
+        const bDate = parseCompetitionDate(competitionRecencyValue(b));
+        const dateDifference =
+          (bDate?.getTime() || 0) - (aDate?.getTime() || 0);
+        if (dateDifference !== 0) return dateDifference;
+      }
+      return compareCompetitions(a, b, sort);
     });
   }, [
-    concursos,
+    tabConcursos,
     query,
     category,
     district,
@@ -414,13 +794,19 @@ export default function CompetitionsDashboard({
     activeTab,
     favoriteIds,
     statFilter,
+    precoMin,
+    precoMax,
+    selectedPriceMin,
+    selectedPriceMax,
+    entidadeQuery,
+    prazoFilter,
   ]);
 
   const newThisWeek = concursos.filter((item) =>
-    isPublishedInLast7Days(item.data_publicacao_iso ?? item.data),
+    isPublishedInLast7Days(competitionRecencyValue(item)),
   ).length;
 
-  const active = concursos.filter((item) => item.estado === "aberto").length;
+  const currentCount = concursos.length;
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -430,21 +816,47 @@ export default function CompetitionsDashboard({
   sevenDaysAhead.setHours(23, 59, 59, 999);
 
   const endingSoon = concursos.filter((item) => {
-    if (!item.data_fim_calculada) return false;
-
-    const deadline = new Date(item.data_fim_calculada);
-
-    return (
-      !Number.isNaN(deadline.getTime()) &&
-      deadline >= today &&
-      deadline <= sevenDaysAhead
+    const deadline = parseDataEntrega(
+      item.data_fim_calculada,
     );
+
+    if (!deadline || Number.isNaN(deadline.getTime())) {
+      return false;
+    }
+
+    const deadlineDay = new Date(
+      deadline.getFullYear(),
+      deadline.getMonth(),
+      deadline.getDate(),
+    );
+
+    const todayDay = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    );
+
+    const diffDays = Math.ceil(
+      (deadlineDay.getTime() - todayDay.getTime()) /
+      (1000 * 60 * 60 * 24)
+    );
+
+    return diffDays >= 0 && diffDays <= 7;
   }).length;
 
-  const entityCount = uniqueCount(concursos.map((item) => item.entidade));
+  const filtersState = {
+    district,
+    precoMin,
+    precoMax,
+    entidadeQuery,
+    prazoFilter,
+    selectedProcedures,
+    selectedServices,
+  };
+  const hasActiveFilters = hasActiveCompetitionFilters(filtersState);
 
   function applyStatFilter(
-    filter: "todos" | "ativos" | "novos" | "terminam" | "entidades",
+    filter: "todos" | "ativos" | "novos" | "terminam",
   ) {
     const nextFilter = statFilter === filter ? "todos" : filter;
 
@@ -455,6 +867,10 @@ export default function CompetitionsDashboard({
     setDistrict("Todos os distritos");
     setSelectedProcedures([]);
     setSelectedServices([]);
+    setPrecoMin("");
+    setPrecoMax("");
+    setEntidadeQuery("");
+    setPrazoFilter("todos");
 
     window.requestAnimationFrame(() => {
       window.setTimeout(() => {
@@ -473,20 +889,23 @@ export default function CompetitionsDashboard({
   return (
     <>
       <section className="hero-section">
-        <div className="site-container hero-grid">
-          <div className="hero-copy">
-            <p className="eyebrow">Concursos públicos</p>
-            <h1>
-              Plataforma de
-              <br />
-              acompanhamento de concursos
+        <div className="site-container hero-grid bird-hero-grid">
+          <div className="hero-copy bird-hero-copy">
+            <p className="eyebrow">Pesquisa de concursos</p>
+            <h1 className="bird-hero-logo-wrap">
+              <img
+                src="/brand/bird-logo-horizontal.png"
+                alt="BIRD - Bureau of Intelligence, Research and Design by CNLL"
+                className="bird-hero-logo"
+              />
             </h1>
-            <p className="hero-description">
-              Consulta, pesquisa e acompanhamento de concursos públicos de
-              arquitetura, urbanismo e paisagismo em Portugal.
+            <p className="hero-description" style={{ marginTop: "16px" }}>
+              Pesquisa concursos públicos de arquitetura, urbanismo e
+              paisagismo em Portugal. Filtra por categoria, distrito,
+              tipo de procedimento e muito mais.
             </p>
 
-            <div className="search-row">
+            <div className="search-row" style={{ marginTop: "24px" }}>
               <label className="search-box">
                 <Search size={20} strokeWidth={1.8} />
                 <input
@@ -500,7 +919,7 @@ export default function CompetitionsDashboard({
               </button>
             </div>
 
-            <div className="category-pills">
+            <div className="category-pills" style={{ marginTop: "18px" }}>
               {categories.map((item) => (
                 <button
                   key={item}
@@ -560,77 +979,90 @@ export default function CompetitionsDashboard({
             </div>
           </div>
 
-          <div className="hero-visual-wrap">
-            <div className="hero-visual" />
+          <div
+            className="hero-visual-wrap"
+            style={{
+              background: "transparent",
+              border: "none",
+              borderRadius: 0,
+              boxShadow: "none",
+              overflow: "visible",
+            }}
+          >
+            <div
+              className="hero-visual"
+              style={{
+                backgroundImage:
+                  'linear-gradient(90deg, #ffffff 0%, rgba(255,255,255,.94) 5%, rgba(255,255,255,.64) 13%, rgba(255,255,255,.18) 24%, rgba(255,255,255,0) 38%), linear-gradient(180deg, rgba(255,255,255,0) 58%, rgba(255,255,255,.18) 72%, rgba(255,255,255,.72) 90%, #ffffff 100%), url("/brand/bird-competitions-hero.svg")',
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                backgroundColor: "transparent",
+                border: "none",
+                borderRadius: 0,
+                boxShadow: "none",
+                WebkitMaskImage:
+                  "linear-gradient(90deg, transparent 0%, #000 12%, #000 98%, transparent 100%)",
+                maskImage:
+                  "linear-gradient(90deg, transparent 0%, #000 12%, #000 98%, transparent 100%)",
+              }}
+            />
           </div>
 
         </div>
 
-        <div className="site-container stats-container">
-          <div className="stats-panel">
-            <button
-              type="button"
-              className={`stat ${statFilter === "ativos" ? "active" : ""}`}
-              onClick={() => applyStatFilter("ativos")}
-              title="Ver todos os concursos ativos"
-              aria-pressed={statFilter === "ativos"}
-            >
-              <Building2 />
-              <div>
-                <strong>{active || concursos.length}</strong>
-                <span>Concursos ativos</span>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              className={`stat ${statFilter === "novos" ? "active" : ""}`}
-              onClick={() => applyStatFilter("novos")}
-              title="Ver concursos publicados nos últimos 7 dias"
-              aria-pressed={statFilter === "novos"}
-            >
-              <CalendarDays />
-              <div>
-                <strong>{newThisWeek}</strong>
-                <span>Novos esta semana</span>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              className={`stat ${statFilter === "terminam" ? "active" : ""}`}
-              onClick={() => applyStatFilter("terminam")}
-              title="Ver concursos que terminam nos próximos 7 dias"
-              aria-pressed={statFilter === "terminam"}
-            >
-              <Clock3 />
-              <div>
-                <strong>{endingSoon}</strong>
-                <span>Terminam em 7 dias</span>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              className={`stat ${statFilter === "entidades" ? "active" : ""}`}
-              onClick={() => applyStatFilter("entidades")}
-              title="Ver concursos com entidade identificada"
-              aria-pressed={statFilter === "entidades"}
-            >
-              <Landmark />
-              <div>
-                <strong>{entityCount}</strong>
-                <span>Entidades públicas</span>
-              </div>
-            </button>
-          </div>
-
-        </div>
       </section>
 
       <section id="concursos" className="listing-section">
-        <div className="site-container listing-shell">
-          <aside className="filters-panel">
+        <div className="site-container listing-shell search-listing-shell">
+          <CompetitionFiltersSidebar
+            items={tabConcursos}
+            districts={districts}
+            filters={filtersState}
+            onChange={(next) => {
+              setDistrict(next.district);
+              setPrecoMin(next.precoMin);
+              setPrecoMax(next.precoMax);
+              setEntidadeQuery(next.entidadeQuery);
+              setPrazoFilter(next.prazoFilter);
+              setSelectedProcedures(next.selectedProcedures);
+              setSelectedServices(next.selectedServices);
+            }}
+            onClear={clearFilters}
+            hasActiveFilters={hasActiveFilters}
+            contextContent={
+              <div className="filter-context-metrics" aria-label="Resumo de concursos">
+                <button
+                  type="button"
+                  className={`filter-context-metric ${statFilter === "ativos" ? "active" : ""}`}
+                  onClick={() => applyStatFilter("ativos")}
+                  aria-pressed={statFilter === "ativos"}
+                >
+                  <Building2 size={15} />
+                  <span><strong>{currentCount}</strong> Concursos atuais</span>
+                </button>
+                <button
+                  type="button"
+                  className={`filter-context-metric ${statFilter === "novos" ? "active" : ""}`}
+                  onClick={() => applyStatFilter("novos")}
+                  aria-pressed={statFilter === "novos"}
+                >
+                  <CalendarDays size={15} />
+                  <span><strong>{newThisWeek}</strong> Novos esta semana</span>
+                </button>
+                <button
+                  type="button"
+                  className={`filter-context-metric ${statFilter === "terminam" ? "active" : ""}`}
+                  onClick={() => applyStatFilter("terminam")}
+                  aria-pressed={statFilter === "terminam"}
+                >
+                  <Clock3 size={15} />
+                  <span><strong>{endingSoon}</strong> Termina em 7 dias</span>
+                </button>
+              </div>
+            }
+          />
+          <aside className="filters-panel filters-panel-legacy-hidden" aria-hidden="true">
             <div className="filters-title">
               <Filter size={17} />
               <span>Filtrar</span>
@@ -647,6 +1079,111 @@ export default function CompetitionsDashboard({
                 {districts.map((item) => (
                   <option key={item}>{item}</option>
                 ))}
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <p>Intervalo de preço</p>
+              {priceRange ? (
+                <div className="dynamic-price-filter">
+                  <div className="dynamic-price-values">
+                    <strong>{formatPriceFilter(selectedPriceMin)}</strong>
+                    <strong>{formatPriceFilter(selectedPriceMax)}</strong>
+                  </div>
+                  <div
+                    className="dynamic-price-slider"
+                    style={{
+                      "--price-start": `${
+                        ((selectedPriceMin - priceScaleMin) /
+                          Math.max(priceRange.max - priceScaleMin, 1)) *
+                        100
+                      }%`,
+                      "--price-end": `${
+                        ((selectedPriceMax - priceScaleMin) /
+                          Math.max(priceRange.max - priceScaleMin, 1)) *
+                        100
+                      }%`,
+                    } as React.CSSProperties}
+                  >
+                    <input
+                      type="range"
+                      min={priceScaleMin}
+                      max={priceRange.max}
+                      step="any"
+                      value={selectedPriceMin}
+                      aria-label="Valor mínimo"
+                      onChange={(event) =>
+                        setPrecoMin(
+                          String(
+                            Math.min(
+                              Number(event.target.value),
+                              selectedPriceMax,
+                            ),
+                          ),
+                        )
+                      }
+                    />
+                    <input
+                      type="range"
+                      min={priceScaleMin}
+                      max={priceRange.max}
+                      step="any"
+                      value={selectedPriceMax}
+                      aria-label="Valor máximo"
+                      onChange={(event) =>
+                        setPrecoMax(
+                          String(
+                            Math.max(
+                              Number(event.target.value),
+                              selectedPriceMin,
+                            ),
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="dynamic-price-extremes">
+                    <span>{formatPriceFilter(priceScaleMin)}</span>
+                    <span>{formatPriceFilter(priceRange.max)}</span>
+                  </div>
+                  <small>
+                    {priceRange.count} concursos com valor · menor valor
+                    encontrado: {formatPriceFilter(priceRange.min)}
+                  </small>
+                </div>
+              ) : (
+                <p className="dynamic-price-empty">
+                  Sem valores disponíveis nos concursos atuais.
+                </p>
+              )}
+            </div>
+
+            <div className="filter-group">
+              <label htmlFor="entity-filter">Entidade promotora</label>
+              <input
+                id="entity-filter"
+                className="filter-text-input"
+                value={entidadeQuery}
+                onChange={(event) => setEntidadeQuery(event.target.value)}
+                placeholder="Pesquisar entidade"
+              />
+            </div>
+
+            <div className="filter-group">
+              <label htmlFor="deadline-filter">Prazo de entrega</label>
+              <select
+                id="deadline-filter"
+                value={prazoFilter}
+                onChange={(event) =>
+                  setPrazoFilter(
+                    event.target.value as "todos" | "7" | "15" | "30",
+                  )
+                }
+              >
+                <option value="todos">Todos os prazos</option>
+                <option value="7">Próximos 7 dias</option>
+                <option value="15">Próximos 15 dias</option>
+                <option value="30">Próximos 30 dias</option>
               </select>
             </div>
 
@@ -701,6 +1238,18 @@ export default function CompetitionsDashboard({
                     onClick={() => setActiveTab("todos")}
                   >
                     Todos
+                    <span>{concursos.length}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === "historico"}
+                    className={activeTab === "historico" ? "active" : ""}
+                    onClick={() => setActiveTab("historico")}
+                  >
+                    Histórico
+                    <span>{historicalConcursos.length}</span>
                   </button>
 
                   <button
@@ -719,15 +1268,23 @@ export default function CompetitionsDashboard({
                   <strong>{filtered.length}</strong>{" "}
                   {activeTab === "favoritos"
                     ? "favoritos encontrados"
+                    : activeTab === "historico"
+                      ? "concursos históricos encontrados"
                     : "concursos encontrados"}
                 </p>
               </div>
 
               <div className="toolbar-actions">
                 <span>Ordenar por</span>
-                <select value={sort} onChange={(e) => setSort(e.target.value)}>
+                <select
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value as CompetitionSort)}
+                >
                   <option value="recentes">Mais recentes</option>
                   <option value="antigos">Mais antigos</option>
+                  <option value="prazo">Prazo mais próximo</option>
+                  <option value="valor_desc">Valor mais elevado</option>
+                  <option value="valor_asc">Valor mais baixo</option>
                 </select>
                 <div className="view-toggle">
                   <button
@@ -765,6 +1322,26 @@ export default function CompetitionsDashboard({
                     index={index}
                     isFavorite={favoriteIds.includes(String(concurso.id))}
                     onToggleFavorite={() => toggleFavorite(concurso.id)}
+                    temAnalise={
+                      analisesMap[String(concurso.id)]?.tem_analise ??
+                      concurso.temAnalise
+                    }
+                    analiseEstado={
+                      analisesMap[String(concurso.id)]?.estado ??
+                      concurso.estadoAnalise ??
+                      undefined
+                    }
+                    analiseStage={
+                      analisesMap[String(concurso.id)]?.stage ??
+                      undefined
+                    }
+                    onCriarAnalise={() => criarAnalise(String(concurso.id))}
+                    className="search-competition-card"
+                    badge={
+                      concurso.estado === "encerrado" ? (
+                        <span className="freshness-badge">Encerrado</span>
+                      ) : undefined
+                    }
                   />
                 ))}
               </div>
@@ -774,11 +1351,15 @@ export default function CompetitionsDashboard({
                 <h2>
                   {activeTab === "favoritos"
                     ? "Ainda não tens favoritos"
+                    : activeTab === "historico"
+                      ? "Não encontrámos concursos no histórico"
                     : "Não encontrámos concursos"}
                 </h2>
                 <p>
                   {activeTab === "favoritos"
                     ? "Clica na bandeirinha de um concurso para o guardar aqui."
+                    : activeTab === "historico"
+                      ? "Os concursos relevantes encerrados aparecem aqui; experimenta alterar a pesquisa ou os filtros."
                     : "Experimenta alterar a pesquisa ou os filtros selecionados."}
                 </p>
               </div>
