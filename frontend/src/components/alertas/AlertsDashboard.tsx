@@ -170,7 +170,7 @@ export default function AlertsDashboard() {
                 <p className="alerts-empty" role="alert">{error}</p>
               ) : filtrados.length === 0 ? (
                 <p className="alerts-empty">
-                  Ainda não há alertas para os concursos acompanhados.
+                  Ainda não há alertas configurados para concursos.
                 </p>
               ) : (
                 filtrados.map((alerta) => (
@@ -196,7 +196,7 @@ export default function AlertsDashboard() {
 
               {ativos.length === 0 ? (
                 <p className="alerts-empty">
-                  Marca concursos como favoritos, ativa alertas ou cria uma análise AI.
+                  Ativa alertas nos Favoritos para acompanhar concursos.
                 </p>
               ) : (
                 <div className="monitored-list">

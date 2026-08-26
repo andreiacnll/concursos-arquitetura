@@ -17,7 +17,7 @@ from app.company_ai.compatibility_analysis import analyze_compatibility
 from app.company_ai.compatibility_score import calculate_compatibility_score
 from app.company_ai.company_context import build_company_context
 from app.company_ai.competition_context import build_competition_context
-from app.company_ai.company_extractor import CompanyExtractionResult, ExtractedFact
+from app.company_ai.company_extractor import CompanyExtractionResult, ExtractedFact, extract_company_information
 from app.company_ai.company_matching_v2 import analyze_company_match_v2
 from app.company_ai.profile_builder import apply_extraction_to_profile
 from app.company_ai.profile_updater import apply_answer_to_profile
@@ -1363,3 +1363,136 @@ class CompanyMatchingV2Tests(CompanyAiTestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class CompanyIdentityPersistenceTests(CompanyAiTestCase):
+    def test_profile_identity_persists_and_syncs_legacy_company_projection(self) -> None:
+        company = criar_empresa("user-identity", "Nome Antigo", "https://old.example")
+        saved = guardar_company_profile(
+            company["id"],
+            CompanyProfile(
+                company_id=company["id"],
+                identity=CompanyIdentity(
+                    company_name="Empresa Teste",
+                    website="https://new.example",
+                    location="Lisboa",
+                ),
+            ),
+        )
+
+        reloaded = obter_company_profile(company["id"])
+        self.assertEqual(saved.identity.company_name, "Empresa Teste")
+        self.assertEqual(reloaded.identity.company_name, "Empresa Teste")
+        self.assertEqual(reloaded.identity.website, "https://new.example")
+        self.assertEqual(reloaded.identity.location, "Lisboa")
+
+        with closing(database.abrir_conexao()) as connection:
+            projection = connection.execute(
+                "SELECT name, website FROM companies WHERE id = ?",
+                (company["id"],),
+            ).fetchone()
+        self.assertEqual(projection["name"], "Empresa Teste")
+        self.assertEqual(projection["website"], "https://new.example")
+
+    def test_blank_ai_identity_never_replaces_saved_identity(self) -> None:
+        profile = CompanyProfile(
+            identity=CompanyIdentity(
+                company_name="Empresa Teste",
+                website="https://new.example",
+                location="Lisboa",
+            ),
+        )
+        extraction = CompanyExtractionResult(
+            facts=[
+                ExtractedFact(
+                    field="company.identity",
+                    value={"company_name": "", "website": "", "location": ""},
+                    status="confirmed",
+                )
+            ]
+        )
+
+        updated = apply_extraction_to_profile(profile, extraction)
+        self.assertEqual(updated.identity.company_name, "Empresa Teste")
+        self.assertEqual(updated.identity.website, "https://new.example")
+        self.assertEqual(updated.identity.location, "Lisboa")
+
+    def test_ai_identity_complements_only_missing_values(self) -> None:
+        profile = CompanyProfile(
+            identity=CompanyIdentity(
+                company_name="Empresa Teste",
+                website="https://new.example",
+                location="Lisboa",
+            ),
+        )
+        extraction = CompanyExtractionResult(
+            facts=[
+                ExtractedFact(
+                    field="company.identity",
+                    value={
+                        "company_name": "Nome inferido diferente",
+                        "website": "https://old.example",
+                        "location": "Porto",
+                    },
+                    status="confirmed",
+                )
+            ]
+        )
+
+        updated = apply_extraction_to_profile(profile, extraction)
+        self.assertEqual(updated.identity.company_name, "Empresa Teste")
+        self.assertEqual(updated.identity.website, "https://new.example")
+        self.assertEqual(updated.identity.location, "Lisboa")
+
+    def test_extractor_and_website_ingestion_receive_persisted_identity(self) -> None:
+        company = criar_empresa("user-context", "Nome Antigo", "https://old.example")
+        guardar_company_profile(
+            company["id"],
+            CompanyProfile(
+                company_id=company["id"],
+                identity=CompanyIdentity(
+                    company_name="Empresa Teste",
+                    website="https://new.example",
+                    location="Lisboa",
+                ),
+            ),
+        )
+        extraction = extract_company_information(
+            "Architecture and BIM",
+            company_identity={
+                "company_name": "Empresa Teste",
+                "website": "https://new.example",
+                "location": "Lisboa",
+            },
+        )
+        self.assertEqual(extraction.company_identity["website"], "https://new.example")
+        self.assertEqual(extraction.company_identity["location"], "Lisboa")
+
+        crawl_result = WebsiteCrawlResult(
+            start_url="https://new.example/",
+            final_url="https://new.example/",
+            pages_visited=1,
+            pages=[],
+            combined_text="Architecture",
+            project_names=[],
+            services_found=[],
+            warnings=[],
+        )
+        from unittest.mock import patch
+
+        with patch(
+            "app.company_ai.website_ingestion.crawl_website",
+            return_value=crawl_result,
+        ), patch(
+            "app.company_ai.website_ingestion.ingest_company_information",
+            return_value={
+                "extraction": CompanyExtractionResult(),
+                "facts_created": 0,
+            },
+        ) as ingest:
+            result = ingest_company_website(company["id"], "https://new.example")
+
+        self.assertEqual(result["company_identity"]["website"], "https://new.example")
+        self.assertEqual(
+            ingest.call_args.kwargs["company_identity"]["website"],
+            "https://new.example",
+        )

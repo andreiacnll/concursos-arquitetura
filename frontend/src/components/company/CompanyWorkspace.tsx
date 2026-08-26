@@ -59,7 +59,7 @@ function buildOnboardingCompletedKey(
   return userId ? `company-onboarding-completed:user:${userId}` : null;
 }
 
-export default function CompanyWorkspace() {
+export default function CompanyWorkspace({ embedded = false }: { embedded?: boolean }) {
   const { session, user, loading: authLoading } = useAuth();
   const [company, setCompany] = useState<CompanyBasicInfo | null>(null);
   const [profile, setProfile] = useState<CompanyProfile>(
@@ -268,6 +268,15 @@ export default function CompanyWorkspace() {
       );
       setProfile(saved);
       setDraftProfile(saved);
+      setCompany((current) =>
+        current
+          ? {
+              ...current,
+              name: saved.identity.company_name || current.name,
+              website: saved.identity.website || current.website,
+            }
+          : current,
+      );
       setHasProfile(true);
       setIsEditing(false);
       setSuccess("Perfil da empresa guardado com sucesso.");
@@ -286,7 +295,7 @@ export default function CompanyWorkspace() {
 
   return (
     <main
-        className="site-container"
+        className={embedded ? "company-workspace" : "site-container"}
         style={{
           paddingTop: "32px",
           paddingBottom: "56px",

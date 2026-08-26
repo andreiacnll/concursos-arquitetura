@@ -4,12 +4,54 @@ import json
 from contextlib import closing
 from typing import Any
 
-from .models import CompanyMemory, CompanyProfile, CompanyPreferences
+from .models import CompanyIdentity, CompanyMemory, CompanyProfile, CompanyPreferences
 from ..database import abrir_conexao
 
 
-def _perfil_vazio(company_id: int) -> CompanyProfile:
-    return CompanyProfile(company_id=company_id)
+def _perfil_vazio(company_id: int, identity: CompanyIdentity | None = None) -> CompanyProfile:
+    return CompanyProfile(company_id=company_id, identity=identity or CompanyIdentity())
+
+
+def _identidade_da_empresa(conexao, company_id: int) -> CompanyIdentity:
+    linha = conexao.execute(
+        """
+        SELECT name, website
+        FROM companies
+        WHERE id = ?
+        LIMIT 1
+        """,
+        (company_id,),
+    ).fetchone()
+    if linha is None:
+        return CompanyIdentity()
+    return CompanyIdentity(
+        company_name=str(linha["name"] or "").strip(),
+        website=str(linha["website"] or "").strip(),
+    )
+
+
+def _preencher_identidade_em_falta(perfil: CompanyProfile, fallback: CompanyIdentity) -> CompanyProfile:
+    resultado = perfil.model_copy(deep=True)
+    if not str(resultado.identity.company_name or "").strip():
+        resultado.identity.company_name = fallback.company_name
+    if not str(resultado.identity.website or "").strip():
+        resultado.identity.website = fallback.website
+    return resultado
+
+
+def _sincronizar_projecao_empresa(conexao, perfil: CompanyProfile) -> None:
+    """Mantém o registo legado companies alinhado com a identidade canónica."""
+    name = str(perfil.identity.company_name or "").strip()
+    website = str(perfil.identity.website or "").strip()
+    conexao.execute(
+        """
+        UPDATE companies
+        SET name = CASE WHEN ? <> '' THEN ? ELSE name END,
+            website = CASE WHEN ? <> '' THEN ? ELSE website END
+        WHERE id = ?
+        """,
+        (name, name, website, website, perfil.company_id),
+    )
 
 
 def _carregar_json(valor: str | None) -> dict[str, Any]:
@@ -66,19 +108,20 @@ def obter_company_profile(company_id: int) -> CompanyProfile:
             """,
             (company_id,),
         ).fetchone()
+        fallback_identity = _identidade_da_empresa(conexao, company_id)
 
     if linha is None:
-        return _perfil_vazio(company_id)
+        return _perfil_vazio(company_id, fallback_identity)
 
-    dados_principais = _carregar_json(linha["profile_json"])
-    return _normalizar_perfil(
-        company_id,
-        dados_principais,
-        linha["strategy_json"],
-        linha["ai_memory_json"],
+    return _preencher_identidade_em_falta(
+        _normalizar_perfil(
+            company_id,
+            _carregar_json(linha["profile_json"]),
+            linha["strategy_json"],
+            linha["ai_memory_json"],
+        ),
+        fallback_identity,
     )
-
-
 def guardar_company_profile(
     company_id: int,
     profile: CompanyProfile,
@@ -109,6 +152,8 @@ def guardar_company_profile(
                 existente["ai_memory_json"],
             ).merge(perfil)
             perfil.company_id = company_id
+
+        _sincronizar_projecao_empresa(conexao, perfil)
 
         dados_principais = perfil.model_dump(
             exclude={"strategy", "ai_memory"},

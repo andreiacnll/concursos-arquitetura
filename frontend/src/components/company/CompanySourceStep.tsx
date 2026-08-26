@@ -8,7 +8,6 @@ import {
   Globe,
   Link2,
   RefreshCw,
-  Search,
   Sparkles,
   Trash2,
   UserRoundPen,
@@ -202,8 +201,7 @@ export default function CompanySourceStep({
     <div className="onboarding-step">
       <h2>Vamos conhecer a sua empresa</h2>
       <p>
-        Começamos por confirmar se está a criar uma empresa nova ou a tentar
-        encontrar uma empresa já existente. A associação nunca é automática.
+        Confirma os dados da empresa associada ao teu workspace.
       </p>
 
       <div className="onboarding-form">
@@ -232,120 +230,6 @@ export default function CompanySourceStep({
             onChange={(event) => onWebsiteChange(event.target.value)}
           />
         </div>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: "12px",
-          }}
-        >
-          <button
-            type="button"
-            className={`onboarding-choice ${companyChoice === "new" ? "active" : ""}`}
-            onClick={() => onCompanyChoiceChange("new")}
-          >
-            <Building2 size={18} />
-            Criar empresa nova
-          </button>
-          <button
-            type="button"
-            className={`onboarding-choice ${companyChoice === "existing" ? "active" : ""}`}
-            onClick={() => onCompanyChoiceChange("existing")}
-            disabled={hasExistingCompany}
-          >
-            <Search size={18} />
-            Procurar empresa existente
-          </button>
-        </div>
-
-        {hasExistingCompany && (
-          <div
-            style={{
-              padding: "12px 14px",
-              borderRadius: "12px",
-              background: "#fafaf7",
-              border: "1px solid #ecece5",
-              color: "#666",
-              fontSize: "13px",
-            }}
-          >
-            Já existe uma empresa associada à sua conta. Esta experiência vai
-            trabalhar sobre essa empresa.
-          </div>
-        )}
-
-        {companyChoice === "existing" && !hasExistingCompany && (
-          <div
-            style={{
-              display: "grid",
-              gap: "12px",
-              padding: "14px",
-              borderRadius: "14px",
-              background: "#fafaf7",
-              border: "1px solid #ecece5",
-            }}
-          >
-            <button
-              type="button"
-              className="onboarding-btn secondary"
-              onClick={onSearchCompanies}
-              disabled={searchLoading || (!companyName.trim() && !website.trim())}
-            >
-              <Search size={16} />
-              {searchLoading ? "A procurar..." : "Procurar possíveis empresas"}
-            </button>
-
-            {searchError && (
-              <p style={{ margin: 0, color: "#9f3a3a" }}>{searchError}</p>
-            )}
-
-            {searchResults.length > 0 && (
-              <div style={{ display: "grid", gap: "10px" }}>
-                {searchResults.map((result) => (
-                  <div
-                    key={result.id}
-                    style={{
-                      display: "grid",
-                      gap: "6px",
-                      padding: "12px",
-                      borderRadius: "12px",
-                      border: "1px solid #e6e3d7",
-                      background: "white",
-                    }}
-                  >
-                    <strong>{result.name}</strong>
-                    <span style={{ color: "#777", fontSize: "13px" }}>
-                      {result.website || "Sem website público"}
-                    </span>
-                    <button
-                      type="button"
-                      className="onboarding-btn secondary"
-                      onClick={() => onSelectExistingCompany(result.id)}
-                    >
-                      Esta é a minha empresa
-                    </button>
-                    {selectedExistingCompanyId === result.id && (
-                      <p style={{ margin: 0, color: "#777", fontSize: "13px" }}>
-                        Para proteger dados privados, esta versão não associa
-                        automaticamente. Será necessário convite ou aprovação
-                        do owner/admin.
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <button
-              type="button"
-              className="onboarding-btn secondary"
-              onClick={() => onCompanyChoiceChange("new")}
-            >
-              Criar uma empresa diferente
-            </button>
-          </div>
-        )}
 
         <div>
           <p style={{ margin: "8px 0 10px", color: "#555", fontWeight: 600 }}>

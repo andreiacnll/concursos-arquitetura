@@ -171,7 +171,7 @@ export default function FavoritosPage() {
             analise_stage: jobsMap.get(favorito.concurso_id)?.stage,
             analise_job_id: jobsMap.get(favorito.concurso_id)?.job_id,
             analise_id: jobsMap.get(favorito.concurso_id)?.analysis_id,
-            alerta_ativo: alertasMap.get(favorito.concurso_id) ?? true,
+            alerta_ativo: alertasMap.get(favorito.concurso_id) ?? false,
           })),
         );
         setRecommendationScores(scoresMap);

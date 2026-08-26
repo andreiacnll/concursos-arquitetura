@@ -107,9 +107,9 @@ def _mesclar_identity(
         if not atual_texto:
             dados[chave] = texto
             continue
-        if texto.lower() in atual_texto.lower():
-            continue
-        dados[chave] = texto
+        # A identidade explicitamente guardada vence inferências do website.
+        # O extrator só completa campos que ainda não têm valor.
+        continue
 
     return CompanyIdentity.model_validate(dados)
 

@@ -5,6 +5,7 @@ from typing import Any
 
 from .company_ingestion import ingest_company_information
 from .knowledge_storage import save_company_source_raw_text
+from .profile_storage import obter_company_profile
 from .website_crawler import WebsiteCrawlResult, crawl_website
 from .website_normalizer import normalize_website_content
 
@@ -35,6 +36,13 @@ def ingest_company_website(
     max_depth: int = 2,
     timeout_seconds: int = 15,
 ) -> dict[str, Any]:
+    persisted_profile = obter_company_profile(company_id)
+    company_identity = {
+        "company_name": persisted_profile.identity.company_name,
+        "website": persisted_profile.identity.website,
+        "location": persisted_profile.identity.location,
+    }
+
     crawl_result: WebsiteCrawlResult = crawl_website(
         website_url,
         max_pages=max_pages,
@@ -58,6 +66,7 @@ def ingest_company_website(
         project_names=normalized.project_names,
         section_urls=normalized.section_urls,
         section_evidence=normalized.section_evidence,
+        company_identity=company_identity,
     )
 
     projects_found = _dedupe(normalized.project_names)
@@ -92,6 +101,7 @@ def ingest_company_website(
     return {
         "status": status,
         "source_url": crawl_result.final_url,
+        "company_identity": company_identity,
         "pages_visited": crawl_result.pages_visited,
         "facts_created": ingestion_result.get("facts_created", 0),
         "projects_found": projects_found,

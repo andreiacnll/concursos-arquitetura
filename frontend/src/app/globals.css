@@ -2506,7 +2506,7 @@ a {
 
 .analysis-metrics {
   display: grid;
-  gap: 40px;
+  gap: 48px;
   margin: 80px 0;
   padding: 50px 0;
 }
@@ -4017,7 +4017,7 @@ a {
 
 .profile-layout {
   display: flex;
-  gap: 40px;
+  gap: 48px;
 }
 
 /* Sidebar interna */
@@ -4027,6 +4027,7 @@ a {
   width: 240px;
   min-width: 240px;
   height: fit-content;
+  padding: 0 8px;
 }
 
 .profile-sidebar-header {
@@ -4111,6 +4112,14 @@ a {
 .profile-content {
   flex: 1;
   min-width: 0;
+  max-width: 1240px;
+  margin-inline: auto;
+  padding-inline: 28px;
+}
+
+.company-workspace {
+  width: 100%;
+  max-width: 100%;
 }
 
 /* Card de secção */
@@ -4720,6 +4729,13 @@ a {
   .profile-layout {
     flex-direction: column;
     gap: 24px;
+  }
+
+  .profile-content {
+    max-width: none;
+    width: 100%;
+    margin-inline: 0;
+    padding-inline: 20px;
   }
 
   .profile-sidebar {

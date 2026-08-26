@@ -1825,69 +1825,33 @@ def listar_alerta_subscricoes_utilizador(user_id: str):
     with closing(abrir_conexao()) as conexao:
         linhas = conexao.execute(
             """
-            WITH acompanhados AS (
-                SELECT concurso_id, 'favorito' AS origem
-                FROM favoritos
-                WHERE user_id = ?
-
-                UNION
-
-                SELECT concurso_id, 'analise' AS origem
-                FROM analises
-                WHERE user_id = ?
-
-                UNION
-
-                SELECT concurso_id, 'analise' AS origem
-                FROM analise_jobs
-                WHERE user_id = ?
-
-                UNION
-
-                SELECT concurso_id, origem
-                FROM alerta_subscricoes
-                WHERE user_id = ?
-            )
             SELECT
-                c.id AS concurso_id,
+                s.concurso_id,
                 c.titulo,
                 c.entidade,
                 c.link,
-                COALESCE(s.ativo, 1) AS ativo,
-                COALESCE(s.origem, a.origem) AS origem,
+                s.ativo,
+                s.origem,
                 EXISTS (
                     SELECT 1 FROM favoritos AS f
-                    WHERE f.user_id = ?
-                      AND f.concurso_id = c.id
+                    WHERE f.user_id = s.user_id
+                      AND f.concurso_id = s.concurso_id
                 ) AS e_favorito,
                 EXISTS (
                     SELECT 1 FROM analises AS an
-                    WHERE an.user_id = ?
-                      AND an.concurso_id = c.id
+                    WHERE an.user_id = s.user_id
+                      AND an.concurso_id = s.concurso_id
                 ) AS tem_analise
-            FROM acompanhados AS a
+            FROM alerta_subscricoes AS s
             JOIN concursos AS c
-              ON c.id = a.concurso_id
-            LEFT JOIN alerta_subscricoes AS s
-              ON s.user_id = ?
-             AND s.concurso_id = c.id
-            GROUP BY c.id
+              ON c.id = s.concurso_id
+            WHERE s.user_id = ?
             ORDER BY c.titulo
             """,
-            (
-                user_id,
-                user_id,
-                user_id,
-                user_id,
-                user_id,
-                user_id,
-                user_id,
-            ),
+            (user_id,),
         ).fetchall()
 
     return [dict(linha) for linha in linhas]
-
-
 def _data_limite_alerta(concurso) -> date | None:
     data_direta = _converter_data_guardada(
         concurso["data_entrega_propostas"]
@@ -1922,24 +1886,6 @@ def gerar_alertas_datas_monitorizados(user_id: str | None = None):
                 """
                 WITH acompanhados AS (
                     SELECT concurso_id
-                    FROM favoritos
-                    WHERE user_id = ?
-
-                    UNION
-
-                    SELECT concurso_id
-                    FROM analises
-                    WHERE user_id = ?
-
-                    UNION
-
-                    SELECT concurso_id
-                    FROM analise_jobs
-                    WHERE user_id = ?
-
-                    UNION
-
-                    SELECT concurso_id
                     FROM alerta_subscricoes
                     WHERE user_id = ?
                       AND ativo = 1
@@ -1949,18 +1895,12 @@ def gerar_alertas_datas_monitorizados(user_id: str | None = None):
                 JOIN acompanhados AS a
                   ON a.concurso_id = c.id
                 """,
-                (user_id, user_id, user_id, user_id),
+                (user_id,),
             ).fetchall()
         else:
             concursos = conexao.execute(
                 """
                 WITH acompanhados AS (
-                    SELECT concurso_id FROM favoritos
-                    UNION
-                    SELECT concurso_id FROM analises WHERE user_id IS NOT NULL
-                    UNION
-                    SELECT concurso_id FROM analise_jobs
-                    UNION
                     SELECT concurso_id
                     FROM alerta_subscricoes
                     WHERE ativo = 1
@@ -2060,6 +2000,12 @@ def listar_alertas_utilizador(user_id: str):
               ON c.id = a.concurso_id
             WHERE a.user_id = ?
               AND a.estado != 'arquivado'
+              AND EXISTS (
+                  SELECT 1 FROM alerta_subscricoes AS s
+                  WHERE s.user_id = a.user_id
+                    AND s.concurso_id = a.concurso_id
+                    AND s.ativo = 1
+              )
             ORDER BY a.data_deteccao DESC, a.id DESC
             """,
             (user_id,),

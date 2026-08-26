@@ -105,6 +105,7 @@ def ingest_company_information(
     project_names: list[str] | None = None,
     section_urls: dict[str, str] | None = None,
     section_evidence: dict[str, str] | None = None,
+    company_identity: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     """
     Orquestra a ingestão de informação empresarial.
@@ -116,14 +117,21 @@ def ingest_company_information(
     - builder de CompanyProfile;
     - persistência do profile.
     """
+    current_profile = obter_company_profile(company_id)
+    identity_context = company_identity or {
+        "company_name": current_profile.identity.company_name,
+        "website": current_profile.identity.website,
+        "location": current_profile.identity.location,
+    }
+
     extraction = extract_company_information(
         text,
         source=source,
         project_names=project_names,
         section_urls=section_urls,
         section_evidence=section_evidence,
+        company_identity=identity_context,
     )
-    current_profile = obter_company_profile(company_id)
 
     if not isinstance(extraction, CompanyExtractionResult):
         return {

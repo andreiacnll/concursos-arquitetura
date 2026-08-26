@@ -432,6 +432,25 @@ async function searchCompanies(
     : [];
 }
 
+function reconcileDraftProfile(
+  persistedProfile: CompanyProfile,
+  draftProfile: CompanyProfile,
+): CompanyProfile {
+  const persisted = normalizeCompanyProfile(persistedProfile);
+  const draft = normalizeCompanyProfile(draftProfile);
+
+  return normalizeCompanyProfile({
+    ...draft,
+    company_id: persisted.company_id ?? draft.company_id,
+    identity: {
+      ...draft.identity,
+      company_name:
+        persisted.identity.company_name.trim() || draft.identity.company_name,
+      website: persisted.identity.website.trim() || draft.identity.website,
+      location: persisted.identity.location.trim() || draft.identity.location,
+    },
+  });
+}
 export default function CompanyOnboardingModal({
   open,
   token,
@@ -523,9 +542,18 @@ export default function CompanyOnboardingModal({
 
     const draft = loadCompanyOnboardingDraft(draftKey);
     if (draft) {
+      const persistedProfile = normalizeCompanyProfile(profile);
+      const reconciledProfile = reconcileDraftProfile(
+        persistedProfile,
+        draft.summaryProfile ?? profile,
+      );
       setStep(draft.step);
-      setCompanyName(draft.companyName);
-      setWebsite(draft.website);
+      setCompanyName(
+        persistedProfile.identity.company_name || company?.name || draft.companyName,
+      );
+      setWebsite(
+        persistedProfile.identity.website || company?.website || draft.website,
+      );
       setCompanyChoice(draft.companyChoice);
       setProfilePath(draft.profilePath);
       setPortfolioFiles([]);
@@ -549,7 +577,7 @@ export default function CompanyOnboardingModal({
       setSessionId(draft.sessionId ?? null);
       setQuestions(draft.questions ?? []);
       setAnswers(draft.answers ?? {});
-      setSummaryProfile(normalizeCompanyProfile(draft.summaryProfile ?? profile));
+      setSummaryProfile(reconciledProfile);
       setError(null);
       setSearchResults([]);
       setSearchLoading(false);
@@ -728,8 +756,8 @@ export default function CompanyOnboardingModal({
   function profileWithIdentity(base: CompanyProfile): CompanyProfile {
     const normalized = normalizeCompanyProfile(base);
     const nextCompanyName =
-      companyName.trim() || normalized.identity.company_name;
-    const nextWebsite = website.trim() || normalized.identity.website;
+      normalized.identity.company_name.trim() || companyName.trim();
+    const nextWebsite = normalized.identity.website.trim() || website.trim();
 
     return normalizeCompanyProfile({
       ...normalized,

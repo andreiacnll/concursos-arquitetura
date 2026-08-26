@@ -22,7 +22,7 @@ class CompanyExtractionResult(BaseModel):
     facts: list[ExtractedFact] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
     source: str = ""
-
+    company_identity: dict[str, str] = Field(default_factory=dict)
 
 _SERVICE_RULES: tuple[tuple[str, str], ...] = (
     ("arquitetura", "arquitetura"),
@@ -197,6 +197,7 @@ def extract_company_information(
     project_names: list[str] | None = None,
     section_urls: dict[str, str] | None = None,
     section_evidence: dict[str, str] | None = None,
+    company_identity: dict[str, str] | None = None,
 ) -> CompanyExtractionResult:
     """
     Camada determinística de extração empresarial.
@@ -210,6 +211,11 @@ def extract_company_information(
     origem = _texto_limpo(source)
     urls = section_urls or {}
     evidence = section_evidence or {}
+    identity_context = {
+        key: _texto_limpo(value)
+        for key, value in (company_identity or {}).items()
+        if key in {"company_name", "website", "location"} and _texto_limpo(value)
+    }
     warnings: list[str] = []
     facts: list[ExtractedFact] = []
 
@@ -219,6 +225,7 @@ def extract_company_information(
             facts=facts,
             warnings=warnings,
             source=origem,
+            company_identity=identity_context,
         )
 
     identity_text = _extrair_secao(texto, "IDENTIDADE") or texto
@@ -309,4 +316,5 @@ def extract_company_information(
         facts=facts,
         warnings=warnings,
         source=origem,
+        company_identity=identity_context,
     )
