@@ -1,0 +1,418 @@
+/* ============================================================
+   CompanyExperienceCards.module.css
+   Visual specification: redesign_company_experience_section
+   Style: modern premium SaaS dashboard (Linear / Vercel / Stripe)
+   ============================================================ */
+
+.container {
+  width: 100%;
+  background: #FFFFFF;
+  border: 1px solid rgba(20, 45, 35, 0.10);
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 8px 30px rgba(20, 45, 35, 0.05);
+  overflow: visible;
+  display: grid;
+  gap: 20px;
+}
+
+/* ---------- Header ---------- */
+.headerRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.titleBlock h2 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 650;
+  line-height: 1.2;
+  color: #163B2E;
+  letter-spacing: -0.01em;
+}
+
+.titleBlock p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #6C7D75;
+  max-width: 680px;
+}
+
+.actionButton {
+  margin-top: 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(20, 45, 35, 0.14);
+  background: #FFFFFF;
+  color: #2E4A3C;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.actionButton:hover {
+  background: #F6FAF7;
+  border-color: rgba(39, 116, 85, 0.28);
+  color: #1F6447;
+}
+
+.actionButton svg {
+  transition: transform 180ms ease;
+}
+
+.actionButton:hover svg {
+  transform: translateX(3px);
+}
+
+/* ---------- Grid ---------- */
+.grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: stretch;
+  margin-top: 24px;
+}
+
+/* ---------- Card ---------- */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 285px;
+  height: 100%;
+  padding: 20px;
+  background: #FFFFFF;
+  border: 1px solid rgba(20, 45, 35, 0.10);
+  border-radius: 16px;
+  box-shadow: 0 3px 14px rgba(20, 45, 35, 0.035);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(20, 45, 35, 0.09);
+  border-color: rgba(40, 125, 88, 0.25);
+}
+
+/* Icon */
+.iconContainer {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  margin-bottom: 18px;
+  background: var(--icon-bg, #EDF1EF);
+  color: var(--icon-color, #607269);
+}
+
+/* Typology title */
+.typology {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.3;
+  color: #183B30;
+}
+
+/* Project count */
+.projectCount {
+  margin: 8px 0 0;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: #173D31;
+  letter-spacing: -0.01em;
+}
+
+/* Stars — always horizontal in a single row */
+.stars {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 15px;
+  margin-top: 13px;
+}
+
+.starFilled {
+  display: inline-flex;
+  color: #3E916E;
+  line-height: 0;
+}
+
+.starEmpty {
+  display: inline-flex;
+  color: #D8E1DC;
+  line-height: 0;
+}
+
+/* Experience level */
+.experienceLevel {
+  margin: 7px 0 0;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #718078;
+}
+
+/* Progress bar */
+.progressBar {
+  height: 5px;
+  border-radius: 999px;
+  background: #E8EFEB;
+  overflow: hidden;
+  margin-top: 16px;
+}
+
+.progressFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #4C9875;
+}
+
+/* Spacer pushes the action to the bottom of the card */
+.spacer {
+  flex: 1 1 auto;
+  min-height: 20px;
+}
+
+/* View projects action — pinned to card bottom */
+.viewProjectsAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid rgba(20, 45, 35, 0.08);
+  padding: 16px 0 0;
+  margin-top: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #277455;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.viewProjectsAction svg {
+  transition: transform 180ms ease;
+}
+
+.viewProjectsAction:hover {
+  text-decoration: none;
+}
+
+.viewProjectsAction:hover svg {
+  transform: translateX(3px);
+}
+
+/* Expanded projects list */
+.projects {
+  margin-top: 14px;
+  max-height: 220px;
+  overflow-y: auto;
+  border-top: 1px solid rgba(20, 45, 35, 0.06);
+}
+
+.projectsList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.projectItem {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(20, 45, 35, 0.07);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.projectItem:last-child {
+  border-bottom: 0;
+}
+
+.projectName {
+  display: block;
+  font-weight: 600;
+  color: #254A39;
+}
+
+.projectMeta {
+  display: block;
+  color: #718078;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.projectsEmpty {
+  margin: 0;
+  padding: 12px 0;
+  color: #718078;
+  font-size: 13px;
+}
+
+.moreProjectsAction {
+  margin-top: 8px;
+  border: 0;
+  background: transparent;
+  color: #277455;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 650;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ---------- Information panel ---------- */
+.infoPanel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: center;
+  background: #F4F8F5;
+  border: 1px solid rgba(39, 116, 85, 0.10);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.infoCopy h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 650;
+  color: #1E5340;
+}
+
+.infoCopy p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #4F6A5D;
+}
+
+/* Legend */
+.legend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.legendStars {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+  flex: 0 0 auto;
+}
+
+.legendStars .starFilled {
+  color: #3E916E;
+}
+
+.legendStars .starEmpty {
+  color: #D8E1DC;
+}
+
+.legendLabel {
+  font-size: 12px;
+  color: #5B6F65;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- Empty state ---------- */
+.emptyState {
+  border: 1px dashed rgba(20, 45, 35, 0.16);
+  border-radius: 16px;
+  background: #FAFCFA;
+  padding: 28px 20px;
+  text-align: center;
+}
+
+.emptyTitle {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 650;
+  color: #183B30;
+}
+
+.emptyDescription {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #6C7D75;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1439px) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1023px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .infoPanel {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+}
+
+@media (max-width: 767px) {
+  .container {
+    padding: 18px;
+  }
+
+  .headerRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .titleBlock p {
+    max-width: none;
+  }
+
+  .actionButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .legend {
+    grid-template-columns: 1fr;
+  }
+}

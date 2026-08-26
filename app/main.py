@@ -2,6 +2,8 @@ from .ai import analisar_concurso
 from .coletor import procurar_concursos
 from .dre import enriquecer_concurso
 from .database import (
+    gerar_alertas_datas_monitorizados,
+    gerar_timeline,
     atualizar_dados_concurso,
     concurso_existe,
     contar_concursos,
@@ -137,8 +139,38 @@ def atualizar_concursos_existentes(concursos):
                     concurso
                 )
             ),
+            criterio_tipo=concurso.get(
+                "criterio_tipo"
+            ),
+            criterio_resumo=concurso.get(
+                "criterio_resumo"
+            ),
+            criterio_detalhe=concurso.get(
+                "criterio_detalhe"
+            ),
+            entregaveis=concurso.get(
+                "entregaveis"
+            ),
             link_anuncio_dr=concurso.get(
                 "link_anuncio_dr"
+            ),
+            link_pecas=concurso.get(
+                "link_pecas"
+            ),
+            data_entrega_propostas=concurso.get(
+                "data_entrega_propostas"
+            ),
+            data_esclarecimentos=concurso.get(
+                "data_esclarecimentos"
+            ),
+            municipio=concurso.get("municipio"),
+            freguesia=concurso.get("freguesia"),
+            morada=concurso.get("morada"),
+            codigo_postal=concurso.get("codigo_postal"),
+            latitude=concurso.get("latitude"),
+            longitude=concurso.get("longitude"),
+            localizacao_contexto=concurso.get(
+                "localizacao_contexto"
             ),
         )
 
@@ -150,8 +182,7 @@ def atualizar_concursos_existentes(concursos):
 
 def guardar_concursos_enviados(concursos):
     """
-    Guarda na base de dados os concursos cujo email
-    foi enviado com sucesso.
+    Guarda na base de dados os concursos novos relevantes.
 
     Devolve a quantidade efetivamente guardada.
     """
@@ -159,11 +190,39 @@ def guardar_concursos_enviados(concursos):
 
     for concurso in concursos:
 
-        if concurso.get("link_anuncio_dr"):
+        tem_enriquecimento = bool(
+            concurso.get("enriquecimento_dr_concluido")
+            or any(
+                concurso.get(campo)
+                for campo in (
+                    "criterio_tipo",
+                    "criterio_resumo",
+                    "criterio_detalhe",
+                    "entregaveis",
+                    "data_entrega_propostas",
+                    "data_esclarecimentos",
+                )
+            )
+        )
+
+        if (
+            concurso.get("link_anuncio_dr")
+            and not tem_enriquecimento
+        ):
             try:
                 concurso = enriquecer_concurso(
                     concurso,
                     concurso["link_anuncio_dr"],
+                )
+
+                print(
+                    "DEBUG DATA ENTREGA:",
+                    concurso.get("data_entrega_propostas")
+                )
+
+                print(
+                    "DEBUG DATA ESCLARECIMENTOS:",
+                    concurso.get("data_esclarecimentos")
                 )
 
             except Exception as erro:
@@ -190,12 +249,49 @@ def guardar_concursos_enviados(concursos):
                     concurso
                 )
             ),
+            criterio_tipo=concurso.get(
+                "criterio_tipo"
+            ),
+            criterio_resumo=concurso.get(
+                "criterio_resumo"
+            ),
+            criterio_detalhe=concurso.get(
+                "criterio_detalhe"
+            ),
+            entregaveis=concurso.get(
+                "entregaveis"
+            ),
             link_anuncio_dr=concurso.get(
                 "link_anuncio_dr"
+            ),
+            link_pecas=concurso.get(
+                "link_pecas"
+            ),
+            data_entrega_propostas=concurso.get(
+                "data_entrega_propostas"
+            ),
+            data_esclarecimentos=concurso.get(
+                "data_esclarecimentos"
+            ),
+            municipio=concurso.get("municipio"),
+            freguesia=concurso.get("freguesia"),
+            morada=concurso.get("morada"),
+            codigo_postal=concurso.get("codigo_postal"),
+            latitude=concurso.get("latitude"),
+            longitude=concurso.get("longitude"),
+            localizacao_contexto=concurso.get(
+                "localizacao_contexto"
             ),
         )
 
         if guardado:
+
+            concurso["id"] = guardado
+
+            gerar_timeline(
+                concurso
+            )
+
             quantidade_guardada += 1
 
     return quantidade_guardada
@@ -224,7 +320,7 @@ def main():
             "o Portal BASE."
         )
         print(f"Detalhe: {erro}")
-        return
+        raise
 
     concursos_relevantes = []
     concursos_novos = []
@@ -279,6 +375,7 @@ def main():
             concursos_ja_existentes
         )
     )
+    alertas_datas = gerar_alertas_datas_monitorizados()
 
     print("\n" + "=" * 52)
     print("RESUMO DA ANÁLISE")
@@ -310,6 +407,11 @@ def main():
     print(
         "Concursos existentes atualizados: "
         f"{quantidade_atualizada}"
+    )
+
+    print(
+        "Alertas de prazo gerados: "
+        f"{alertas_datas}"
     )
 
     if not concursos_novos:

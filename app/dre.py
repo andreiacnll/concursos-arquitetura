@@ -424,6 +424,25 @@ def extrair_criterio(texto: str) -> dict:
 
 
     if not encontrados:
+        # Alguns anuncios monofator indicam apenas "Nome: Preco", sem
+        # ponderacao. O valor e extraido apenas dentro da secao oficial.
+        secao_criterio = _extrair_secao_criterio(texto_limpo)
+        secao_sem_acentos = _sem_acentos(secao_criterio).lower()
+        e_monofator = bool(
+            re.search(r"multifator\s*:\s*(?:nao|n[^\s]*o)\b", secao_sem_acentos)
+        )
+        nome_monofator = re.search(
+            r"monofator\s*:\s*(?:\s*\n\s*)*(?:nome\s*:\s*)?([^\n\r]+)",
+            secao_criterio,
+            re.IGNORECASE,
+        )
+
+        if e_monofator and nome_monofator:
+            nome = _limpar_nome_fator(nome_monofator.group(1))
+            if nome:
+                encontrados.append(nome)
+
+    if not encontrados:
         return resultado
 
 
@@ -436,7 +455,9 @@ def extrair_criterio(texto: str) -> dict:
     resultado["criterio_resumo"] = " • ".join(encontrados)
     resultado["criterio_detalhe"] = "\n".join(encontrados)
 
-    return resultado
+    from app.criterios_adjudicacao import normalizar_criterio_adjudicacao
+
+    return normalizar_criterio_adjudicacao(**resultado)
 
 def extrair_entregaveis(texto: str) -> str | None:
     """
@@ -466,6 +487,18 @@ def enriquecer_concurso(
         extrair_entregaveis(texto)
     )
 
+    enriquecido["data_entrega_propostas"] = (
+        extrair_data_entrega_propostas(texto)
+    )
+
+    enriquecido["data_esclarecimentos"] = (
+        extrair_data_esclarecimentos(texto)
+    )
+
+    # Permite distinguir uma extração concluída (mesmo quando o
+    # documento não contém todos os campos) de uma tentativa que falhou.
+    enriquecido["enriquecimento_dr_concluido"] = True
+
     return enriquecido
 
 
@@ -490,6 +523,66 @@ def testar_pdf(url: str) -> None:
         print(f"{chave}: {valor or 'não identificado'}")
 
 
+
+def extrair_data_entrega_propostas(texto: str) -> str | None:
+    """
+    Extrai a data/hora limite de apresentação
+    de propostas a partir do texto do PDF DR.
+    """
+
+    import re
+
+    padroes = [
+        r"Prazo para apresentação das propostas\s*[:\-]?\s*(\d{2}-\d{2}-\d{4})(?:\s+(\d{2}:\d{2}))?",
+        r"Data limite para apresentação das propostas\s*[:\-]?\s*(\d{2}-\d{2}-\d{4})(?:\s+(\d{2}:\d{2}))?",
+    ]
+
+    for padrao in padroes:
+        resultado = re.search(
+            padrao,
+            texto,
+            re.IGNORECASE
+        )
+
+        if resultado:
+            data = resultado.group(1)
+            hora = resultado.group(2)
+
+            if hora:
+                return f"{data} {hora}"
+
+            return data
+
+    return None
+
+
+
+
+
+def extrair_data_esclarecimentos(texto: str) -> str | None:
+    """
+    Extrai a data limite para pedidos de esclarecimento.
+    """
+
+    padroes = [
+        r"pedidos de esclarecimento.*?(\d{2}-\d{2}-\d{4})",
+        r"esclarecimentos.*?(\d{2}-\d{2}-\d{4})",
+        r"solicita[cç][aã]o de esclarecimentos.*?(\d{2}-\d{2}-\d{4})",
+    ]
+
+    for padrao in padroes:
+        resultado = re.search(
+            padrao,
+            texto,
+            re.IGNORECASE | re.DOTALL,
+        )
+
+        if resultado:
+            return resultado.group(1)
+
+    return None
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
@@ -505,6 +598,7 @@ def main() -> None:
 
     argumentos = parser.parse_args()
     testar_pdf(argumentos.url)
+
 
 
 if __name__ == "__main__":
