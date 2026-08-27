@@ -88,6 +88,61 @@ function getCategory(title: string) {
   return "Arquitetura";
 }
 
+type CategoryThumbnail = {
+  label: string;
+  backgroundColor: string;
+};
+
+function normalizeCategoryThumbnailText(value: string | null | undefined) {
+  return (value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function getSpecificCategoryThumbnail(value: string): CategoryThumbnail | null {
+  if (/equipamentos?.*publico|equipamento|pavilhao/.test(value)) {
+    return { label: "EQUIP", backgroundColor: "#D9A2A3" };
+  }
+  if (/espaco.*publico|urbanismo|espaco.*urbano|paisag|parque/.test(value)) {
+    return { label: "ESPAÇO", backgroundColor: "#C8D1C1" };
+  }
+  if (/escola|educa|escolar/.test(value)) {
+    return { label: "EDU", backgroundColor: "#AFC4DB" };
+  }
+  if (/saude|hospital|clinica|unidade.*saude/.test(value)) {
+    return { label: "SAÚDE", backgroundColor: "#C7D3B8" };
+  }
+  if (/habit|residencial|residencia/.test(value)) {
+    return { label: "HAB", backgroundColor: "#E6B4A2" };
+  }
+  if (/cultura|cultural|museu|biblioteca|teatro/.test(value)) {
+    return { label: "CULT", backgroundColor: "#E7D6BA" };
+  }
+  if (/mobilidade|transporte/.test(value)) {
+    return { label: "MOB", backgroundColor: "#B8DCE0" };
+  }
+  if (/patrimon|reabilitacao.*patrimonial|edificio.*classificado/.test(value)) {
+    return { label: "PAT", backgroundColor: "#F0D989" };
+  }
+  return null;
+}
+
+export function getCategoryThumbnail(
+  category: string | null | undefined,
+  title: string | null | undefined = "",
+): CategoryThumbnail {
+  const explicitCategory = normalizeCategoryThumbnailText(category);
+  const titleText = normalizeCategoryThumbnailText(title);
+
+  return (
+    getSpecificCategoryThumbnail(explicitCategory) ||
+    getSpecificCategoryThumbnail(titleText) ||
+    (explicitCategory.includes("arquitet")
+      ? { label: "ARQ", backgroundColor: "#C9D4DD" }
+      : { label: "BIRD", backgroundColor: "#D7D8D4" })
+  );
+}
 function getFreshness(dateValue: string) {
   const date = new Date(dateValue);
   if (Number.isNaN(date.getTime())) return null;
@@ -177,6 +232,7 @@ export function CompetitionCardBase({
   const tituloLongo = concurso.titulo.length > 75;
 
   const category = concurso.categoria || getCategory(concurso.titulo);
+  const categoryThumbnail = getCategoryThumbnail(concurso.categoria, concurso.titulo);
   const publication = getCompetitionPublication(concurso);
   const freshness = getFreshness(publication?.rawDate || "");
   const isSearchCard = className.split(/\s+/).includes("search-competition-card");
@@ -192,7 +248,13 @@ export function CompetitionCardBase({
   return (
     <article className={`competition-card ${className}`.trim()} data-category={category}>
       <div className="card-image">
-        <div className="card-colour-surface" aria-label={category} />
+        <div
+          className="card-category-thumbnail"
+          style={{ backgroundColor: categoryThumbnail.backgroundColor }}
+          aria-hidden="true"
+        >
+          <span>{categoryThumbnail.label}</span>
+        </div>
 
         {freshness && (
           <span className="freshness-badge">
