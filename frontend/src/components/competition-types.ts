@@ -4,6 +4,9 @@ export type Concurso = {
   data_publicacao_iso?: string;
   first_seen_at?: string | null;
   last_seen_at?: string | null;
+  last_changed_at?: string | null;
+  has_updates?: boolean;
+  changed_fields?: string | null;
   id: number;
   titulo: string;
   entidade: string;

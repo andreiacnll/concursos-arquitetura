@@ -19,6 +19,7 @@ from app.analise.common_project_extractor import extract_common_project_data
 from app.analise.platform_documents import (
     discover_public_documents,
     download_public_documents,
+    probe_public_document_versions,
     load_cached_platform_documents,
     save_platform_metadata,
 )
@@ -107,6 +108,9 @@ def _document_signature(documents: Iterable[Any]) -> str:
             "source_url": _clean(getattr(document, "source_url", "")),
             "filename": _clean(getattr(document, "filename", "")),
             "sha256": _clean(getattr(document, "sha256", "")),
+            "etag": _clean(getattr(document, "etag", "")),
+            "last_modified": _clean(getattr(document, "last_modified", "")),
+            "content_length": _clean(getattr(document, "content_length", "")),
         }
         for document in documents
     ]
@@ -131,6 +135,9 @@ def _cached_document_signature(cache_dir: Path) -> str:
             "source_url": _clean(item.get("source_url")),
             "filename": _clean(item.get("filename")),
             "sha256": _clean(item.get("sha256")),
+            "etag": _clean(item.get("etag")),
+            "last_modified": _clean(item.get("last_modified")),
+            "content_length": _clean(item.get("content_length")),
         }
         for item in documents
         if isinstance(item, dict)
@@ -160,6 +167,9 @@ def _obtain_documents(
     if result.status != "success" or not public:
         return cached, warnings or [f"Platform has no public documents: {result.status}."], False, False
 
+    public = probe_public_document_versions(public)
+    if cached and _document_signature(public) == previous_signature:
+        return cached, warnings, False, True
     downloaded = download_public_documents(public, cache_dir, timeout=120)
     if not downloaded:
         return cached, warnings + ["Could not confirm current official documents."], False, False

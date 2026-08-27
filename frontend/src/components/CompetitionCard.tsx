@@ -245,6 +245,9 @@ export function CompetitionCardBase({
         <div className="card-heading-row">
           <div>
             <p className="category-label">{category}</p>
+            {concurso.has_updates ? (
+              <span className="competition-update-badge" title={concurso.changed_fields || "Concurso atualizado"}>⚠ Atualizado</span>
+            ) : null}
 
             <h3
               className={`competition-title ${
