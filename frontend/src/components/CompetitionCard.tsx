@@ -104,14 +104,17 @@ function getSpecificCategoryThumbnail(value: string): CategoryThumbnail | null {
   if (/equipamentos?.*publico|equipamento|pavilhao/.test(value)) {
     return { label: "EQUIP", backgroundColor: "#D9A2A3" };
   }
-  if (/espaco.*publico|urbanismo|espaco.*urbano|paisag|parque/.test(value)) {
-    return { label: "ESPAÇO", backgroundColor: "#C8D1C1" };
+  if (/espaco.*publico|urbanismo|espaco.*urbano/.test(value)) {
+    return { label: "ESPA\u00C7O", backgroundColor: "#C8D1C1" };
+  }
+  if (/paisag|parque/.test(value)) {
+    return { label: "PAISAGEM", backgroundColor: "#C8D1C1" };
   }
   if (/escola|educa|escolar/.test(value)) {
     return { label: "EDU", backgroundColor: "#AFC4DB" };
   }
   if (/saude|hospital|clinica|unidade.*saude/.test(value)) {
-    return { label: "SAÚDE", backgroundColor: "#C7D3B8" };
+    return { label: "SA\u00DADE", backgroundColor: "#C7D3B8" };
   }
   if (/habit|residencial|residencia/.test(value)) {
     return { label: "HAB", backgroundColor: "#E6B4A2" };
@@ -125,6 +128,9 @@ function getSpecificCategoryThumbnail(value: string): CategoryThumbnail | null {
   if (/patrimon|reabilitacao.*patrimonial|edificio.*classificado/.test(value)) {
     return { label: "PAT", backgroundColor: "#F0D989" };
   }
+  if (/arquitet/.test(value)) {
+    return { label: "ARQ", backgroundColor: "#C9D4DD" };
+  }
   return null;
 }
 
@@ -132,16 +138,17 @@ export function getCategoryThumbnail(
   category: string | null | undefined,
   title: string | null | undefined = "",
 ): CategoryThumbnail {
-  const explicitCategory = normalizeCategoryThumbnailText(category);
-  const titleText = normalizeCategoryThumbnailText(title);
-
-  return (
-    getSpecificCategoryThumbnail(explicitCategory) ||
-    getSpecificCategoryThumbnail(titleText) ||
-    (explicitCategory.includes("arquitet")
-      ? { label: "ARQ", backgroundColor: "#C9D4DD" }
-      : { label: "BIRD", backgroundColor: "#D7D8D4" })
+  const explicitCategory = getSpecificCategoryThumbnail(
+    normalizeCategoryThumbnailText(category),
   );
+  if (explicitCategory) return explicitCategory;
+
+  const inferredCategory = getSpecificCategoryThumbnail(
+    normalizeCategoryThumbnailText(title),
+  );
+  if (inferredCategory) return inferredCategory;
+
+  return { label: "BIRD", backgroundColor: "#D7D8D4" };
 }
 function getFreshness(dateValue: string) {
   const date = new Date(dateValue);
