@@ -34,6 +34,9 @@ class PlatformDocument:
     path: str = ""
     context_url: str = ""
     server_relative_url: str = ""
+    etag: str = ""
+    last_modified: str = ""
+    content_length: str = ""
 
 
 @dataclass
@@ -119,6 +122,18 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def probe_public_document_versions(documents: list[PlatformDocument], timeout: int = 20) -> list[PlatformDocument]:
+    """Obtém metadata HTTP leve; nunca lê o corpo do documento."""
+    for document in documents:
+        try:
+            response = requests.head(document.source_url, timeout=timeout, allow_redirects=True, headers={"User-Agent": "CNLL/1.0"})
+            if response.ok:
+                document.etag = _clean(response.headers.get("ETag"))
+                document.last_modified = _clean(response.headers.get("Last-Modified"))
+                document.content_length = _clean(response.headers.get("Content-Length"))
+        except requests.RequestException:
+            continue
+    return documents
 def load_cached_platform_documents(cache_dir: Path) -> list[PlatformDocument]:
     metadata = cache_dir / "metadata.json"
     if not metadata.exists():
@@ -142,6 +157,9 @@ def load_cached_platform_documents(cache_dir: Path) -> list[PlatformDocument]:
             path=_clean(item.get("path")),
             context_url=_clean(item.get("context_url")),
             server_relative_url=_clean(item.get("server_relative_url")),
+            etag=_clean(item.get("etag")),
+            last_modified=_clean(item.get("last_modified")),
+            content_length=_clean(item.get("content_length")),
         )
         if not (document.external_id and document.source_url and document.sha256):
             continue

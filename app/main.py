@@ -5,6 +5,9 @@ from .database import (
     gerar_alertas_datas_monitorizados,
     gerar_timeline,
     atualizar_dados_concurso,
+    atualizar_concurso_existente_se_alterado,
+    abrir_conexao,
+
     concurso_existe,
     contar_concursos,
     criar_base_dados,
@@ -122,6 +125,9 @@ def atualizar_concursos_existentes(concursos):
     quantidade_atualizada = 0
 
     for concurso in concursos:
+        decisao = atualizar_concurso_existente_se_alterado(concurso["link"], concurso)
+        if not decisao["changed"]:
+            continue
         atualizado = atualizar_dados_concurso(
             link=concurso["link"],
             titulo=concurso.get("titulo"),
@@ -415,12 +421,9 @@ def main():
     )
 
     if not concursos_novos:
-        print(
-            "\nNão foram encontrados concursos novos."
-        )
+        print("\nNão foram encontrados concursos novos.")
         print("Nenhum email foi enviado.")
         return
-
     quantidade_a_mostrar = min(
         LIMITE_RESULTADOS_NO_ECRA,
         len(concursos_novos),

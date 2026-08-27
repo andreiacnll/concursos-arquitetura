@@ -18,6 +18,7 @@ from app.analise.common_project_extractor import extract_common_project_data
 from app.analise.platform_documents import (
     discover_public_documents,
     download_public_documents,
+    probe_public_document_versions,
     load_cached_platform_documents,
     save_platform_metadata,
 )
@@ -97,6 +98,56 @@ def _cache_dir(root: Path, concurso_id: int) -> Path:
     return root / "analise_documentos" / str(concurso_id) / "pre_analise"
 
 
+
+def _document_signature(documents: Iterable[Any]) -> str:
+    """Fingerprint of the official documents used for an extraction."""
+    rows = [
+        {
+            "external_id": _clean(getattr(document, "external_id", "")),
+            "source_url": _clean(getattr(document, "source_url", "")),
+            "filename": _clean(getattr(document, "filename", "")),
+            "sha256": _clean(getattr(document, "sha256", "")),
+            "etag": _clean(getattr(document, "etag", "")),
+            "last_modified": _clean(getattr(document, "last_modified", "")),
+            "content_length": _clean(getattr(document, "content_length", "")),
+        }
+        for document in documents
+    ]
+    raw = json.dumps(
+        sorted(rows, key=lambda item: json.dumps(item, sort_keys=True)),
+        sort_keys=True,
+    )
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _cached_document_signature(cache_dir: Path) -> str:
+    metadata = cache_dir / "metadata.json"
+    if not metadata.exists():
+        return ""
+    try:
+        documents = json.loads(metadata.read_text(encoding="utf-8")).get("documents") or []
+    except (OSError, json.JSONDecodeError):
+        return ""
+    rows = [
+        {
+            "external_id": _clean(item.get("external_id")),
+            "source_url": _clean(item.get("source_url")),
+            "filename": _clean(item.get("filename")),
+            "sha256": _clean(item.get("sha256")),
+            "etag": _clean(item.get("etag")),
+            "last_modified": _clean(item.get("last_modified")),
+            "content_length": _clean(item.get("content_length")),
+        }
+        for item in documents
+        if isinstance(item, dict)
+    ]
+    raw = json.dumps(
+        sorted(rows, key=lambda item: json.dumps(item, sort_keys=True)),
+        sort_keys=True,
+    )
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
 def _obtain_documents(
     concurso: dict[str, Any],
     cache_dir: Path,
@@ -116,6 +167,9 @@ def _obtain_documents(
     if result.status != "success" or not public:
         return [], warnings or [f"Plataforma sem documentos públicos: {result.status}."]
 
+    public = probe_public_document_versions(public)
+    if cached and _document_signature(public) == previous_signature:
+        return cached, warnings, False, True
     downloaded = download_public_documents(public, cache_dir, timeout=120)
     save_platform_metadata(cache_dir, result, downloaded)
     return downloaded, warnings

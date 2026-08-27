@@ -39,6 +39,7 @@ COLUNAS_ANALISE = {
     "job_id": "INTEGER",
     # O SQLite nÃ£o aceita CURRENT_TIMESTAMP ao acrescentar uma coluna.
     "updated_at": "TEXT",
+    "needs_revalidation": "INTEGER NOT NULL DEFAULT 0",
 }
 
 COLUNAS_ALERTA = {
@@ -87,6 +88,12 @@ COLUNAS_ADICIONAIS = {
     "criterio_detalhe": "TEXT",
     "criterio_fatores": "TEXT",
     "criterio_estado": "TEXT",
+    "evidencia_documental": "TEXT",
+    "last_seen_at": "TEXT",
+    "last_changed_at": "TEXT",
+    "has_updates": "INTEGER NOT NULL DEFAULT 0",
+    "changed_fields": "TEXT",
+
     "entregaveis": "TEXT",
     "link_anuncio_dr": "TEXT",
     "link_pecas": "TEXT",
@@ -1175,6 +1182,21 @@ def criar_base_dados():
     _adicionar_colunas_analise_jobs_em_falta(cursor)
     _migrar_tabela_analises(cursor)
     _adicionar_colunas_alertas_em_falta(cursor)
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS concurso_alteracoes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            concurso_id INTEGER NOT NULL,
+            detected_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            campo TEXT NOT NULL,
+            valor_anterior TEXT,
+            valor_novo TEXT,
+            fonte TEXT,
+            evidencia TEXT,
+            FOREIGN KEY(concurso_id) REFERENCES concursos(id) ON DELETE CASCADE
+        )
+        """
+    )
     _criar_tabela_versoes_analise(cursor)
     _criar_tabelas_company_ai(cursor)
     _migrar_tabela_company_members(cursor)
@@ -3830,6 +3852,37 @@ def atualizar_dados_concurso(
 
     return atualizado
 
+
+def atualizar_concurso_existente_se_alterado(link: str, novos: dict, *, fonte: str = "base_gov") -> dict:
+    """Compara metadata leve; só regista mudança e reprocessa quando necessário."""
+    fields = ("titulo", "entidade", "data", "data_limite", "preco_base", "cpv", "tipo_procedimento", "criterio_tipo", "criterio_resumo", "criterio_detalhe", "criterio_fatores", "link_anuncio_dr", "link_pecas", "data_entrega_propostas", "data_esclarecimentos")
+    with abrir_conexao() as conn:
+        current = conn.execute("SELECT * FROM concursos WHERE link = ?", (link,)).fetchone()
+        if current is None:
+            return {"exists": False, "changed": False, "concurso_id": None, "changed_fields": []}
+        changed = []
+        for field in fields:
+            old = _texto_ou_none(current[field])
+            new = _texto_ou_none(novos.get(field))
+            if new is not None and new != old:
+                changed.append(field)
+        now = datetime.now().isoformat(timespec="seconds")
+        conn.execute("UPDATE concursos SET last_seen_at = ? WHERE id = ?", (now, current["id"]))
+        if not changed:
+            conn.commit()
+            return {"exists": True, "changed": False, "concurso_id": current["id"], "changed_fields": []}
+        for field in changed:
+            conn.execute(
+                "INSERT INTO concurso_alteracoes (concurso_id, campo, valor_anterior, valor_novo, fonte, evidencia) VALUES (?, ?, ?, ?, ?, ?)",
+                (current["id"], field, current[field], novos.get(field), fonte, novos.get("link_pecas") or novos.get("link_anuncio_dr")),
+            )
+        conn.execute(
+            "UPDATE concursos SET has_updates = 1, changed_fields = ?, last_changed_at = ? WHERE id = ?",
+            (json.dumps(changed, ensure_ascii=False), now, current["id"]),
+        )
+        conn.execute("UPDATE analises SET needs_revalidation = 1 WHERE concurso_id = ?", (current["id"],))
+        conn.commit()
+        return {"exists": True, "changed": True, "concurso_id": current["id"], "changed_fields": changed}
 
 def concurso_existe(link):
     """
