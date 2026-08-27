@@ -74,36 +74,6 @@ function diasRestantes(valor?: string | null) {
   );
 }
 
-const categoryImages = {
-  Saude: [
-    "/categories/saude.svg",
-  ],
-
-  Habitacao: [
-    "/categories/habitacao.svg",
-  ],
-
-  Escolas: [
-    "/categories/escolas.svg",
-  ],
-
-  Paisagismo: [
-    "/categories/paisagismo.svg",
-  ],
-
-  "Espaco publico": [
-    "/categories/espaco-publico.svg",
-  ],
-
-  Patrimonio: [
-    "/categories/patrimonio.svg",
-  ],
-
-  Arquitetura: [
-    "/categories/arquitetura.svg",
-  ],
-};
-
 function getCategory(title: string) {
   const text = title.toLowerCase();
 
@@ -207,10 +177,6 @@ export function CompetitionCardBase({
   const tituloLongo = concurso.titulo.length > 75;
 
   const category = concurso.categoria || getCategory(concurso.titulo);
-  const images =
-    categoryImages[category as keyof typeof categoryImages] ??
-    categoryImages.Arquitetura;
-  const image = images[index % images.length];
   const publication = getCompetitionPublication(concurso);
   const freshness = getFreshness(publication?.rawDate || "");
   const isSearchCard = className.split(/\s+/).includes("search-competition-card");
@@ -226,11 +192,7 @@ export function CompetitionCardBase({
   return (
     <article className={`competition-card ${className}`.trim()} data-category={category}>
       <div className="card-image">
-        <img
-          src={image}
-          alt={category}
-          className="card-illustration"
-        />
+        <div className="card-colour-surface" aria-label={category} />
 
         {freshness && (
           <span className="freshness-badge">
