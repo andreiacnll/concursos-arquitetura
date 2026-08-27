@@ -503,7 +503,15 @@
     "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/07/131/419966724.pdf",
     "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTExOTE3NA",
     "id_portal_base": "450785",
-    "id_procedimento": "19901977"
+    "id_procedimento": "19901977",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Sim Percentagem 5%",
+    "criterio_detalhe": "Sim Percentagem 5%",
+    "criterio_fatores": "[{\"nome\": \"Sim Percentagem\", \"peso\": 5, \"tipo\": \"outro\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "23-08-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
   },
   {
     "titulo": "Projeto de Execução da Empreitada de Implementação das Soluções Técnicas para Mitigação dos Riscos Existentes na Pedreira n.º 20457  Senhora de Todo o Mundo",
@@ -1473,5 +1481,395 @@
     "link_pecas": "https://www.anogov.com/ap-tsm/faces/app/acessoDocs.jsp?codigoAcesso=M3cNBJmSeidu3leFZp2IEDC80MIGMhflrU1V5BPfzcvf9Ont6W",
     "id_portal_base": "451699",
     "id_procedimento": "19981633"
+  },
+  {
+    "titulo": "Fiscalização da empreitada de remodelação do serviço definitivo de imagiologia",
+    "entidade": "Estado-Maior-General das Forças Armadas (EMGFA)",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=454748",
+    "data": "26-08-2026",
+    "data_limite": "30 dias.",
+    "texto": "DescriÃ§Ã£o: Fiscalização da empreitada de remodelação do serviço definitivo de imagiologia\nEntidade: Estado-Maior-General das Forças Armadas (EMGFA)\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71540000-5, Serviços de gestão de obras\nPreÃ§o base: 60.975,61 €\nPrazo para propostas: 30 dias.\nData de publicaÃ§Ã£o: 26-08-2026\nNÃºmero do anÃºncio: 21635/2026",
+    "numero_anuncio": "21635/2026",
+    "preco_base": "60.975,61 €",
+    "cpvs": [
+      "71540000-5, Serviços de gestão de obras"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/08/165/419971356.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEzODA5OA",
+    "id_portal_base": "454748",
+    "id_procedimento": "20275125",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "25-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "CONTRATO DE AQUISIÇÃO DE SERVIÇOS PARA \"GESTÃO E FISCALIZAÇÃO DA EMPREITADA GERAL DE CONSTRUÇÃO DAS INFRAESTRUTURAS HIDRÁULICAS PARA O FORNECIMENTO DE ÁGUA À ETA DA PÓVOA, NO ÂMBITO DO EMPREENDIMENTO",
+    "entidade": "Comunidade Intermunicipal do Alto Alentejo",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=454675",
+    "data": "26-08-2026",
+    "data_limite": "31 dias.",
+    "texto": "DescriÃ§Ã£o: CONTRATO DE AQUISIÇÃO DE SERVIÇOS PARA \"GESTÃO E FISCALIZAÇÃO DA EMPREITADA GERAL DE CONSTRUÇÃO DAS INFRAESTRUTURAS HIDRÁULICAS PARA O FORNECIMENTO DE ÁGUA À ETA DA PÓVOA, NO ÂMBITO DO EMPREENDIMENTO\nEntidade: Comunidade Intermunicipal do Alto Alentejo\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71247000-1, Supervisão de trabalhos de construção\nPreÃ§o base: 1.209.700,00 €\nPrazo para propostas: 31 dias.\nData de publicaÃ§Ã£o: 26-08-2026\nNÃºmero do anÃºncio: 21610/2026",
+    "numero_anuncio": "21610/2026",
+    "preco_base": "1.209.700,00 €",
+    "cpvs": [
+      "71247000-1, Supervisão de trabalhos de construção"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/08/165/419971167.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/WE15U0NoNjlnRERDc3BhR0l0ZFBLT2FqWDJWdEF0ZWlXOEg4R3dwditBOVBjVUNKU0wrRXVpV3RSbVZTanZaOXJDVGpTb1RUMm1nZEpmaDZlYlFCbHc9PVI0Q0J3",
+    "id_portal_base": "454675",
+    "id_procedimento": "20271916",
+    "criterio_tipo": "Multifator",
+    "criterio_resumo": "Preço 40% · Qualidade 60%",
+    "criterio_detalhe": "Preço 40%\nQualidade 60%",
+    "criterio_fatores": "[{\"nome\": \"Preço\", \"peso\": 40, \"tipo\": \"preco\"}, {\"nome\": \"Qualidade\", \"peso\": 60, \"tipo\": \"qualidade\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "26-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "P336/2026 - Conceção de Projeto de Iluminação Festiva e Decorativa de Natal do natal de 2026 para as cidades de Ourém e Fátima (61215/2026)",
+    "entidade": "Município de Ourém",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=454588",
+    "data": "25-08-2026",
+    "data_limite": "27 dias.",
+    "texto": "DescriÃ§Ã£o: P336/2026 - Conceção de Projeto de Iluminação Festiva e Decorativa de Natal do natal de 2026 para as cidades de Ourém e Fátima (61215/2026)\nEntidade: Município de Ourém\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso de concepção\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 92340000-6, Serviços de espectáculos recreativos e de dança\nPreÃ§o base: 250.000,00 €\nPrazo para propostas: 27 dias.\nData de publicaÃ§Ã£o: 25-08-2026\nNÃºmero do anÃºncio: 21500/2026",
+    "numero_anuncio": "21500/2026",
+    "preco_base": "250.000,00 €",
+    "cpvs": [
+      "92340000-6, Serviços de espectáculos recreativos e de dança"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Concurso de concepção",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/08/164/419970910.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEzNTQyMg",
+    "id_portal_base": "454588",
+    "id_procedimento": "20261420",
+    "criterio_tipo": null,
+    "criterio_resumo": null,
+    "criterio_detalhe": null,
+    "entregaveis": null,
+    "data_entrega_propostas": null,
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Aquisição de Serviços para a elaboração de Estudo Prévio, Projeto de Execução e Estudo de Impacte Ambiental para um Ponto de Apoio Naval da Marinha Portuguesa em Viana do Castelo",
+    "entidade": "APDL - Administração dos Portos do Douro, Leixões e Viana do Castelo",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=454568",
+    "data": "24-08-2026",
+    "data_limite": "30 dias.",
+    "texto": "DescriÃ§Ã£o: Aquisição de Serviços para a elaboração de Estudo Prévio, Projeto de Execução e Estudo de Impacte Ambiental para um Ponto de Apoio Naval da Marinha Portuguesa em Viana do Castelo\nEntidade: APDL - Administração dos Portos do Douro, Leixões e Viana do Castelo\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71310000-4, Serviços de consultoria em matéria de engenharia e construção\nPreÃ§o base: 350.000,00 €\nPrazo para propostas: 30 dias.\nData de publicaÃ§Ã£o: 24-08-2026\nNÃºmero do anÃºncio: 21443/2026",
+    "numero_anuncio": "21443/2026",
+    "preco_base": "350.000,00 €",
+    "cpvs": [
+      "71310000-4, Serviços de consultoria em matéria de engenharia e construção"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/08/163/419971141.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/d1NlUjIrV2p2SzliU3U0R21MbWFLNkZKNzhJYjcvNk1kcTBMempvdkx1MUI0dmxLZk1PZzhzQ1RTcEhNVFZmcVM4bCtMamhHS2NDd3Z3KzlENWMvZ0E9PW02Iyp6",
+    "id_portal_base": "454568",
+    "id_procedimento": "20258751",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "23-09-2026 18:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Aquisição de Serviços para Elaboração do Projeto de Execução das Soluções Técnicas de Mitigação dos Riscos Existentes na Pedreira n.º 20457  Senhora de Todo o Mundo",
+    "entidade": "EDM - Empresa de Desenvolvimento Mineiro, SA",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=454543",
+    "data": "24-08-2026",
+    "data_limite": "14 dias.",
+    "texto": "DescriÃ§Ã£o: Aquisição de Serviços para Elaboração do Projeto de Execução das Soluções Técnicas de Mitigação dos Riscos Existentes na Pedreira n.º 20457  Senhora de Todo o Mundo\nEntidade: EDM - Empresa de Desenvolvimento Mineiro, SA\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71242000-6, Preparação de projecto e concepção, estimativa de custos\nPreÃ§o base: 100.000,00 €\nPrazo para propostas: 14 dias.\nData de publicaÃ§Ã£o: 24-08-2026\nNÃºmero do anÃºncio: 21469/2026",
+    "numero_anuncio": "21469/2026",
+    "preco_base": "100.000,00 €",
+    "cpvs": [
+      "71242000-6, Preparação de projecto e concepção, estimativa de custos"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/08/163/419971170.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEzNjQyMw",
+    "id_portal_base": "454543",
+    "id_procedimento": "20258726",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "07-09-2026 17:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Aquisição de serviços de arquitetura",
+    "entidade": "Secretaria-Geral do Governo",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=454542",
+    "data": "24-08-2026",
+    "data_limite": "9 dias.",
+    "texto": "DescriÃ§Ã£o: Aquisição de serviços de arquitetura\nEntidade: Secretaria-Geral do Governo\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71240000-2, Serviços de arquitectura, engenharia e planeamento\nPreÃ§o base: 79.800,00 €\nPrazo para propostas: 9 dias.\nData de publicaÃ§Ã£o: 24-08-2026\nNÃºmero do anÃºncio: 21470/2026",
+    "numero_anuncio": "21470/2026",
+    "preco_base": "79.800,00 €",
+    "cpvs": [
+      "71240000-2, Serviços de arquitectura, engenharia e planeamento"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/08/163/419971155.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEzNjIyOQ",
+    "id_portal_base": "454542",
+    "id_procedimento": "20258725",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "02-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Aquisição de Serviços de Fiscalização da Empreitada de Construção da Escola Básica do 1ºciclo e Jardim-de-Infância de Vale do Paraíso",
+    "entidade": "Município de Azambuja",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=454533",
+    "data": "24-08-2026",
+    "data_limite": "9 dias.",
+    "texto": "DescriÃ§Ã£o: Aquisição de Serviços de Fiscalização da Empreitada de Construção da Escola Básica do 1ºciclo e Jardim-de-Infância de Vale do Paraíso\nEntidade: Município de Azambuja\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71520000-9, Serviços de supervisão da construção\nPreÃ§o base: 124.257,00 €\nPrazo para propostas: 9 dias.\nData de publicaÃ§Ã£o: 24-08-2026\nNÃºmero do anÃºncio: 21479/2026",
+    "numero_anuncio": "21479/2026",
+    "preco_base": "124.257,00 €",
+    "cpvs": [
+      "71520000-9, Serviços de supervisão da construção"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/08/163/419971104.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEzNjAwMw",
+    "id_portal_base": "454533",
+    "id_procedimento": "20258716",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "2.ª série",
+    "criterio_detalhe": "2.ª série",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "02-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Fiscalização da Empreitada de Construção do Edifício de Comando da Nova Subestação da Ponta Delgada 30/6,6 kV",
+    "entidade": "EEM - Empresa de Electricidade da Madeira, SA",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=454506",
+    "data": "24-08-2026",
+    "data_limite": "35 dias.",
+    "texto": "DescriÃ§Ã£o: Fiscalização da Empreitada de Construção do Edifício de Comando da Nova Subestação da Ponta Delgada 30/6,6 kV\nEntidade: EEM - Empresa de Electricidade da Madeira, SA\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71520000-9, Serviços de supervisão da construção\nPreÃ§o base: 148.500,00 €\nPrazo para propostas: 35 dias.\nData de publicaÃ§Ã£o: 24-08-2026\nNÃºmero do anÃºncio: 21397/2026",
+    "numero_anuncio": "21397/2026",
+    "preco_base": "148.500,00 €",
+    "cpvs": [
+      "71520000-9, Serviços de supervisão da construção"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/08/163/419970817.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/U3NpaVREdmIzczJndFBzYXQvUjF0V1Y5NmhnY1dHNjRnQWp1Yi9lZk1sZlVpbU5qL3BEeHlFQ1pWbmdwbEVyM0ZaLzNBb2NuV0VFQ0g1S3ptdjdjWXc9PTZkd21i",
+    "id_portal_base": "454506",
+    "id_procedimento": "20255881",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Sim Percentagem 2%",
+    "criterio_detalhe": "Sim Percentagem 2%",
+    "criterio_fatores": "[{\"nome\": \"Sim Percentagem\", \"peso\": 2, \"tipo\": \"outro\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "28-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "PRESTAÇÃO DE SERVIÇOS DE ELABORAÇÃO DO PROJETO DE REQUALIFICAÇÃO DA LOTA DE RABO DE PEIXE, ILHA DE SÃO MIGUEL",
+    "entidade": "Lotaçor - Serviço de Lotas dos Açores, SA",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=454502",
+    "data": "24-08-2026",
+    "data_limite": "26 dias.",
+    "texto": "DescriÃ§Ã£o: PRESTAÇÃO DE SERVIÇOS DE ELABORAÇÃO DO PROJETO DE REQUALIFICAÇÃO DA LOTA DE RABO DE PEIXE, ILHA DE SÃO MIGUEL\nEntidade: Lotaçor - Serviço de Lotas dos Açores, SA\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71320000-7, Serviços de concepção técnica\nPreÃ§o base: 30.000,00 €\nPrazo para propostas: 26 dias.\nData de publicaÃ§Ã£o: 24-08-2026\nNÃºmero do anÃºncio: 21401/2026",
+    "numero_anuncio": "21401/2026",
+    "preco_base": "30.000,00 €",
+    "cpvs": [
+      "71320000-7, Serviços de concepção técnica"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/08/163/419970844.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEzMjExNg",
+    "id_portal_base": "454502",
+    "id_procedimento": "20255877",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "19-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "PRESTAÇÃO DE SERVIÇOS DE ELABORAÇÃO DO PROJETO DE REQUALIFICAÇÃO DO ENTREPOSTO FRIGORÍFICO DE PONTA DELGADA, ILHA DE SÃO MIGUEL",
+    "entidade": "Lotaçor - Serviço de Lotas dos Açores, SA",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=454499",
+    "data": "24-08-2026",
+    "data_limite": "26 dias.",
+    "texto": "DescriÃ§Ã£o: PRESTAÇÃO DE SERVIÇOS DE ELABORAÇÃO DO PROJETO DE REQUALIFICAÇÃO DO ENTREPOSTO FRIGORÍFICO DE PONTA DELGADA, ILHA DE SÃO MIGUEL\nEntidade: Lotaçor - Serviço de Lotas dos Açores, SA\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71320000-7, Serviços de concepção técnica\nPreÃ§o base: 67.500,00 €\nPrazo para propostas: 26 dias.\nData de publicaÃ§Ã£o: 24-08-2026\nNÃºmero do anÃºncio: 21404/2026",
+    "numero_anuncio": "21404/2026",
+    "preco_base": "67.500,00 €",
+    "cpvs": [
+      "71320000-7, Serviços de concepção técnica"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/08/163/419970845.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEzMjE2MA",
+    "id_portal_base": "454499",
+    "id_procedimento": "20255874",
+    "criterio_tipo": "Multifator",
+    "criterio_resumo": "Preço 85% · Prazo de Execução 10% · Experiência do Coordenador de projeto na área alimentar 5%",
+    "criterio_detalhe": "Preço 85%\nOutros Outro Nome: Prazo de Execução 10%\nOutros Outro Nome: Experiência do Coordenador de projeto na área alimentar 5%",
+    "criterio_fatores": "[{\"nome\": \"Preço\", \"peso\": 85, \"tipo\": \"preco\"}, {\"nome\": \"Prazo de Execução\", \"peso\": 10, \"tipo\": \"outro\"}, {\"nome\": \"Experiência do Coordenador de projeto na área alimentar\", \"peso\": 5, \"tipo\": \"outro\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "19-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Aquisição de serviços para a Elaboração do Projeto de alterações da Rede elétrica, ITED e AVAC da Delegação Distrital do IMT, I.P. de Vila Real",
+    "entidade": "Instituto da Mobilidade e dos Transportes, IP",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=454449",
+    "data": "21-08-2026",
+    "data_limite": "21 dias.",
+    "texto": "DescriÃ§Ã£o: Aquisição de serviços para a Elaboração do Projeto de alterações da Rede elétrica, ITED e AVAC da Delegação Distrital do IMT, I.P. de Vila Real\nEntidade: Instituto da Mobilidade e dos Transportes, IP\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71240000-2, Serviços de arquitectura, engenharia e planeamento\nPreÃ§o base: 7.500,00 €\nPrazo para propostas: 21 dias.\nData de publicaÃ§Ã£o: 21-08-2026\nNÃºmero do anÃºncio: 21344/2026",
+    "numero_anuncio": "21344/2026",
+    "preco_base": "7.500,00 €",
+    "cpvs": [
+      "71240000-2, Serviços de arquitectura, engenharia e planeamento"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/08/162/419971018.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEzNjAyMQ",
+    "id_portal_base": "454449",
+    "id_procedimento": "20253966",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "11-09-2026 17:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "3026008240_1412_DI - Serviço de Revisão de Projeto de Execução e Tradução da Requalificação da Rede de Média Tensão 30Kv da Base Naval de Lisboa (BNL)",
+    "entidade": "Superintendência do Material - Direção de Infraestruturas",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=454437",
+    "data": "21-08-2026",
+    "data_limite": "10 dias.",
+    "texto": "DescriÃ§Ã£o: 3026008240_1412_DI - Serviço de Revisão de Projeto de Execução e Tradução da Requalificação da Rede de Média Tensão 30Kv da Base Naval de Lisboa (BNL)\nEntidade: Superintendência do Material - Direção de Infraestruturas\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71250000-5, Serviços de arquitectura, engenharia e levantamento topográfico\nPreÃ§o base: 20.000,00 €\nPrazo para propostas: 10 dias.\nData de publicaÃ§Ã£o: 21-08-2026\nNÃºmero do anÃºncio: 21356/2026",
+    "numero_anuncio": "21356/2026",
+    "preco_base": "20.000,00 €",
+    "cpvs": [
+      "71250000-5, Serviços de arquitectura, engenharia e levantamento topográfico"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/08/162/419971009.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEzNTk0MA",
+    "id_portal_base": "454437",
+    "id_procedimento": "20253954",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "31-08-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Aquisição de serviços para elaboração de estudo de viabilidade, estudo prévio e projeto de execução para a construção da ligação da área empresarial das Palhagueiras a Santa Cruz",
+    "entidade": "Município de Torres Vedras",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=454389",
+    "data": "21-08-2026",
+    "data_limite": "28 dias.",
+    "texto": "DescriÃ§Ã£o: Aquisição de serviços para elaboração de estudo de viabilidade, estudo prévio e projeto de execução para a construção da ligação da área empresarial das Palhagueiras a Santa Cruz\nEntidade: Município de Torres Vedras\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71240000-2, Serviços de arquitectura, engenharia e planeamento\nPreÃ§o base: 400.000,00 €\nPrazo para propostas: 28 dias.\nData de publicaÃ§Ã£o: 21-08-2026\nNÃºmero do anÃºncio: 21289/2026",
+    "numero_anuncio": "21289/2026",
+    "preco_base": "400.000,00 €",
+    "cpvs": [
+      "71240000-2, Serviços de arquitectura, engenharia e planeamento"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/08/162/419970708.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEzNDk0Mg",
+    "id_portal_base": "454389",
+    "id_procedimento": "20251470",
+    "criterio_tipo": "Multifator",
+    "criterio_resumo": "Preço 30% · Valia Técnica da Proposta 70%",
+    "criterio_detalhe": "Preço 30%\nOutros Outro Nome: Valia Técnica da Proposta 70%",
+    "criterio_fatores": "[{\"nome\": \"Preço\", \"peso\": 30, \"tipo\": \"preco\"}, {\"nome\": \"Valia Técnica da Proposta\", \"peso\": 70, \"tipo\": \"outro\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "18-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
   }
 ]
