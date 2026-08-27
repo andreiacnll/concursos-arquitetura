@@ -97,15 +97,17 @@ function normalizeCategoryThumbnailText(value: string | null | undefined) {
   return (value || "")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function getSpecificCategoryThumbnail(value: string): CategoryThumbnail | null {
-  if (/equipamentos?.*publico|equipamento|pavilhao/.test(value)) {
-    return { label: "EQUIP", backgroundColor: "#D9A2A3" };
-  }
   if (/espaco.*publico|urbanismo|espaco.*urbano/.test(value)) {
     return { label: "ESPA\u00C7O", backgroundColor: "#C8D1C1" };
+  }
+  if (/equipamentos?.*publico|equipamento|pavilhao/.test(value)) {
+    return { label: "EQUIP", backgroundColor: "#D9A2A3" };
   }
   if (/paisag|parque/.test(value)) {
     return { label: "PAISAGEM", backgroundColor: "#C8D1C1" };
@@ -239,7 +241,7 @@ export function CompetitionCardBase({
   const tituloLongo = concurso.titulo.length > 75;
 
   const category = concurso.categoria || getCategory(concurso.titulo);
-  const categoryThumbnail = getCategoryThumbnail(concurso.categoria, concurso.titulo);
+  const categoryThumbnail = getCategoryThumbnail(category, concurso.titulo);
   const publication = getCompetitionPublication(concurso);
   const freshness = getFreshness(publication?.rawDate || "");
   const isSearchCard = className.split(/\s+/).includes("search-competition-card");
