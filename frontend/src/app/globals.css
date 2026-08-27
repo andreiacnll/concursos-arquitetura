@@ -2506,7 +2506,7 @@ a {
 
 .analysis-metrics {
   display: grid;
-  gap: 40px;
+  gap: 48px;
   margin: 80px 0;
   padding: 50px 0;
 }
@@ -4017,7 +4017,7 @@ a {
 
 .profile-layout {
   display: flex;
-  gap: 40px;
+  gap: 48px;
 }
 
 /* Sidebar interna */
@@ -4027,6 +4027,7 @@ a {
   width: 240px;
   min-width: 240px;
   height: fit-content;
+  padding: 0 8px;
 }
 
 .profile-sidebar-header {
@@ -4111,6 +4112,14 @@ a {
 .profile-content {
   flex: 1;
   min-width: 0;
+  max-width: 1240px;
+  margin-inline: auto;
+  padding-inline: 28px;
+}
+
+.company-workspace {
+  width: 100%;
+  max-width: 100%;
 }
 
 /* Card de secção */
@@ -4720,6 +4729,13 @@ a {
   .profile-layout {
     flex-direction: column;
     gap: 24px;
+  }
+
+  .profile-content {
+    max-width: none;
+    width: 100%;
+    margin-inline: 0;
+    padding-inline: 20px;
   }
 
   .profile-sidebar {
@@ -6477,24 +6493,97 @@ a {
   max-height: 30px;
   object-fit: contain;
 }
+/* Pesquisa BIRD: hero e lockup num eixo central único. */
+.bird-hero-grid {
+  display: block;
+  width: min(100% - 48px, 1100px);
+  min-height: 0;
+  margin-inline: auto;
+}
+
+.bird-hero-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 1100px;
+  margin-inline: auto;
+  padding: 60px 0 66px;
+  text-align: center;
+}
+
+.bird-hero-copy .eyebrow {
+  margin-inline: auto;
+  text-align: center;
+}
+
 .bird-hero-logo-wrap {
-  margin: 8px 0 0;
+  display: flex;
+  width: 100%;
+  margin: 22px auto 0;
+  justify-content: center;
+  align-items: center;
   line-height: 0;
+  text-align: center;
 }
 
 .bird-hero-logo {
   display: block;
-  width: clamp(440px, 36vw, 540px);
+  flex: 0 1 auto;
+  width: clamp(740px, 60vw, 900px);
   max-width: 100%;
   height: auto;
   object-fit: contain;
-  object-position: left center;
+  object-position: center;
 }
 
 .bird-hero-logo-wrap + .hero-description {
-  margin-top: 24px !important;
+  max-width: 700px;
+  margin: 38px auto 0 !important;
+  text-align: center;
 }
 
-@media (max-width: 680px) {
-  .bird-hero-logo { width: min(100%, 440px); }
+.bird-hero-copy .search-row {
+  width: min(900px, 100%);
+  margin: 36px auto 0 !important;
+}
+
+.bird-hero-copy .search-box,
+.bird-hero-copy .search-button {
+  min-height: 54px;
+}
+
+.bird-hero-copy .category-pills {
+  justify-content: center;
+  margin-top: 28px !important;
+}
+
+/* Pesquisa BIRD: thumbnails editoriais, sem imagens ou ilustrações. */
+.search-listing-shell .search-competition-card .card-image {
+  height: 124px;
+  background: transparent;
+}
+
+.search-listing-shell .search-competition-card .card-category-thumbnail {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 24px;
+}
+
+.search-listing-shell .search-competition-card .card-category-thumbnail span {
+  color: rgba(255, 255, 255, 0.76);
+  font-size: clamp(24px, 2.2vw, 34px);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  line-height: 1;
+}
+
+@media (max-width: 760px) {
+  .bird-hero-grid { width: min(100% - 32px, 1100px); }
+  .bird-hero-copy { padding: 36px 0 44px; }
+  .bird-hero-logo { width: min(100%, 600px); }
+  .bird-hero-copy .search-row { width: 100%; }
 }
