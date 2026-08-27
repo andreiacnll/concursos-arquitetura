@@ -979,35 +979,6 @@ export default function CompetitionsDashboard({
             </div>
           </div>
 
-          <div
-            className="hero-visual-wrap"
-            style={{
-              background: "transparent",
-              border: "none",
-              borderRadius: 0,
-              boxShadow: "none",
-              overflow: "visible",
-            }}
-          >
-            <div
-              className="hero-visual"
-              style={{
-                backgroundImage:
-                  'linear-gradient(90deg, #ffffff 0%, rgba(255,255,255,.94) 5%, rgba(255,255,255,.64) 13%, rgba(255,255,255,.18) 24%, rgba(255,255,255,0) 38%), linear-gradient(180deg, rgba(255,255,255,0) 58%, rgba(255,255,255,.18) 72%, rgba(255,255,255,.72) 90%, #ffffff 100%), url("/brand/bird-competitions-hero.svg")',
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
-                backgroundColor: "transparent",
-                border: "none",
-                borderRadius: 0,
-                boxShadow: "none",
-                WebkitMaskImage:
-                  "linear-gradient(90deg, transparent 0%, #000 12%, #000 98%, transparent 100%)",
-                maskImage:
-                  "linear-gradient(90deg, transparent 0%, #000 12%, #000 98%, transparent 100%)",
-              }}
-            />
-          </div>
 
         </div>
 
