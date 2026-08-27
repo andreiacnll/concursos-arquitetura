@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import os
 import sqlite3
+import hashlib
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Iterable
@@ -25,7 +26,7 @@ from app.analise.procedure_analysis import extract_procedure_analysis
 from app.database import abrir_conexao
 
 
-VERSION = "pre-analysis-enrichment-v15.6"
+VERSION = "pre-analysis-enrichment-v15.7"
 GENERIC_TYPES = {
     "",
     "concurso público",
@@ -97,29 +98,75 @@ def _cache_dir(root: Path, concurso_id: int) -> Path:
     return root / "analise_documentos" / str(concurso_id) / "pre_analise"
 
 
+
+def _document_signature(documents: Iterable[Any]) -> str:
+    """Fingerprint of the official documents used for an extraction."""
+    rows = [
+        {
+            "external_id": _clean(getattr(document, "external_id", "")),
+            "source_url": _clean(getattr(document, "source_url", "")),
+            "filename": _clean(getattr(document, "filename", "")),
+            "sha256": _clean(getattr(document, "sha256", "")),
+        }
+        for document in documents
+    ]
+    raw = json.dumps(
+        sorted(rows, key=lambda item: json.dumps(item, sort_keys=True)),
+        sort_keys=True,
+    )
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _cached_document_signature(cache_dir: Path) -> str:
+    metadata = cache_dir / "metadata.json"
+    if not metadata.exists():
+        return ""
+    try:
+        documents = json.loads(metadata.read_text(encoding="utf-8")).get("documents") or []
+    except (OSError, json.JSONDecodeError):
+        return ""
+    rows = [
+        {
+            "external_id": _clean(item.get("external_id")),
+            "source_url": _clean(item.get("source_url")),
+            "filename": _clean(item.get("filename")),
+            "sha256": _clean(item.get("sha256")),
+        }
+        for item in documents
+        if isinstance(item, dict)
+    ]
+    raw = json.dumps(
+        sorted(rows, key=lambda item: json.dumps(item, sort_keys=True)),
+        sort_keys=True,
+    )
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
 def _obtain_documents(
     concurso: dict[str, Any],
     cache_dir: Path,
     *,
     allow_download: bool,
-) -> tuple[list[Any], list[str]]:
+) -> tuple[list[Any], list[str], bool, bool]:
+    """Obtains current official documents and reports a verified revision."""
     warnings: list[str] = []
     cached = load_cached_platform_documents(cache_dir)
-    if cached:
-        return cached, warnings
+    previous_signature = _cached_document_signature(cache_dir)
     if not allow_download:
-        return [], ["Sem documentos em cache e downloads desativados."]
+        return cached, ["Downloads disabled; current documents not confirmed."], False, False
 
     result = discover_public_documents(concurso, timeout=45)
     warnings.extend(result.warnings or [])
     public = result.public_documents or []
     if result.status != "success" or not public:
-        return [], warnings or [f"Plataforma sem documentos públicos: {result.status}."]
+        return cached, warnings or [f"Platform has no public documents: {result.status}."], False, False
 
     downloaded = download_public_documents(public, cache_dir, timeout=120)
+    if not downloaded:
+        return cached, warnings + ["Could not confirm current official documents."], False, False
     save_platform_metadata(cache_dir, result, downloaded)
-    return downloaded, warnings
-
+    current_signature = _document_signature(downloaded)
+    changed = bool(previous_signature and previous_signature != current_signature)
+    return downloaded, warnings, changed, True
 
 def _extract_texts(cache_dir: Path) -> dict[str, str]:
     # Reutiliza exatamente os leitores e a extração segura já usados pelo worker.
@@ -159,17 +206,25 @@ def _verified_criteria(procedure: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(criteria, dict):
         return {}
     factors = criteria.get("factors") or []
-    verified = bool(criteria.get("verified_top_level_weights"))
-    if factors and verified:
+    if factors and bool(criteria.get("verified_top_level_weights")):
         return criteria
-    # Não gravar ponderações inferidas a partir de subfatores ou frases soltas.
+    # A legal formula may be shown, but weights are never inferred from prose.
+    if _clean(criteria.get("type")) or _clean(criteria.get("summary")):
+        return {
+            "type": criteria.get("type"),
+            "summary": criteria.get("summary"),
+            "source_document": criteria.get("source_document"),
+            "source_heading": criteria.get("source_heading"),
+        }
     return {}
-
 
 def _build_updates(
     concurso: dict[str, Any],
     common: dict[str, Any],
     procedure: dict[str, Any],
+    *,
+    revalidate_document: bool = False,
+    document_evidence: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     updates: dict[str, Any] = {}
     current_type = _clean(concurso.get("tipo_procedimento"))
@@ -188,37 +243,40 @@ def _build_updates(
             price = {"value": metric.get("value")}
         elif key == "submission_deadline" and not _clean(deadline.get("value")):
             if metric.get("status") in {"confirmed", "relative_confirmed"}:
-                deadline = {
-                    "value": metric.get("value"),
-                    "status": metric.get("status"),
-                }
+                deadline = {"value": metric.get("value"), "status": metric.get("status")}
     criteria = _verified_criteria(procedure)
 
-    if _clean(publication.get("value")) and not _clean(concurso.get("data")):
+    if _clean(publication.get("value")) and (revalidate_document or not _clean(concurso.get("data"))):
         updates["data"] = publication["value"]
     if _clean(deadline.get("value")):
-        if not _clean(concurso.get("data_entrega_propostas")):
+        if revalidate_document or not _clean(concurso.get("data_entrega_propostas")):
             updates["data_entrega_propostas"] = deadline["value"]
-        if not _clean(concurso.get("data_limite")):
+        if revalidate_document or not _clean(concurso.get("data_limite")):
             updates["data_limite"] = deadline["value"]
-    if _clean(price.get("value")) and not _clean(concurso.get("preco_base")):
+    if _clean(price.get("value")) and (revalidate_document or not _clean(concurso.get("preco_base"))):
         updates["preco_base"] = price["value"]
 
     if criteria:
         updates["criterio_tipo"] = criteria.get("type") or None
         updates["criterio_resumo"] = criteria.get("summary") or None
-        updates["criterio_detalhe"] = json.dumps(
-            {
-                "factors": criteria.get("factors") or [],
-                "formula": criteria.get("formula") or "",
-                "tie_breakers": criteria.get("tie_breakers") or [],
-                "source_document": criteria.get("source_document") or "",
-                "source_heading": criteria.get("source_heading") or "",
-            },
-            ensure_ascii=False,
-        )
-    return {key: value for key, value in updates.items() if value is not None}
+        updates["criterio_detalhe"] = json.dumps({"factors": criteria.get("factors") or [], "formula": criteria.get("formula") or "", "tie_breakers": criteria.get("tie_breakers") or [], "source_document": criteria.get("source_document") or "", "source_heading": criteria.get("source_heading") or ""}, ensure_ascii=False)
+        updates["criterio_fatores"] = json.dumps(criteria.get("factors") or [], ensure_ascii=False)
+        updates["criterio_estado"] = "confirmado"
 
+    deliverables = common.get("deliverables") or []
+    if deliverables and (revalidate_document or not _clean(concurso.get("entregaveis"))):
+        updates["entregaveis"] = "\n".join(_clean(item) for item in deliverables if _clean(item))
+
+    if revalidate_document:
+        # A revised official source replaces only what it proves. Missing proof
+        # clears the confirmed field rather than preserving an old assumption.
+        for field in ("preco_base", "data_entrega_propostas", "data_limite", "entregaveis"):
+            updates.setdefault(field, None)
+        if not criteria:
+            updates.update({"criterio_tipo": None, "criterio_resumo": None, "criterio_detalhe": None, "criterio_fatores": None, "criterio_estado": "por_confirmar"})
+        if document_evidence is not None:
+            updates["evidencia_documental"] = json.dumps(document_evidence, ensure_ascii=False)
+    return updates
 
 def _persist_updates(concurso_id: int, updates: dict[str, Any]) -> tuple[str, ...]:
     if not updates:
@@ -252,7 +310,7 @@ def enrich_concurso(
     warnings: list[str] = []
 
     try:
-        documents, obtain_warnings = _obtain_documents(
+        documents, obtain_warnings, documents_changed, documents_current = _obtain_documents(
             concurso,
             cache,
             allow_download=allow_download,
@@ -266,49 +324,62 @@ def enrich_concurso(
         )
 
     if not documents:
-        # O tipo ainda pode ser normalizado apenas pelos dados estruturados.
         procedure = extract_procedure_analysis(
             ficha={},
             textos={},
             concurso=concurso,
         )
         updates = _build_updates(concurso, {}, procedure)
+        updates["criterio_estado"] = "por_confirmar"
         fields = _persist_updates(concurso_id, updates)
         return EnrichmentReport(
             concurso_id=concurso_id,
-            status="classified_without_documents",
+            status="por_confirmar",
             updated_fields=fields,
             family=_clean(procedure.get("family")),
             warnings=tuple(warnings),
         )
-
     texts = _extract_texts(cache)
     if not texts:
+        fields = _persist_updates(concurso_id, {"criterio_estado": "por_confirmar"})
         return EnrichmentReport(
             concurso_id=concurso_id,
-            status="no_readable_text",
+            status="por_confirmar",
             documents=len(documents),
+            updated_fields=fields,
             warnings=tuple(warnings),
         )
-
     common = extract_common_project_data(textos=texts, concurso=concurso)
     procedure = extract_procedure_analysis(
         ficha={"common_project_extraction": common},
         textos=texts,
         concurso=concurso,
     )
-    updates = _build_updates(concurso, common, procedure)
-    fields = _persist_updates(concurso_id, updates)
-
     evidence = {
         "version": VERSION,
         "concurso_id": concurso_id,
-        "updates": updates,
-        "common": common,
-        "procedure": procedure,
+        "document_status": "updated" if documents_changed else "current",
+        "document_signature": _document_signature(documents),
         "documents": [asdict(document) for document in documents],
+        "facts": {
+            "base_price": common.get("base_price") or {},
+            "submission_deadline": common.get("submission_deadline") or {},
+            "award_criteria": procedure.get("award_criteria") or {},
+            "deliverables": common.get("deliverables") or [],
+        },
         "warnings": warnings,
     }
+    updates = _build_updates(
+        concurso,
+        common,
+        procedure,
+        revalidate_document=documents_changed,
+        document_evidence=evidence,
+    )
+    fields = _persist_updates(concurso_id, updates)
+    evidence["updates"] = updates
+    evidence["common"] = common
+    evidence["procedure"] = procedure
     evidence_path = cache / "pre_analysis_enrichment.json"
     evidence_path.write_text(
         json.dumps(evidence, ensure_ascii=False, indent=2),

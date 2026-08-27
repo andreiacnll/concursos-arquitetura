@@ -87,6 +87,7 @@ COLUNAS_ADICIONAIS = {
     "criterio_detalhe": "TEXT",
     "criterio_fatores": "TEXT",
     "criterio_estado": "TEXT",
+    "evidencia_documental": "TEXT",
     "entregaveis": "TEXT",
     "link_anuncio_dr": "TEXT",
     "link_pecas": "TEXT",
@@ -3661,6 +3662,8 @@ def atualizar_dados_concurso(
     criterio_resumo=None,
     criterio_detalhe=None,
     criterio_fatores=None,
+    criterio_estado=None,
+    evidencia_documental=None,
     entregaveis=None,
     link_anuncio_dr=None,
     link_pecas=None,
@@ -3709,6 +3712,8 @@ def atualizar_dados_concurso(
     criterio_resumo = normalizado_criterio['criterio_resumo']
     criterio_detalhe = normalizado_criterio['criterio_detalhe']
     criterio_fatores = normalizado_criterio['criterio_fatores']
+    criterio_estado = _texto_ou_none(criterio_estado)
+    evidencia_documental = _texto_ou_none(evidencia_documental)
     entregaveis = _texto_ou_none(entregaveis)
     link_anuncio_dr = _texto_ou_none(link_anuncio_dr)
     link_pecas = _texto_ou_none(link_pecas)
@@ -3803,6 +3808,8 @@ def atualizar_dados_concurso(
                 ?,
                 criterio_fatores
             ),
+            criterio_estado = COALESCE(?, criterio_estado),
+            evidencia_documental = COALESCE(?, evidencia_documental),
             entregaveis = COALESCE(
                 ?,
                 entregaveis
@@ -3862,6 +3869,8 @@ def atualizar_dados_concurso(
             criterio_resumo,
             criterio_detalhe,
             criterio_fatores,
+            criterio_estado,
+            evidencia_documental,
             entregaveis,
             link_anuncio_dr,
             link_pecas,

@@ -5,6 +5,7 @@ from .database import (
     gerar_alertas_datas_monitorizados,
     gerar_timeline,
     atualizar_dados_concurso,
+    abrir_conexao,
     concurso_existe,
     contar_concursos,
     criar_base_dados,
@@ -179,6 +180,29 @@ def atualizar_concursos_existentes(concursos):
 
     return quantidade_atualizada
 
+
+def revalidar_documentos_oficiais(concursos):
+    """Encaminha concursos BASE persistidos para o pipeline documental comum."""
+    links = [item.get("link") for item in concursos if item.get("link")]
+    if not links:
+        return []
+    markers = ", ".join("?" for _ in links)
+    with abrir_conexao() as connection:
+        rows = connection.execute(
+            f"SELECT id FROM concursos WHERE link IN ({markers}) "
+            "AND COALESCE(link_pecas, '') != ''",
+            links,
+        ).fetchall()
+    ids = [int(row["id"]) for row in rows]
+    if not ids:
+        return []
+    try:
+        from pathlib import Path
+        from .analise.pre_analysis_enrichment import automatic_enabled, enrich_many
+        return enrich_many(ids, root=Path.cwd(), allow_download=True) if automatic_enabled() else []
+    except Exception as error:
+        print(f"Aviso: revalidacao documental nao concluida: {error}")
+        return []
 
 def guardar_concursos_enviados(concursos):
     """
@@ -415,12 +439,11 @@ def main():
     )
 
     if not concursos_novos:
-        print(
-            "\nNão foram encontrados concursos novos."
-        )
+        revalidacoes = revalidar_documentos_oficiais(concursos_ja_existentes)
+        print(f"Concursos revalidados documentalmente: {len(revalidacoes)}")
+        print("\nNão foram encontrados concursos novos.")
         print("Nenhum email foi enviado.")
         return
-
     quantidade_a_mostrar = min(
         LIMITE_RESULTADOS_NO_ECRA,
         len(concursos_novos),
@@ -459,6 +482,9 @@ def main():
             concursos_novos
         )
     )
+
+    revalidacoes = revalidar_documentos_oficiais(concursos_relevantes)
+    print(f"Concursos revalidados documentalmente: {len(revalidacoes)}")
 
     total_final_base_dados = contar_concursos()
 
