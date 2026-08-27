@@ -4414,6 +4414,7 @@ def _fase_extracao(job: dict, concurso: dict, pasta_job: Path) -> tuple[Path, li
     ):
         return pasta_extraida, avisos
 
+    plataforma, _ = detect_platform(concurso)
     avisos.extend(
         _tentar_recolha_plataforma_publica(
             job,
@@ -4423,6 +4424,18 @@ def _fase_extracao(job: dict, concurso: dict, pasta_job: Path) -> tuple[Path, li
         )
     )
     if _tem_documentos_ou_fallback(pasta_extraida):
+        return pasta_extraida, avisos
+
+
+    # O fluxo VORTAL ja tentou HTTP publico, API publica e pagina publica.
+    # Nao repetir o URL no downloader generico: uma pagina de login nunca e
+    # um documento e a ausencia de pecas nao autoriza inferencia documental.
+    if plataforma == "vortal":
+        if not avisos:
+            avisos.append(
+                "Nao foram encontradas pecas VORTAL publicamente acessiveis."
+            )
+        _criar_fallback_concurso(pasta_extraida, concurso, avisos)
         return pasta_extraida, avisos
 
     link_pecas = _texto_limpo(concurso.get("link_pecas"))

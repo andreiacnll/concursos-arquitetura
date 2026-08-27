@@ -8,6 +8,7 @@ import random
 import re
 import time
 from dataclasses import dataclass, asdict
+from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
 from urllib.parse import urljoin, urlparse
@@ -223,6 +224,235 @@ def _document_url(item: dict[str, Any], base_url: str) -> str:
     return ""
 
 
+class _VortalLinkParser(HTMLParser):
+    """Extrai apenas links declarados pela pagina publica."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.links: list[dict[str, str]] = []
+        self._anchor: dict[str, str] | None = None
+        self._anchor_depth = 0
+        self._text: list[str] = []
+
+    def handle_starttag(
+        self,
+        tag: str,
+        attrs: list[tuple[str, str | None]],
+    ) -> None:
+        if self._anchor is not None:
+            self._anchor_depth += 1
+            return
+        if tag.casefold() != "a":
+            return
+        values = {key.casefold(): value or "" for key, value in attrs}
+        self._anchor = {
+            "href": values.get("href", ""),
+            "download": values.get("download", ""),
+        }
+        self._anchor_depth = 0
+        self._text = []
+
+    def handle_data(self, data: str) -> None:
+        if self._anchor is not None:
+            self._text.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if self._anchor is None:
+            return
+        if self._anchor_depth:
+            self._anchor_depth -= 1
+            return
+        if tag.casefold() != "a":
+            return
+        self.links.append(
+            {
+                **self._anchor,
+                "text": _clean(" ".join(self._text)),
+            }
+        )
+        self._anchor = None
+        self._text = []
+
+
+_VORTAL_LOGIN_WARNING = (
+    "A pagina VORTAL requer autenticacao; "
+    "as pecas nao estao publicamente acessiveis."
+)
+
+
+def _vortal_requires_login(final_url: str, page_text: str) -> bool:
+    """Reconhece apenas sinais fortes de autenticacao, sem tentar contorna-la."""
+    url_path = urlparse(final_url).path.casefold()
+    login_path = bool(
+        re.search(
+            r"/(?:login|sign-?in|signin|account/login|authentication)(?:/|$)",
+            url_path,
+        )
+    )
+    lowered = page_text.casefold()
+    password_field = bool(
+        re.search(
+            r"<input\b[^>]*\btype\s*=\s*['\"]?password\b",
+            lowered,
+        )
+    )
+    paired_prompt = any(
+        first in lowered and second in lowered
+        for first, second in (
+            ("iniciar sess", "palavra-passe"),
+            ("autentica", "palavra-passe"),
+            ("sign in", "password"),
+            ("log in", "password"),
+            ("authentication required", "password"),
+        )
+    )
+    return password_field or (login_path and paired_prompt)
+
+
+def _documents_from_vortal_html(
+    html: str,
+    page_url: str,
+) -> list[PlatformDocument]:
+    parser = _VortalLinkParser()
+    try:
+        parser.feed(html)
+        parser.close()
+    except Exception:
+        return []
+
+    documents: list[PlatformDocument] = []
+    for index, row in enumerate(parser.links, start=1):
+        href = urljoin(page_url, _clean(row.get("href")))
+        label = _clean(row.get("text"))
+        download_name = _clean(row.get("download"))
+        if not href or not _looks_like_public_document_link(href, label):
+            continue
+        parsed = urlparse(href)
+        if parsed.scheme.casefold() not in {"http", "https"}:
+            continue
+        documents.append(
+            PlatformDocument(
+                external_id=href,
+                source_url=href,
+                filename=(
+                    download_name
+                    or Path(parsed.path).name
+                    or label
+                    or f"documento-http-{index}.pdf"
+                ),
+                context_url=page_url,
+            )
+        )
+    return _dedupe_platform_documents(documents)
+
+
+def _read_public_page_text(
+    response: requests.Response,
+    *,
+    max_bytes: int = 2 * 1024 * 1024,
+) -> str:
+    chunks: list[bytes] = []
+    total = 0
+    for chunk in response.iter_content(chunk_size=64 * 1024):
+        if not chunk:
+            continue
+        remaining = max_bytes - total
+        if remaining <= 0:
+            break
+        chunks.append(chunk[:remaining])
+        total += min(len(chunk), remaining)
+        if total >= max_bytes:
+            break
+    encoding = response.encoding or "utf-8"
+    return b"".join(chunks).decode(encoding, errors="replace")
+
+
+def _discover_vortal_with_http(
+    platform_url: str,
+    timeout: int,
+) -> tuple[list[PlatformDocument], str, bool, list[str]]:
+    """Tenta primeiro o acesso publico normal, incluindo redirects publicos."""
+    warnings: list[str] = []
+    response: requests.Response | None = None
+    try:
+        response = requests.get(
+            platform_url,
+            timeout=timeout,
+            allow_redirects=True,
+            stream=True,
+            headers={
+                "User-Agent": "CNLL/1.0",
+                "Accept": "text/html,application/json,application/octet-stream,*/*",
+                "Accept-Language": "pt-PT,pt;q=0.9",
+            },
+        )
+        final_url = _clean(response.url) or platform_url
+        if response.status_code in {401, 403}:
+            return [], final_url, True, [_VORTAL_LOGIN_WARNING]
+        response.raise_for_status()
+
+        content_type = _clean(response.headers.get("content-type")).casefold()
+        content_disposition = _clean(
+            response.headers.get("content-disposition")
+        )
+        is_html = "html" in content_type
+        is_json = "json" in content_type
+
+        if not is_html and not is_json:
+            parsed = urlparse(final_url)
+            disposition_name = re.search(
+                r"filename\*?=(?:UTF-8''|['\"])?([^;'\"]+)",
+                content_disposition,
+                flags=re.IGNORECASE,
+            )
+            filename = (
+                disposition_name.group(1).strip()
+                if disposition_name
+                else Path(parsed.path).name
+            )
+            if filename and (
+                "attachment" in content_disposition.casefold()
+                or _looks_like_public_document_link(final_url, filename)
+            ):
+                return [
+                    PlatformDocument(
+                        external_id=final_url,
+                        source_url=final_url,
+                        filename=filename,
+                        context_url=platform_url,
+                    )
+                ], final_url, False, warnings
+
+        page_text = _read_public_page_text(response)
+        if is_json:
+            try:
+                payload = json.loads(page_text)
+            except json.JSONDecodeError:
+                payload = {}
+            parsed_final = urlparse(final_url)
+            base_url = (
+                f"{parsed_final.scheme}://{parsed_final.netloc}"
+                if parsed_final.scheme and parsed_final.netloc
+                else final_url
+            )
+            documents = _vortal_documents_from_payload(payload, base_url)
+        else:
+            documents = _documents_from_vortal_html(page_text, final_url)
+
+        if documents:
+            return documents, final_url, False, warnings
+        if _vortal_requires_login(final_url, page_text):
+            return [], final_url, True, [_VORTAL_LOGIN_WARNING]
+        return [], final_url, False, warnings
+    except requests.RequestException as error:
+        warnings.append(
+            f"Acesso HTTP publico VORTAL indisponivel: {error}"
+        )
+        return [], platform_url, False, warnings
+    finally:
+        if response is not None:
+            response.close()
+
 # CNLL_DOCUMENT_ACQUISITION_V17_5
 _VORTAL_DOCUMENT_EXTENSIONS = {
     ".pdf",
@@ -354,6 +584,9 @@ def _looks_like_public_document_link(
             "pecas",
             "peças",
             "anexo",
+            "retifica",
+            "esclarec",
+            "atualiza",
         )
     )
 
@@ -392,6 +625,7 @@ def _discover_vortal_with_playwright(
     captured_payloads: list[Any] = []
     anchor_rows: list[dict[str, Any]] = []
     used = False
+    login_required = False
 
     try:
         from playwright.sync_api import sync_playwright
@@ -475,6 +709,14 @@ def _discover_vortal_with_playwright(
                     f"Não foi possível ler os links da página VORTAL: {error}"
                 )
 
+            try:
+                login_required = _vortal_requires_login(
+                    str(page.url or platform_url),
+                    page.content(),
+                )
+            except Exception:
+                login_required = False
+
             if context is not None:
                 context.close()
                 context = None
@@ -541,7 +783,10 @@ def _discover_vortal_with_playwright(
             )
         )
 
-    return _dedupe_platform_documents(documents), used, warnings
+    documents = _dedupe_platform_documents(documents)
+    if login_required and not documents:
+        warnings.append(_VORTAL_LOGIN_WARNING)
+    return documents, used, warnings
 
 
 def discover_public_vortal_documents(
@@ -556,57 +801,70 @@ def discover_public_vortal_documents(
         warnings=[],
     )
 
-    key = _vortal_key(platform_url)
-    if not key:
-        result.status = "unsupported"
-        result.warnings.append(
-            "URL VORTAL pública sem identificador reconhecido."
-        )
+    (
+        http_documents,
+        effective_url,
+        requires_login,
+        http_warnings,
+    ) = _discover_vortal_with_http(platform_url, timeout)
+    result.platform_url = effective_url or platform_url
+    result.warnings.extend(http_warnings)
+
+    if http_documents:
+        result.public_documents = http_documents
+        result.status = "success"
         return result
 
-    parsed_platform = urlparse(platform_url)
+    if requires_login:
+        result.requires_login = True
+        result.status = "login_required"
+        return result
+
+    key = _vortal_key(effective_url) or _vortal_key(platform_url)
+    parsed_platform = urlparse(effective_url or platform_url)
     base_url = (
         f"{parsed_platform.scheme}://{parsed_platform.netloc}"
         if parsed_platform.scheme and parsed_platform.netloc
         else platform_url
     )
 
-    api_url = (
-        "https://community.vortal.biz/public/api/PublicTenderDocuments/"
-        f"GetPublicTenderInformation?uniqueIdentifierEncrypted={key}"
-        "&languageCode=pt-PT"
-    )
-
     api_failed = False
-    try:
-        data = _request_json(
-            api_url,
-            platform_url,
-            timeout,
-        )
-    except Exception as error:
-        data = {}
-        api_failed = True
-        result.warnings.append(
-            f"API pública VORTAL não devolveu informação utilizável: {error}"
-        )
+    api_attempted = bool(key)
+    api_documents: list[PlatformDocument] = []
 
-    api_documents = _vortal_documents_from_payload(
-        data,
-        base_url,
-    )
+    if key:
+        api_url = (
+            "https://community.vortal.biz/public/api/PublicTenderDocuments/"
+            f"GetPublicTenderInformation?uniqueIdentifierEncrypted={key}"
+            "&languageCode=pt-PT"
+        )
+        try:
+            data = _request_json(
+                api_url,
+                effective_url or platform_url,
+                timeout,
+            )
+        except Exception as error:
+            data = {}
+            api_failed = True
+            result.warnings.append(
+                f"API publica VORTAL nao devolveu informacao utilizavel: {error}"
+            )
+        api_documents = _vortal_documents_from_payload(data, base_url)
+    else:
+        result.warnings.append(
+            "URL VORTAL sem identificador da API publica; "
+            "a pagina publica foi verificada diretamente."
+        )
 
     if api_documents:
         result.public_documents = api_documents
         result.status = "success"
         return result
 
-    # A implementação anterior terminava aqui com no_documents/error.
-    # Agora a página pública é usada como segunda fonte, via browser, apenas
-    # quando a API não forneceu documentos.
     browser_documents, used_playwright, browser_warnings = (
         _discover_vortal_with_playwright(
-            platform_url,
+            effective_url or platform_url,
             timeout=max(timeout, 20),
         )
     )
@@ -616,22 +874,25 @@ def discover_public_vortal_documents(
     if browser_documents:
         result.public_documents = browser_documents
         result.status = "success"
-        if api_failed:
-            result.warnings.append(
-                "Documentos recuperados pela página pública VORTAL "
-                "após falha da API."
-            )
-        else:
-            result.warnings.append(
-                "Documentos recuperados pela página pública VORTAL "
-                "porque a API não os listou."
-            )
+        result.warnings.append(
+            "Documentos recuperados pela pagina publica VORTAL "
+            "depois da tentativa HTTP/API."
+        )
         return result
 
-    result.status = "error" if api_failed and not used_playwright else "no_documents"
+    if _VORTAL_LOGIN_WARNING in result.warnings:
+        result.requires_login = True
+        result.status = "login_required"
+        return result
+
+    result.status = (
+        "error"
+        if api_attempted and api_failed and not used_playwright
+        else "no_documents"
+    )
     result.warnings.append(
-        "Nenhum documento público descarregável foi encontrado na API "
-        "nem na página pública VORTAL."
+        "Nenhum documento publico descarregavel foi encontrado por HTTP, "
+        "na API ou na pagina publica VORTAL."
     )
     return result
 
@@ -885,9 +1146,9 @@ def _stream_response_to_file(
         filename,
     )
 
-    if suffix == ".bin" and (
+    if (
         "html" in content_type.casefold()
-        or first.lstrip().startswith(b"<")
+        or first.lstrip().casefold().startswith((b"<!doctype html", b"<html", b"<form"))
     ):
         raise RuntimeError(
             "O servidor devolveu uma pagina HTML em vez de um documento."

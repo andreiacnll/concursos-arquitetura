@@ -71,6 +71,14 @@ class DocumentAcquisitionV175Tests(unittest.TestCase):
         ]
 
         with patch(
+            "app.analise.platform_documents._discover_vortal_with_http",
+            return_value=(
+                [],
+                "https://community.vortal.biz/Public/public-tender-documents/abc",
+                False,
+                [],
+            ),
+        ), patch(
             "app.analise.platform_documents._request_json",
             return_value={"documentList": []},
         ), patch(
