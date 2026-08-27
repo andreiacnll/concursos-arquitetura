@@ -603,3 +603,92 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+def _normalizar_referencia_dr(valor: object) -> str:
+    """Normaliza Unicode e espaços sem recorrer a fuzzy matching."""
+    texto = unicodedata.normalize("NFKC", _texto_limpo(valor))
+    texto = texto.replace("\u00a0", " ").replace("\u202f", " ")
+    texto = texto.replace("\u00ba", "o").replace("\u00b0", "o")
+    texto = _sem_acentos(texto.casefold())
+    texto = re.sub(r"\bn\s*\.\s*o\b", "n", texto)
+    texto = re.sub(r"\bn\s*o\b", "n", texto)
+    return re.sub(r"\s+", " ", texto).strip()
+
+
+def _numero_anuncio_dr(valor: object) -> str:
+    texto = _normalizar_referencia_dr(valor)
+    resultado = re.search(r"\b(\d{1,6})\s*/\s*(\d{4})\b", texto)
+    if not resultado:
+        return texto
+    return f"{resultado.group(1)}/{resultado.group(2)}"
+
+
+def resolver_versoes_dr(original: dict, candidatos: list[dict]) -> dict:
+    """Resolve cadeias DR suportadas apenas por referência oficial explícita."""
+    def valor(item, *chaves):
+        return next(
+            (item.get(chave) for chave in chaves if item.get(chave) is not None),
+            "",
+        )
+
+    def numero(item):
+        return _numero_anuncio_dr(
+            valor(item, "numero", "numero_anuncio", "anuncio")
+        )
+
+    def id_dr(item):
+        return _normalizar_referencia_dr(
+            valor(item, "id_dr", "dr_id", "id")
+        )
+
+    def texto(item):
+        return _normalizar_referencia_dr(
+            valor(item, "texto", "descricao", "referencia")
+        )
+
+    cadeia = [original]
+    atual = original
+
+    while True:
+        numero_atual = numero(atual)
+        id_atual = id_dr(atual)
+        correspondencias = []
+
+        for candidato in candidatos:
+            if candidato in cadeia:
+                continue
+
+            texto_candidato = texto(candidato)
+            referencia = re.search(
+                r"\balteracao\s+do\s+anuncio\s+de\s+procedimento\b",
+                texto_candidato,
+            )
+            numeros_referidos = {
+                f"{grupo[0]}/{grupo[1]}"
+                for grupo in re.findall(
+                    r"\b(\d{1,6})\s*/\s*(\d{4})\b",
+                    texto_candidato[referencia.end():] if referencia else "",
+                )
+            }
+            por_numero = bool(
+                referencia and numero_atual in numeros_referidos
+            )
+            por_id = bool(id_atual and id_atual in texto_candidato)
+
+            if por_numero or por_id:
+                correspondencias.append(candidato)
+
+        if len(correspondencias) != 1:
+            break
+
+        atual = correspondencias[0]
+        cadeia.append(atual)
+
+    resolvido = len(cadeia) > 1
+    return {
+        "current": atual,
+        "chain": cadeia,
+        "resolved": resolvido,
+        "reason": "explicit_reference" if resolvido else "unresolved",
+    }

@@ -832,6 +832,78 @@ def normalizar_anuncio(anuncio: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _id_dr_do_link(link: Any) -> str:
+    resultado = re.search(r"/(\d+)\.pdf(?:$|[?#])", normalizar_texto(link))
+    return resultado.group(1) if resultado else ""
+
+
+def _dados_resolver_dr(anuncio: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "numero": anuncio.get("numero_anuncio"),
+        "id_dr": (
+            anuncio.get("id_dr")
+            or _id_dr_do_link(anuncio.get("link_anuncio_dr"))
+        ),
+        "texto": anuncio.get("texto"),
+    }
+
+
+def atualizar_versao_dr_no_checkpoint(
+    por_id: dict[str, dict[str, Any]],
+    candidato: dict[str, Any],
+    enriquecer_dr,
+) -> dict[str, Any]:
+    """Aplica uma versão DR explícita sem criar outro concurso no checkpoint."""
+    from app.dre import resolver_versoes_dr
+
+    versao_candidata = _dados_resolver_dr(candidato)
+    correspondencias = []
+
+    for identificador, guardado in por_id.items():
+        resultado = resolver_versoes_dr(
+            _dados_resolver_dr(guardado),
+            [versao_candidata],
+        )
+        if resultado["resolved"]:
+            correspondencias.append((identificador, guardado, resultado))
+
+    if len(correspondencias) != 1:
+        return {
+            "changed": False,
+            "reason": (
+                "ambiguous" if len(correspondencias) > 1 else "unresolved"
+            ),
+        }
+
+    identificador, guardado, resultado = correspondencias[0]
+    link_atual = normalizar_texto(guardado.get("link_anuncio_dr"))
+    link_novo = normalizar_texto(candidato.get("link_anuncio_dr"))
+    if not link_novo or link_novo == link_atual:
+        return {"changed": False, "reason": "same_version"}
+
+    atualizado = dict(guardado)
+    for campo in (
+        "numero_anuncio",
+        "link_anuncio_dr",
+        "data",
+        "data_limite",
+        "texto",
+    ):
+        if candidato.get(campo) not in (None, ""):
+            atualizado[campo] = candidato[campo]
+
+    atualizado["enriquecimento_dr_concluido"] = False
+    atualizado = enriquecer_dr(atualizado, link_novo)
+    atualizado["versoes_anuncio_dr"] = resultado["chain"]
+    por_id[identificador] = atualizado
+
+    return {
+        "changed": True,
+        "reason": resultado["reason"],
+        "id_portal_base": identificador,
+        "current": resultado["current"],
+    }
+
 def recolher_listagem(
     portal: PortalBaseBrowser,
 ) -> list[dict[str, Any]]:
@@ -912,6 +984,31 @@ def enriquecer(
         )
 
         if not identificador:
+            continue
+
+        versao_candidata = normalizar_anuncio(candidato)
+        try:
+            from app.dre import enriquecer_concurso
+
+            decisao_versao = atualizar_versao_dr_no_checkpoint(
+                por_id,
+                versao_candidata,
+                enriquecer_concurso,
+            )
+        except Exception as erro:
+            decisao_versao = {"changed": False, "reason": "error"}
+            print(
+                "Aviso: não foi possível enriquecer a nova versão DR "
+                f"de {identificador}: {erro}"
+            )
+
+        if decisao_versao["changed"]:
+            guardar_checkpoint(list(por_id.values()))
+            if MOSTRAR_DIAGNOSTICO:
+                print(
+                    "Nova versão DR associada ao concurso BASE "
+                    f"{decisao_versao['id_portal_base']}."
+                )
             continue
 
         if identificador in por_id:
