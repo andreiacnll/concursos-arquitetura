@@ -12,6 +12,9 @@ from app.analise import worker
 from app.analise.platform_documents import (
     PlatformDocument,
     PlatformDocumentResult,
+    _documents_from_vortal_html,
+    _looks_like_html_content,
+    _stream_response_to_file,
     discover_public_vortal_documents,
     download_public_documents,
 )
@@ -169,7 +172,10 @@ class PublicVortalAnalysisTests(unittest.TestCase):
             "app.analise.platform_documents._request_json"
         ) as request_json, patch(
             "app.analise.platform_documents._discover_vortal_with_playwright"
-        ) as browser:
+        ) as browser, patch(
+            "app.analise.platform_documents._documents_from_vortal_html",
+            wraps=_documents_from_vortal_html,
+        ) as html_parser:
             result = discover_public_vortal_documents(source_url, timeout=1)
 
         self.assertEqual(result.status, "success")
@@ -185,6 +191,52 @@ class PublicVortalAnalysisTests(unittest.TestCase):
         )
         request_json.assert_not_called()
         browser.assert_not_called()
+        self.assertIsInstance(html_parser.call_args.args[0], str)
+
+    def test_streamed_html_bytes_are_classified_without_bytes_casefold(self) -> None:
+        response = FakeResponse(
+            url="https://community.vortal.biz/Public/page",
+            body=b"  <!DOCTYPE html><html><body>Public page</body></html>",
+            content_type="application/octet-stream",
+        )
+
+        with tempfile.TemporaryDirectory() as temporary:
+            target = Path(temporary) / "pagina"
+            with self.assertRaisesRegex(RuntimeError, "pagina HTML"):
+                _stream_response_to_file(
+                    response,
+                    target,
+                    filename="pagina.bin",
+                    max_bytes=1024,
+                )
+            self.assertEqual(list(Path(temporary).iterdir()), [])
+
+    def test_html_string_input_remains_supported(self) -> None:
+        self.assertTrue(
+            _looks_like_html_content(
+                "  <HTML><body>Public page</body></HTML>",
+                "application/octet-stream",
+            )
+        )
+
+    def test_streamed_pdf_binary_is_not_treated_as_html(self) -> None:
+        body = b"%PDF-1.7\n\x00\x01binary-content"
+        response = FakeResponse(
+            url="https://community.vortal.biz/files/Programa.pdf",
+            body=body,
+            content_type="application/pdf",
+        )
+
+        with tempfile.TemporaryDirectory() as temporary:
+            target, size = _stream_response_to_file(
+                response,
+                Path(temporary) / "Programa",
+                filename="Programa.pdf",
+                max_bytes=1024,
+            )
+            self.assertEqual(target.suffix, ".pdf")
+            self.assertEqual(size, len(body))
+            self.assertEqual(target.read_bytes(), body)
 
     def test_authenticated_vortal_is_not_bypassed(self) -> None:
         source_url = "https://community.vortal.biz/Public/procedure/private"

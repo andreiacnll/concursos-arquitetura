@@ -1042,6 +1042,30 @@ def _content_suffix(
     return declared_suffix or ".bin"
 
 
+def _looks_like_html_content(
+    first_chunk: bytes | str,
+    content_type: str,
+) -> bool:
+    if "html" in _clean(content_type).casefold():
+        return True
+
+    if isinstance(first_chunk, bytes):
+        prefix = first_chunk.lstrip()
+        if prefix.startswith(b"\xef\xbb\xbf"):
+            prefix = prefix[3:].lstrip()
+        if not prefix.startswith(b"<"):
+            return False
+        text_prefix = prefix[:512].decode("utf-8", errors="replace")
+    elif isinstance(first_chunk, str):
+        text_prefix = first_chunk
+    else:
+        return False
+
+    return text_prefix.lstrip("\ufeff \t\r\n").casefold().startswith(
+        ("<!doctype html", "<html", "<form")
+    )
+
+
 def _sharepoint_site_url(final_url: str) -> str:
     parsed = urlparse(final_url)
     path = parsed.path
@@ -1146,10 +1170,7 @@ def _stream_response_to_file(
         filename,
     )
 
-    if (
-        "html" in content_type.casefold()
-        or first.lstrip().casefold().startswith((b"<!doctype html", b"<html", b"<form"))
-    ):
+    if _looks_like_html_content(first, content_type):
         raise RuntimeError(
             "O servidor devolveu uma pagina HTML em vez de um documento."
         )
