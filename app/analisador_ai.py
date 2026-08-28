@@ -1,7 +1,7 @@
 from pathlib import Path
 import json
 import re
-import sqlite3
+from app.database import abrir_conexao
 
 
 BASE = Path("analise_documentos")
@@ -21,9 +21,6 @@ def carregar_ficha(id_concurso: str):
 
 def carregar_dados_bd(id_concurso):
 
-    import sqlite3
-
-
     # associação temporária:
     # pasta documentos 450837
     # corresponde ao concurso BD 389
@@ -39,11 +36,7 @@ def carregar_dados_bd(id_concurso):
     )
 
 
-    conn = sqlite3.connect(
-        "concursos.db"
-    )
-
-    conn.row_factory = sqlite3.Row
+    conn = abrir_conexao()
 
     cursor = conn.cursor()
 

@@ -1,5 +1,7 @@
 import json
+import os
 import re
+import shutil
 import sqlite3
 import unicodedata
 from app.criterios_adjudicacao import normalizar_criterio_adjudicacao
@@ -7,10 +9,79 @@ from difflib import SequenceMatcher
 from contextlib import closing
 from datetime import date, datetime, timedelta
 from pathlib import Path
+from typing import Mapping
+from uuid import uuid4
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DB_PATH = BASE_DIR / "concursos.db"
+DEFAULT_DB_PATH = BASE_DIR / "concursos.db"
+DATABASE_PATH_ENV = "DATABASE_PATH"
+
+
+def resolver_caminho_base_dados(
+    environ: Mapping[str, str] | None = None,
+) -> Path:
+    """Resolve o único caminho da SQLite, preservando o comportamento local."""
+    ambiente = os.environ if environ is None else environ
+    configurado = str(ambiente.get(DATABASE_PATH_ENV) or "").strip()
+    return Path(configurado).expanduser() if configurado else DEFAULT_DB_PATH
+
+
+DATABASE_PATH_CONFIGURADO = bool(
+    str(os.environ.get(DATABASE_PATH_ENV) or "").strip()
+)
+DB_PATH = resolver_caminho_base_dados()
+
+
+def obter_caminho_base_dados() -> Path:
+    """Devolve o caminho efetivo usado por todos os acessos à BD principal."""
+    return DB_PATH
+
+
+def bootstrap_base_dados_se_necessario(
+    destino: Path | None = None,
+    *,
+    snapshot: Path | None = None,
+) -> bool:
+    """Copia o snapshot inicial apenas quando o destino persistente não existe.
+
+    A operação usa criação exclusiva do destino: uma BD já existente nunca é
+    substituída em reinícios ou deploys posteriores.
+    """
+    caminho_destino = Path(destino or DB_PATH)
+    caminho_snapshot = Path(snapshot or DEFAULT_DB_PATH)
+
+    if caminho_destino.exists() or caminho_destino.resolve() == caminho_snapshot.resolve():
+        return False
+    if not caminho_snapshot.is_file():
+        return False
+
+    caminho_destino.parent.mkdir(parents=True, exist_ok=True)
+    temporario = caminho_destino.with_name(
+        f".{caminho_destino.name}.{uuid4().hex}.bootstrap"
+    )
+    try:
+        shutil.copyfile(caminho_snapshot, temporario)
+        try:
+            os.link(temporario, caminho_destino)
+        except FileExistsError:
+            return False
+        except OSError:
+            try:
+                with temporario.open("rb") as origem, caminho_destino.open("xb") as copia:
+                    shutil.copyfileobj(origem, copia)
+            except FileExistsError:
+                return False
+        return True
+    finally:
+        temporario.unlink(missing_ok=True)
+
+
+def preparar_base_dados_configurada() -> Path:
+    """Inicializa uma BD configurada para disco persistente uma única vez."""
+    if DATABASE_PATH_CONFIGURADO:
+        bootstrap_base_dados_se_necessario()
+    return DB_PATH
 
 ESTADOS_ANALISE = (
     "aguarda",
@@ -109,7 +180,8 @@ COLUNAS_ADICIONAIS = {
 
 def abrir_conexao() -> sqlite3.Connection:
     """Abre a base principal com as garantias usadas pela API."""
-    conexao = sqlite3.connect(DB_PATH, timeout=5)
+    caminho = preparar_base_dados_configurada()
+    conexao = sqlite3.connect(caminho, timeout=5)
     conexao.row_factory = sqlite3.Row
     conexao.execute("PRAGMA foreign_keys = ON")
     conexao.execute("PRAGMA busy_timeout = 5000")

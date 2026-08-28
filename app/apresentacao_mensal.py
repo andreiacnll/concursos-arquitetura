@@ -2,7 +2,6 @@ import argparse
 import os
 import re
 import smtplib
-import sqlite3
 import webbrowser
 from collections import Counter
 from datetime import date, datetime
@@ -12,8 +11,7 @@ from html import escape
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-
-DB_NAME = "concursos.db"
+from app.database import abrir_conexao
 FICHEIRO_PREVISAO = Path("data/apresentacao_mensal.html")
 
 MESES = {
@@ -148,8 +146,7 @@ def formatar_euros(valor):
 
 
 def obter_concursos():
-    conexao = sqlite3.connect(DB_NAME)
-    conexao.row_factory = sqlite3.Row
+    conexao = abrir_conexao()
 
     linhas = conexao.execute(
         """

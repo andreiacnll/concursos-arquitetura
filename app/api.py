@@ -14,12 +14,13 @@ from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database import (
-    DB_PATH,
     abrir_conexao,
     criar_base_dados,
     estados_analise_concursos,
     listar_versoes_analise,
+    obter_caminho_base_dados,
     obter_analise_ativa_concurso,
+    preparar_base_dados_configurada,
 )
 from .auth import obter_utilizador_atual
 from .analise.worker import executar_worker
@@ -90,9 +91,10 @@ app.include_router(company_ai_router)
 
 
 def obter_conexao() -> sqlite3.Connection:
-    if not DB_PATH.exists():
+    caminho = preparar_base_dados_configurada()
+    if not caminho.exists():
         raise RuntimeError(
-            f"Base de dados não encontrada: {DB_PATH}"
+            f"Base de dados não encontrada: {obter_caminho_base_dados()}"
         )
 
     return abrir_conexao()

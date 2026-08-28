@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from app.database import DB_PATH
+from app.database import abrir_conexao
 from app.titulo_resumido import gerar_titulo_resumido
 
 
@@ -105,7 +105,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--limit", type=int, help="Numero maximo de concursos a processar.")
     parser.add_argument("--after-id", type=int, help="Processa apenas IDs superiores a este valor.")
     parser.add_argument("--id", dest="concurso_id", type=int, help="Processa apenas um concurso.")
-    parser.add_argument("--db-path", type=Path, default=DB_PATH, help=argparse.SUPPRESS)
+    parser.add_argument("--db-path", type=Path, default=None, help=argparse.SUPPRESS)
     args = parser.parse_args()
     if args.limit is not None and args.limit <= 0:
         parser.error("--limit deve ser superior a zero")
@@ -118,7 +118,7 @@ def main() -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(errors="backslashreplace")
     args = parse_args()
-    connection = sqlite3.connect(args.db_path)
+    connection = abrir_conexao() if args.db_path is None else sqlite3.connect(args.db_path)
     try:
         results = executar_backfill(
             connection,

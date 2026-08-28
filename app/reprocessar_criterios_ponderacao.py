@@ -1,4 +1,3 @@
-import sqlite3
 from urllib.parse import urlparse, parse_qs
 
 from app.coletor import PortalBaseBrowser
@@ -8,13 +7,11 @@ from app.dre import (
     extrair_texto_pdf,
     extrair_criterio,
 )
-
-
-DB = "concursos.db"
+from app.database import abrir_conexao
 
 
 def atualizar():
-    conn = sqlite3.connect(DB)
+    conn = abrir_conexao()
     cursor = conn.cursor()
 
     cursor.execute("""

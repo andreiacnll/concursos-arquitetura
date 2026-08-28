@@ -1,8 +1,4 @@
-import sqlite3
-from pathlib import Path
-
-
-DB = Path("concursos.db")
+from app.database import abrir_conexao
 
 
 def limpar_resumo(valor):
@@ -24,7 +20,7 @@ def limpar_resumo(valor):
     return " • ".join(unicos)
 
 
-conn = sqlite3.connect(DB)
+conn = abrir_conexao()
 cursor = conn.cursor()
 
 cursor.execute(

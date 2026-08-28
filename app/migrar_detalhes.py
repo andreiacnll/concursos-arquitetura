@@ -9,11 +9,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from .coletor import PortalBaseBrowser, normalizar_anuncio
-from .database import atualizar_dados_concurso
-
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-DB_PATH = BASE_DIR / "concursos.db"
+from .database import DB_PATH, abrir_conexao, atualizar_dados_concurso
 
 
 def extrair_id_portal(link: str) -> str:
@@ -37,8 +33,7 @@ def obter_concursos_pendentes(limite: int | None) -> list[dict[str, str]]:
     """
     Seleciona concursos que ainda não têm preço base ou prazo.
     """
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
+    conn = abrir_conexao()
 
     sql = """
         SELECT
@@ -70,7 +65,7 @@ def criar_backup() -> Path:
     Cria uma cópia da base antes de qualquer alteração.
     """
     momento = datetime.now().strftime("%Y%m%d-%H%M%S")
-    destino = BASE_DIR / f"concursos-antes-migracao-{momento}.db"
+    destino = DB_PATH.parent / f"concursos-antes-migracao-{momento}.db"
 
     shutil.copy2(DB_PATH, destino)
 
