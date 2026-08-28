@@ -218,6 +218,8 @@ def _verified_criteria(procedure: dict[str, Any]) -> dict[str, Any]:
     factors = criteria.get("factors") or []
     if factors and bool(criteria.get("verified_top_level_weights")):
         return criteria
+    if factors:
+        return {}
     # A legal formula may be shown, but weights are never inferred from prose.
     if _clean(criteria.get("type")) or _clean(criteria.get("summary")):
         return {
