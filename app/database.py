@@ -4,6 +4,7 @@ import re
 import shutil
 import sqlite3
 import unicodedata
+from app.sqlite_snapshot import SnapshotConnection
 from app.criterios_adjudicacao import normalizar_criterio_adjudicacao
 from difflib import SequenceMatcher
 from contextlib import closing
@@ -181,7 +182,11 @@ COLUNAS_ADICIONAIS = {
 def abrir_conexao() -> sqlite3.Connection:
     """Abre a base principal com as garantias usadas pela API."""
     caminho = preparar_base_dados_configurada()
-    conexao = sqlite3.connect(caminho, timeout=5)
+    conexao = sqlite3.connect(
+        caminho,
+        timeout=5,
+        factory=SnapshotConnection,
+    )
     conexao.row_factory = sqlite3.Row
     conexao.execute("PRAGMA foreign_keys = ON")
     conexao.execute("PRAGMA busy_timeout = 5000")

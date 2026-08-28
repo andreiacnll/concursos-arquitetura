@@ -32,6 +32,11 @@ from .company_ai.compatibility_analysis import analyze_compatibility
 from .routes.analises import router as analises_router
 from .routes.alertas import router as alertas_router
 from .routes.favoritos import router as favoritos_router
+from .sqlite_snapshot import (
+    encerrar_sincronizador_snapshot,
+    executar_sincronizador_snapshot,
+    restaurar_snapshot_se_ativo,
+)
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,7 +45,12 @@ CHECKPOINT_PATH = BASE_DIR / "concursos_recolhidos.json"
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    db_path = obter_caminho_base_dados()
+    await asyncio.to_thread(restaurar_snapshot_se_ativo, db_path)
     criar_base_dados()
+    snapshot_task = asyncio.create_task(
+        executar_sincronizador_snapshot(db_path)
+    )
     stop_worker = asyncio.Event()
     worker_task = None
 
@@ -63,6 +73,7 @@ async def lifespan(_: FastAPI):
             worker_task.cancel()
             with suppress(asyncio.CancelledError):
                 await worker_task
+        await encerrar_sincronizador_snapshot(snapshot_task, db_path)
 
 
 app = FastAPI(
