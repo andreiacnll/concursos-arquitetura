@@ -1871,5 +1871,215 @@
     "data_entrega_propostas": "18-09-2026 23:59",
     "data_esclarecimentos": null,
     "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Aquisição de serviços de elaboração de projetos de arquitetura e especialidades para requalificação e adaptação funcional de diversas áreas do hospital",
+    "entidade": "Unidade Local de Saúde do Baixo Mondego, E. P. E.",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=454906",
+    "data": "28-08-2026",
+    "data_limite": "15 dias.",
+    "texto": "DescriÃ§Ã£o: Aquisição de serviços de elaboração de projetos de arquitetura e especialidades para requalificação e adaptação funcional de diversas áreas do hospital\nEntidade: Unidade Local de Saúde do Baixo Mondego, E. P. E.\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71200000-0, Serviços de arquitectura e afins\nPreÃ§o base: 150.000,00 €\nPrazo para propostas: 15 dias.\nData de publicaÃ§Ã£o: 28-08-2026\nNÃºmero do anÃºncio: 21875/2026",
+    "numero_anuncio": "21875/2026",
+    "preco_base": "150.000,00 €",
+    "cpvs": [
+      "71200000-0, Serviços de arquitectura e afins"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/08/167/419971621.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEzOTI5NQ",
+    "id_portal_base": "454906",
+    "id_procedimento": "20292226",
+    "criterio_tipo": "Multifator",
+    "criterio_resumo": "Preço 40% · Valia Técnica da Proposta 60%",
+    "criterio_detalhe": "Preço 40%\nOutros Outro Nome: Valia Técnica da Proposta 60%",
+    "criterio_fatores": "[{\"nome\": \"Preço\", \"peso\": 40, \"tipo\": \"preco\"}, {\"nome\": \"Valia Técnica da Proposta\", \"peso\": 60, \"tipo\": \"outro\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "12-09-2026 17:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "P333/2026 - Fiscalização e Coordenação de Segurança da Empreitada \"P250A/2025 - Requalificação Urbana - Rua São João de Eudes, Fátima - Troço 1 (29794/2026)",
+    "entidade": "Município de Ourém",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=454896",
+    "data": "28-08-2026",
+    "data_limite": "11 dias.",
+    "texto": "DescriÃ§Ã£o: P333/2026 - Fiscalização e Coordenação de Segurança da Empreitada \"P250A/2025 - Requalificação Urbana - Rua São João de Eudes, Fátima - Troço 1 (29794/2026)\nEntidade: Município de Ourém\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 79421200-3, Serviços de concepção de projectos, excepto projectos de construção\nPreÃ§o base: 75.000,00 €\nPrazo para propostas: 11 dias.\nData de publicaÃ§Ã£o: 28-08-2026\nNÃºmero do anÃºncio: 21784/2026",
+    "numero_anuncio": "21784/2026",
+    "preco_base": "75.000,00 €",
+    "cpvs": [
+      "79421200-3, Serviços de concepção de projectos, excepto projectos de construção"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/08/167/419971447.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEzODI2MA",
+    "id_portal_base": "454896",
+    "id_procedimento": "20285340",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Sim Percentagem 5%",
+    "criterio_detalhe": "Sim Percentagem 5%",
+    "criterio_fatores": "[{\"nome\": \"Sim Percentagem\", \"peso\": 5, \"tipo\": \"outro\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "08-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Concurso Público para execução da colocação de rufos e reabilitação da fachada no empreendimento D. ARMINDO LOPES COELHO.",
+    "entidade": "Gaiurb - Urbanismo e Habitação, EM",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=454867",
+    "data": "27-08-2026",
+    "data_limite": "14 dias.",
+    "texto": "DescriÃ§Ã£o: Concurso Público para execução da colocação de rufos e reabilitação da fachada no empreendimento D. ARMINDO LOPES COELHO.\nEntidade: Gaiurb - Urbanismo e Habitação, EM\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Empreitadas de obras públicas\nTipo de procedimento: Concurso público\nCPV: 45453100-8, Obras de recuperação\nPreÃ§o base: 30.000,00 €\nPrazo para propostas: 14 dias.\nData de publicaÃ§Ã£o: 27-08-2026\nNÃºmero do anÃºncio: 21731/2026",
+    "numero_anuncio": "21731/2026",
+    "preco_base": "30.000,00 €",
+    "cpvs": [
+      "45453100-8, Obras de recuperação"
+    ],
+    "tipos_contrato": [
+      "Empreitadas de obras públicas",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/08/166/419971358.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEyNTc0OA",
+    "id_portal_base": "454867",
+    "id_procedimento": "20283908",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "10-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Empreitada de Reabilitação do Edifício Ginasiano - Reparação de Danos Causados por Inundação.",
+    "entidade": "Gaiurb - Urbanismo e Habitação, EM",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=454866",
+    "data": "27-08-2026",
+    "data_limite": "14 dias.",
+    "texto": "DescriÃ§Ã£o: Empreitada de Reabilitação do Edifício Ginasiano - Reparação de Danos Causados por Inundação.\nEntidade: Gaiurb - Urbanismo e Habitação, EM\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Empreitadas de obras públicas\nTipo de procedimento: Concurso público\nCPV: 45453100-8, Obras de recuperação\nPreÃ§o base: 15.000,00 €\nPrazo para propostas: 14 dias.\nData de publicaÃ§Ã£o: 27-08-2026\nNÃºmero do anÃºncio: 21732/2026",
+    "numero_anuncio": "21732/2026",
+    "preco_base": "15.000,00 €",
+    "cpvs": [
+      "45453100-8, Obras de recuperação"
+    ],
+    "tipos_contrato": [
+      "Empreitadas de obras públicas",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/08/166/419971359.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEzODA4MQ",
+    "id_portal_base": "454866",
+    "id_procedimento": "20283906",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "10-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Prestação de Serviços de Fiscalização e Coordenação de Segurança em Obra para a Empreitada de reinstalação de DATA Center no Centro de Medicina de Reabilitação de Alcoitão",
+    "entidade": "Santa Casa da Misericórdia de Lisboa",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=454847",
+    "data": "27-08-2026",
+    "data_limite": "21 dias.",
+    "texto": "DescriÃ§Ã£o: Prestação de Serviços de Fiscalização e Coordenação de Segurança em Obra para a Empreitada de reinstalação de DATA Center no Centro de Medicina de Reabilitação de Alcoitão\nEntidade: Santa Casa da Misericórdia de Lisboa\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71520000-9, Serviços de supervisão da construção\nPreÃ§o base: 21.000,00 €\nPrazo para propostas: 21 dias.\nData de publicaÃ§Ã£o: 27-08-2026\nNÃºmero do anÃºncio: 21751/2026",
+    "numero_anuncio": "21751/2026",
+    "preco_base": "21.000,00 €",
+    "cpvs": [
+      "71520000-9, Serviços de supervisão da construção"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/08/166/419971452.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEzODMwOQ",
+    "id_portal_base": "454847",
+    "id_procedimento": "20283887",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Outros",
+    "criterio_detalhe": "Outros",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "17-09-2026 17:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "PRESTAÇÃO DE SERVIÇOS DE FISCALIZAÇÃO DE OBRA, NO ÂMBITO DA EMPREITADA DE CONSTRUÇÃO DA NOVA ESQUADRA DA POLÍCIA MUNICIPAL",
+    "entidade": "Município da Maia",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=454833",
+    "data": "27-08-2026",
+    "data_limite": "20 dias.",
+    "texto": "DescriÃ§Ã£o: PRESTAÇÃO DE SERVIÇOS DE FISCALIZAÇÃO DE OBRA, NO ÂMBITO DA EMPREITADA DE CONSTRUÇÃO DA NOVA ESQUADRA DA POLÍCIA MUNICIPAL\nEntidade: Município da Maia\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71000000-8, Serviços de arquitectura, construção, engenharia e inspecção\nPreÃ§o base: 73.566,67 €\nPrazo para propostas: 20 dias.\nData de publicaÃ§Ã£o: 27-08-2026\nNÃºmero do anÃºncio: 21765/2026",
+    "numero_anuncio": "21765/2026",
+    "preco_base": "73.566,67 €",
+    "cpvs": [
+      "71000000-8, Serviços de arquitectura, construção, engenharia e inspecção"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/08/166/419971470.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEzODMyNg",
+    "id_portal_base": "454833",
+    "id_procedimento": "20283872",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "16-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Prestação de serviços continuados para elaboração de projetos de arquitetura e de engenharias",
+    "entidade": "Município de Loures",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=454824",
+    "data": "27-08-2026",
+    "data_limite": "15 dias.",
+    "texto": "DescriÃ§Ã£o: Prestação de serviços continuados para elaboração de projetos de arquitetura e de engenharias\nEntidade: Município de Loures\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71200000-0, Serviços de arquitectura e afins\nPreÃ§o base: 100.000,00 €\nPrazo para propostas: 15 dias.\nData de publicaÃ§Ã£o: 27-08-2026\nNÃºmero do anÃºncio: 21775/2026",
+    "numero_anuncio": "21775/2026",
+    "preco_base": "100.000,00 €",
+    "cpvs": [
+      "71200000-0, Serviços de arquitectura e afins"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/08/166/419971378.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/OEF3aE9CUXNlMFB6cTNhMTl3dGx4cXYvdlh3c0VpaWxFcTloaHF5NkdBdGQ1S1poNmpMRzBXY3BjN2V6eExjWUNRVXVndjN2SlJrck90ZmJOWFhmV1E9PUNYYyM4",
+    "id_portal_base": "454824",
+    "id_procedimento": "20283863",
+    "criterio_tipo": "Multifator",
+    "criterio_resumo": "Preço 30% · Qualidade 10% · Qualidade 60%",
+    "criterio_detalhe": "Preço 30%\nQualidade 10%\nQualidade 60%",
+    "criterio_fatores": "[{\"nome\": \"Preço\", \"peso\": 30, \"tipo\": \"preco\"}, {\"nome\": \"Qualidade\", \"peso\": 10, \"tipo\": \"qualidade\"}, {\"nome\": \"Qualidade\", \"peso\": 60, \"tipo\": \"qualidade\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "11-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
   }
 ]
