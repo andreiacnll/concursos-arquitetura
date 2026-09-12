@@ -129,7 +129,15 @@
     "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/07/138/419967515.pdf",
     "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/VldLUktNTktGeTdwMy9YNnFuZkQ5eGhTM3o3YVViai9kV2lsYUxpQkFvL0RCdEgvMWM1a2JKTlRwbUhDelpYaEZkM1BvUU5GQXNKUzNiUER2TUtORmc9PSlmYyRL",
     "id_portal_base": "451599",
-    "id_procedimento": "19973736"
+    "id_procedimento": "19973736",
+    "criterio_tipo": "Multifator",
+    "criterio_resumo": "Outros Fatores - Outro Nome: Fatores de qualificação previstos no programa Fatores - 100% · Qualidade 30% · Qualidade 15% · Qualidade 20% · Qualidade 35%",
+    "criterio_detalhe": "Outros Fatores - Outro Nome: Fatores de qualificação previstos no programa Fatores - 100%\nQualidade 30%\nQualidade 15%\nQualidade 20%\nQualidade 35%",
+    "criterio_fatores": "[{\"nome\": \"Outros Fatores - Outro Nome: Fatores de qualificação previstos no programa Fatores -\", \"peso\": 100, \"tipo\": \"outro\"}, {\"nome\": \"Qualidade\", \"peso\": 30, \"tipo\": \"qualidade\"}, {\"nome\": \"Qualidade\", \"peso\": 15, \"tipo\": \"qualidade\"}, {\"nome\": \"Qualidade\", \"peso\": 20, \"tipo\": \"qualidade\"}, {\"nome\": \"Qualidade\", \"peso\": 35, \"tipo\": \"qualidade\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": null,
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
   },
   {
     "titulo": "02/ABR/2026 - AQUISIÇÃO DE SERVIÇOS PARA A FISCALIZAÇÃO E COORDENAÇÃO DE SEGURANÇA E SAÚDE NA EMPREITADA DE CONSTRUÇÃO DA CENTRAL HIDROELÉTRICA DA BARRAGEM DO ROXO",
@@ -2079,6 +2087,306 @@
     "criterio_fatores": "[{\"nome\": \"Preço\", \"peso\": 30, \"tipo\": \"preco\"}, {\"nome\": \"Qualidade\", \"peso\": 10, \"tipo\": \"qualidade\"}, {\"nome\": \"Qualidade\", \"peso\": 60, \"tipo\": \"qualidade\"}]",
     "entregaveis": null,
     "data_entrega_propostas": "11-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Revisão e melhoria do estudo prévio existente, e consequente elaboração de novo estudo prévio, projeto de execução e assistência técnica para a passagem superior ciclo-pedonal sobre o IC2",
+    "entidade": "Município de Loures",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=455824",
+    "data": "11-09-2026",
+    "data_limite": "28 dias.",
+    "texto": "DescriÃ§Ã£o: Revisão e melhoria do estudo prévio existente, e consequente elaboração de novo estudo prévio, projeto de execução e assistência técnica para a passagem superior ciclo-pedonal sobre o IC2\nEntidade: Município de Loures\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71240000-2, Serviços de arquitectura, engenharia e planeamento\nPreÃ§o base: 360.000,00 €\nPrazo para propostas: 28 dias.\nData de publicaÃ§Ã£o: 11-09-2026\nNÃºmero do anÃºncio: 22724/2026",
+    "numero_anuncio": "22724/2026",
+    "preco_base": "360.000,00 €",
+    "cpvs": [
+      "71240000-2, Serviços de arquitectura, engenharia e planeamento"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/177/419972309.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/OXk4ZDNIZDY3WENqWWNLNmNkeHhoSkI4LzZJU0ZlTU96c2FnMk1wcFdoRkdPVlRDWDdObGhlNGU4a1NGclhFOFdGVnJVUVR0Z0RCRVVNa0F6dnV5M1E9PWJxJitm",
+    "id_portal_base": "455824",
+    "id_procedimento": "20365836",
+    "criterio_tipo": "Multifator",
+    "criterio_resumo": "Preço 20% · Prazo 10% · Memória Descritiva 30% · Qualidade 40%",
+    "criterio_detalhe": "Preço 20%\nOutros Outro Nome: Prazo 10%\nOutros Outro Nome: Memória Descritiva 30%\nQualidade 40%",
+    "criterio_fatores": "[{\"nome\": \"Preço\", \"peso\": 20, \"tipo\": \"preco\"}, {\"nome\": \"Prazo\", \"peso\": 10, \"tipo\": \"outro\"}, {\"nome\": \"Memória Descritiva\", \"peso\": 30, \"tipo\": \"outro\"}, {\"nome\": \"Qualidade\", \"peso\": 40, \"tipo\": \"qualidade\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "09-10-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Aquisição de serviços para a \"Fiscalização, coordenação de segurança, gestão ambiental e certificação energética da empreitada de “Construção da nova esquadra da Polícia de Segurança Pública de Ovar”\"",
+    "entidade": "Município de Ovar",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=455776",
+    "data": "10-09-2026",
+    "data_limite": "8 dias.",
+    "texto": "DescriÃ§Ã£o: Aquisição de serviços para a \"Fiscalização, coordenação de segurança, gestão ambiental e certificação energética da empreitada de “Construção da nova esquadra da Polícia de Segurança Pública de Ovar”\"\nEntidade: Município de Ovar\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71520000-9, Serviços de supervisão da construção\nPreÃ§o base: 100.000,00 €\nPrazo para propostas: 8 dias.\nData de publicaÃ§Ã£o: 10-09-2026\nNÃºmero do anÃºncio: 22692/2026",
+    "numero_anuncio": "22692/2026",
+    "preco_base": "100.000,00 €",
+    "cpvs": [
+      "71520000-9, Serviços de supervisão da construção"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/176/419972469.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/UC9SZzYxbDVkNE9LMWtYUjhsUFl3QStPeVR2MklpV2JpT2lzZGtjZWVybGtxa3ZBRmJxTFRwbEsyWDZsanFJOHRxRnUrcEh1Y050MUVWZFdDekRhWFE9PSVfWVJq",
+    "id_portal_base": "455776",
+    "id_procedimento": "20360306",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "18-09-2026 17:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "aquisição de cartões de tipo oferta de bens essenciais de primeira necessidade  Projeto Partilha Solidária",
+    "entidade": "Gaiurb - Urbanismo e Habitação, EM",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=455755",
+    "data": "10-09-2026",
+    "data_limite": "9 dias.",
+    "texto": "DescriÃ§Ã£o: aquisição de cartões de tipo oferta de bens essenciais de primeira necessidade  Projeto Partilha Solidária\nEntidade: Gaiurb - Urbanismo e Habitação, EM\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de bens móveis\nTipo de procedimento: Concurso público\nCPV: 30160000-8, Cartões magnéticos\nPreÃ§o base: 28.455,28 €\nPrazo para propostas: 9 dias.\nData de publicaÃ§Ã£o: 10-09-2026\nNÃºmero do anÃºncio: 22616/2026",
+    "numero_anuncio": "22616/2026",
+    "preco_base": "28.455,28 €",
+    "cpvs": [
+      "30160000-8, Cartões magnéticos"
+    ],
+    "tipos_contrato": [
+      "Aquisição de bens móveis",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/176/419972429.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTE0MTIxNA",
+    "id_portal_base": "455755",
+    "id_procedimento": "20357854",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Outros",
+    "criterio_detalhe": "Outros",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "19-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "3026008436_1465_DI - Serviço de Projeto de Execução de Edificação de Saída de Emergência da Ala Norte da Unidade de Apoio às Instalações Centrais de Marinha (UAICM)",
+    "entidade": "Marinha",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=455754",
+    "data": "10-09-2026",
+    "data_limite": "9 dias.",
+    "texto": "DescriÃ§Ã£o: 3026008436_1465_DI - Serviço de Projeto de Execução de Edificação de Saída de Emergência da Ala Norte da Unidade de Apoio às Instalações Centrais de Marinha (UAICM)\nEntidade: Marinha\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71250000-5, Serviços de arquitectura, engenharia e levantamento topográfico\nPreÃ§o base: 30.000,00 €\nPrazo para propostas: 9 dias.\nData de publicaÃ§Ã£o: 10-09-2026\nNÃºmero do anÃºncio: 22617/2026",
+    "numero_anuncio": "22617/2026",
+    "preco_base": "30.000,00 €",
+    "cpvs": [
+      "71250000-5, Serviços de arquitectura, engenharia e levantamento topográfico"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/176/419972480.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTE0MTkzOA",
+    "id_portal_base": "455754",
+    "id_procedimento": "20357853",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "19-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "3026008428_1356_DI - Serviço de Projeto de Especialidades para s Reabilitação do Edifício do Comando da Zona Marítima da Madeira (CZMM) (3 Lotes). Lote 1 - Reabilitação da Cobertura; Lote 2 - Reabilitação da Rede Elétrica; Lote 3 - Certificação Energética do Edifício",
+    "entidade": "Marinha",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=455747",
+    "data": "10-09-2026",
+    "data_limite": "6 dias.",
+    "texto": "DescriÃ§Ã£o: 3026008428_1356_DI - Serviço de Projeto de Especialidades para s Reabilitação do Edifício do Comando da Zona Marítima da Madeira (CZMM) (3 Lotes). Lote 1 - Reabilitação da Cobertura; Lote 2 - Reabilitação da Rede Elétrica; Lote 3 - Certificação Energética do Edifício\nEntidade: Marinha\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71300000-1, Serviços de engenharia\nPreÃ§o base: 34.426,24 €\nPrazo para propostas: 6 dias.\nData de publicaÃ§Ã£o: 10-09-2026\nNÃºmero do anÃºncio: 22624/2026",
+    "numero_anuncio": "22624/2026",
+    "preco_base": "34.426,24 €",
+    "cpvs": [
+      "71300000-1, Serviços de engenharia"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/176/419972483.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTE0MjAzMA",
+    "id_portal_base": "455747",
+    "id_procedimento": "20357846",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "16-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "3026008429_1422_DI - Serviço de Projeto de Execução do Sistema Automático de Deteção de Incêndios (SADI) da Direção de Abastecimento (DA)",
+    "entidade": "Marinha",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=455746",
+    "data": "10-09-2026",
+    "data_limite": "15 dias.",
+    "texto": "DescriÃ§Ã£o: 3026008429_1422_DI - Serviço de Projeto de Execução do Sistema Automático de Deteção de Incêndios (SADI) da Direção de Abastecimento (DA)\nEntidade: Marinha\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71323200-0, Serviços de concepção técnica de instalações\nPreÃ§o base: 25.000,00 €\nPrazo para propostas: 15 dias.\nData de publicaÃ§Ã£o: 10-09-2026\nNÃºmero do anÃºncio: 22625/2026",
+    "numero_anuncio": "22625/2026",
+    "preco_base": "25.000,00 €",
+    "cpvs": [
+      "71323200-0, Serviços de concepção técnica de instalações"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/176/419972485.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTE0MjA1NA",
+    "id_portal_base": "455746",
+    "id_procedimento": "20357845",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "25-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Fiscalização, Coordenação de Segurança em Obra, Coordenação de Gestão da Qualidade e Gestão Ambiental e Acompanhamento Arqueológico da Empreitada de conceção-construção de unidades de produção de energia elétrica de fonte fotovoltaica",
+    "entidade": "AgdA - Águas Públicas do Alentejo, SA",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=455704",
+    "data": "09-09-2026",
+    "data_limite": "30 dias.",
+    "texto": "DescriÃ§Ã£o: Fiscalização, Coordenação de Segurança em Obra, Coordenação de Gestão da Qualidade e Gestão Ambiental e Acompanhamento Arqueológico da Empreitada de conceção-construção de unidades de produção de energia elétrica de fonte fotovoltaica\nEntidade: AgdA - Águas Públicas do Alentejo, SA\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71300000-1, Serviços de engenharia\nPreÃ§o base: 141.300,00 €\nPrazo para propostas: 30 dias.\nData de publicaÃ§Ã£o: 09-09-2026\nNÃºmero do anÃºncio: 22559/2026",
+    "numero_anuncio": "22559/2026",
+    "preco_base": "141.300,00 €",
+    "cpvs": [
+      "71300000-1, Serviços de engenharia"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/175/419972403.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTE0MTQ5Nw",
+    "id_portal_base": "455704",
+    "id_procedimento": "20355055",
+    "criterio_tipo": "Multifator",
+    "criterio_resumo": "Preço 50% · Qualidade Técnica da Proposta 50%",
+    "criterio_detalhe": "Preço 50%\nOutros Outro Nome: Qualidade Técnica da Proposta 50%",
+    "criterio_fatores": "[{\"nome\": \"Preço\", \"peso\": 50, \"tipo\": \"preco\"}, {\"nome\": \"Qualidade Técnica da Proposta\", \"peso\": 50, \"tipo\": \"qualidade\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "09-10-2026 18:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Aquisição de Serviços para Elaboração de Projetos de Execução por Lotes, para as seguintes vias estruturantes: VL1, VL3, VL11, Via de Ligação do Estádio Jorge Sampaio aos Carvalhos, Requalificação da VL7 e VL10  Troço Norte para o Município de Vila Nova de Gaia",
+    "entidade": "Município de Vila Nova de Gaia",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=455629",
+    "data": "09-09-2026",
+    "data_limite": "30 dias.",
+    "texto": "DescriÃ§Ã£o: Aquisição de Serviços para Elaboração de Projetos de Execução por Lotes, para as seguintes vias estruturantes: VL1, VL3, VL11, Via de Ligação do Estádio Jorge Sampaio aos Carvalhos, Requalificação da VL7 e VL10  Troço Norte para o Município de Vila Nova de Gaia\nEntidade: Município de Vila Nova de Gaia\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71000000-8, Serviços de arquitectura, construção, engenharia e inspecção\nPreÃ§o base: 2.307.500,00 €\nPrazo para propostas: 30 dias.\nData de publicaÃ§Ã£o: 09-09-2026\nNÃºmero do anÃºncio: 22529/2026",
+    "numero_anuncio": "22529/2026",
+    "preco_base": "2.307.500,00 €",
+    "cpvs": [
+      "71000000-8, Serviços de arquitectura, construção, engenharia e inspecção"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/175/419972177.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTE0MDkxMA",
+    "id_portal_base": "455629",
+    "id_procedimento": "20351109",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "09-10-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Fiscalização, Coordenação de Segurança em Obra e Coordenação de Gestão Ambiental e Acompanhamento Arqueológico da Empreitada de Conceção-Construção da ETAR de Santiago do Escoural",
+    "entidade": "AgdA - Águas Públicas do Alentejo, SA",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=455577",
+    "data": "08-09-2026",
+    "data_limite": "15 dias.",
+    "texto": "DescriÃ§Ã£o: Fiscalização, Coordenação de Segurança em Obra e Coordenação de Gestão Ambiental e Acompanhamento Arqueológico da Empreitada de Conceção-Construção da ETAR de Santiago do Escoural\nEntidade: AgdA - Águas Públicas do Alentejo, SA\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71300000-1, Serviços de engenharia\nPreÃ§o base: 155.400,00 €\nPrazo para propostas: 15 dias.\nData de publicaÃ§Ã£o: 08-09-2026\nNÃºmero do anÃºncio: 22495/2026",
+    "numero_anuncio": "22495/2026",
+    "preco_base": "155.400,00 €",
+    "cpvs": [
+      "71300000-1, Serviços de engenharia"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/174/419972342.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEzOTQ0Ng",
+    "id_portal_base": "455577",
+    "id_procedimento": "20348243",
+    "criterio_tipo": "Multifator",
+    "criterio_resumo": "Preço 50% · Qualidade Técnica da Proposta 50%",
+    "criterio_detalhe": "Preço 50%\nOutros Outro Nome: Qualidade Técnica da Proposta 50%",
+    "criterio_fatores": "[{\"nome\": \"Preço\", \"peso\": 50, \"tipo\": \"preco\"}, {\"nome\": \"Qualidade Técnica da Proposta\", \"peso\": 50, \"tipo\": \"qualidade\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "23-09-2026 18:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Aquisição de serviços para elaboração do Projeto de Execução do Sistema de Videovigilância Urbana do Município de Matosinhos",
+    "entidade": "Câmara Municipal de Matosinhos",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=455544",
+    "data": "08-09-2026",
+    "data_limite": "",
+    "texto": "DescriÃ§Ã£o: Aquisição de serviços para elaboração do Projeto de Execução do Sistema de Videovigilância Urbana do Município de Matosinhos\nEntidade: Câmara Municipal de Matosinhos\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso limitado por prévia qualificação\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso limitado por prévia qualificação\nCPV: 71330000-0, Serviços diversos de engenharia\nPreÃ§o base: 18.490,00 €\nData de publicaÃ§Ã£o: 08-09-2026\nNÃºmero do anÃºncio: 22440/2026",
+    "numero_anuncio": "22440/2026",
+    "preco_base": "18.490,00 €",
+    "cpvs": [
+      "71330000-0, Serviços diversos de engenharia"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso limitado por prévia qualificação",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/174/419972158.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTE0MDk0Ng",
+    "id_portal_base": "455544",
+    "id_procedimento": "20346301",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Multifator 100%",
+    "criterio_detalhe": "Outros Outro Nome: Multifator 100%",
+    "criterio_fatores": "[{\"nome\": \"Multifator\", \"peso\": 100, \"tipo\": \"outro\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": null,
     "data_esclarecimentos": null,
     "enriquecimento_dr_concluido": true
   }
