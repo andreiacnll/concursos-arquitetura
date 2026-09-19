@@ -2389,5 +2389,425 @@
     "data_entrega_propostas": null,
     "data_esclarecimentos": null,
     "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "275CP26 Aquisição de Serviços para Projeto de Modernização do FrontEnd do Balcão Digital da AEdP",
+    "entidade": "Águas e Energia do Porto E.M",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=456398",
+    "data": "18-09-2026",
+    "data_limite": "10 dias.",
+    "texto": "DescriÃ§Ã£o: 275CP26 Aquisição de Serviços para Projeto de Modernização do FrontEnd do Balcão Digital da AEdP\nEntidade: Águas e Energia do Porto E.M\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 72212445-0, Serviços de desenvolvimento de software para gestão da relação com os clientes\nPreÃ§o base: 180.000,00 €\nPrazo para propostas: 10 dias.\nData de publicaÃ§Ã£o: 18-09-2026\nNÃºmero do anÃºncio: 23265/2026",
+    "numero_anuncio": "23265/2026",
+    "preco_base": "180.000,00 €",
+    "cpvs": [
+      "72212445-0, Serviços de desenvolvimento de software para gestão da relação com os clientes"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/182/419973147.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTE0NDY2NA",
+    "id_portal_base": "456398",
+    "id_procedimento": "20404817",
+    "criterio_tipo": "Multifator",
+    "criterio_resumo": "Preço 55% · Qualidade técnica da proposta 30% · Equipa técnica afeta ao projeto 15%",
+    "criterio_detalhe": "Preço 55%\nOutros Outro Nome: Qualidade técnica da proposta 30%\nOutros Outro Nome: Equipa técnica afeta ao projeto 15%",
+    "criterio_fatores": "[{\"nome\": \"Preço\", \"peso\": 55, \"tipo\": \"preco\"}, {\"nome\": \"Qualidade técnica da proposta\", \"peso\": 30, \"tipo\": \"qualidade\"}, {\"nome\": \"Equipa técnica afeta ao projeto\", \"peso\": 15, \"tipo\": \"outro\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "28-09-2026 17:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Aquisição de serviços para o desenvolvimento dos projetos de especialidades com base nos projetos de arquitetura, para os núcleos MMP (norte e poente) a instalar no Palácio Burnay",
+    "entidade": "Museus e Monumentos de Portugal EPE",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=456364",
+    "data": "18-09-2026",
+    "data_limite": "12 dias.",
+    "texto": "DescriÃ§Ã£o: Aquisição de serviços para o desenvolvimento dos projetos de especialidades com base nos projetos de arquitetura, para os núcleos MMP (norte e poente) a instalar no Palácio Burnay\nEntidade: Museus e Monumentos de Portugal EPE\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71335000-5, Estudos de engenharia\nPreÃ§o base: 180.000,00 €\nPrazo para propostas: 12 dias.\nData de publicaÃ§Ã£o: 18-09-2026\nNÃºmero do anÃºncio: 23300/2026",
+    "numero_anuncio": "23300/2026",
+    "preco_base": "180.000,00 €",
+    "cpvs": [
+      "71335000-5, Estudos de engenharia"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/182/419973217.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTE0NDc4NA",
+    "id_portal_base": "456364",
+    "id_procedimento": "20404779",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Outros",
+    "criterio_detalhe": "Outros",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "30-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Prestação de Serviços para Gestão e Fiscalização da Empreitada de Construção do Bloco de Rega de Reguengos",
+    "entidade": "Edia - Empresa de Desenvolvimento e Infra-Estruturas do Alqueva, SA",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=456317",
+    "data": "18-09-2026",
+    "data_limite": "28 dias.",
+    "texto": "DescriÃ§Ã£o: Prestação de Serviços para Gestão e Fiscalização da Empreitada de Construção do Bloco de Rega de Reguengos\nEntidade: Edia - Empresa de Desenvolvimento e Infra-Estruturas do Alqueva, SA\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71300000-1, Serviços de engenharia\nPreÃ§o base: 1.065.000,00 €\nPrazo para propostas: 28 dias.\nData de publicaÃ§Ã£o: 18-09-2026\nNÃºmero do anÃºncio: 23242/2026",
+    "numero_anuncio": "23242/2026",
+    "preco_base": "1.065.000,00 €",
+    "cpvs": [
+      "71300000-1, Serviços de engenharia"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/182/419972962.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/Mlo0eHQ5UXNFUlI1aHRHWkJ2M2haRHBkTjJTVkRHQTYybUF5S0c0QithNGpoNVlFS282NEJEbDhnYUN6Q2ZqQUdtZnU2WjB0MGRDeFdpS01tNWxCYVE9PUhRVUlH",
+    "id_portal_base": "456317",
+    "id_procedimento": "20402372",
+    "criterio_tipo": "Multifator",
+    "criterio_resumo": "Preço 50% · Qualidade 10% · Qualidade 20%",
+    "criterio_detalhe": "Preço 50%\nQualidade 10%\nQualidade 20%",
+    "criterio_fatores": "[{\"nome\": \"Preço\", \"peso\": 50, \"tipo\": \"preco\"}, {\"nome\": \"Qualidade\", \"peso\": 10, \"tipo\": \"qualidade\"}, {\"nome\": \"Qualidade\", \"peso\": 20, \"tipo\": \"qualidade\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "16-10-2026 18:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Construção do \"Arquivo intermédio de Vila Real - Centro de consulta pública de processos urbanísticos\"",
+    "entidade": "Município de Vila Real",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=453517",
+    "data": "18-09-2026",
+    "data_limite": "14 dias.",
+    "texto": "DescriÃ§Ã£o: Construção do \"Arquivo intermédio de Vila Real - Centro de consulta pública de processos urbanísticos\"\nEntidade: Município de Vila Real\nTipo de ato: Anúncio de Alteração\nTipo de modelo: Concurso público\nTipo de contrato: Empreitadas de obras públicas\nTipo de procedimento: Concurso público\nCPV: 45210000-2, Construção de edifícios\nPreÃ§o base: 302.323,08 €\nPrazo para propostas: 14 dias.\nData de publicaÃ§Ã£o: 18-09-2026\nNÃºmero do anÃºncio: 23288/2026",
+    "numero_anuncio": "23288/2026",
+    "preco_base": "302.323,08 €",
+    "cpvs": [
+      "45210000-2, Construção de edifícios"
+    ],
+    "tipos_contrato": [
+      "Empreitadas de obras públicas",
+      "Concurso público",
+      "Anúncio de Alteração"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/182/419973150.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/dWRzUGtvUUk1Zm1oN2NaSnBCOE5jUFZkays1L1lGQ0RPSmFtVXNjQ1E3cE5Rc1orK0NRd0oxRlREeVExNUtMMzExQm9odnhKNG9OYWlBSENsZDdVWGc9PWRzMGJi",
+    "id_portal_base": "453517",
+    "id_procedimento": "20194718",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Sim Percentagem 5%",
+    "criterio_detalhe": "Sim Percentagem 5%",
+    "criterio_fatores": "[{\"nome\": \"Sim Percentagem\", \"peso\": 5, \"tipo\": \"outro\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "02-10-2026 17:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Aquisição de serviços para elaboração de Projetos de Execução de Instalações Elétricas (Tipo A), para a EG em Queluz, para o CFPortalegre e para o CFFigueira Foz",
+    "entidade": "Guarda Nacional Republicana",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=456277",
+    "data": "17-09-2026",
+    "data_limite": "9 dias.",
+    "texto": "DescriÃ§Ã£o: Aquisição de serviços para elaboração de Projetos de Execução de Instalações Elétricas (Tipo A), para a EG em Queluz, para o CFPortalegre e para o CFFigueira Foz\nEntidade: Guarda Nacional Republicana\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71323100-9, Serviços de concepção de sistemas de energia eléctrica\nPreÃ§o base: 9.500,00 €\nPrazo para propostas: 9 dias.\nData de publicaÃ§Ã£o: 17-09-2026\nNÃºmero do anÃºncio: 23173/2026",
+    "numero_anuncio": "23173/2026",
+    "preco_base": "9.500,00 €",
+    "cpvs": [
+      "71323100-9, Serviços de concepção de sistemas de energia eléctrica"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/181/419973079.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/TmFZMmdpQ2FNRWFocUF5SWEvd2RBdEJiNVQraklFL2pQWi9JeU40UFd3S2pFcklJMHhRTTNabVpZQ0lpZlFTeDdJbVpENUl1SG1uN2dhdXBUTDhxMEE9PUUwMmI5",
+    "id_portal_base": "456277",
+    "id_procedimento": "20400629",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "26-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Elaboração de Projeto de Execução para Centro de Recolha Oficial de Animais de Companhia em Elvas",
+    "entidade": "Município de Elvas",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=456271",
+    "data": "17-09-2026",
+    "data_limite": "8 dias.",
+    "texto": "DescriÃ§Ã£o: Elaboração de Projeto de Execução para Centro de Recolha Oficial de Animais de Companhia em Elvas\nEntidade: Município de Elvas\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71242000-6, Preparação de projecto e concepção, estimativa de custos\nPreÃ§o base: 30.000,00 €\nPrazo para propostas: 8 dias.\nData de publicaÃ§Ã£o: 17-09-2026\nNÃºmero do anÃºncio: 23179/2026",
+    "numero_anuncio": "23179/2026",
+    "preco_base": "30.000,00 €",
+    "cpvs": [
+      "71242000-6, Preparação de projecto e concepção, estimativa de custos"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/181/419972953.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/bDNQT1pwYmJpYXFESkNXQ3NHV1VHQVREOXM1V3hBbGxBdzdUOGJ6Ym1VeW0rZlVYbHo4R0tnQ0MrQXNTTG9SRE9zQ2g0bVRsV0FMaUs3UnJrYjJ6K2c9PV85UURB",
+    "id_portal_base": "456271",
+    "id_procedimento": "20400623",
+    "criterio_tipo": "Multifator",
+    "criterio_resumo": "Preço 90% · Qualidade 10%",
+    "criterio_detalhe": "Preço 90%\nQualidade 10%",
+    "criterio_fatores": "[{\"nome\": \"Preço\", \"peso\": 90, \"tipo\": \"preco\"}, {\"nome\": \"Qualidade\", \"peso\": 10, \"tipo\": \"qualidade\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "25-09-2026 17:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "5/FISC/2026 AQUISIÇÃO DE SERVIÇOS DE COORDENAÇÃO DE SEGURANÇA EM OBRA PARA A EOP: \"CONSTRUÇÃO E CONSOLIDAÇÃO DE MUROS DE SUPORTE NA VIA PÚBLICA\"",
+    "entidade": "Município de Almada",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=456255",
+    "data": "17-09-2026",
+    "data_limite": "12 dias.",
+    "texto": "DescriÃ§Ã£o: 5/FISC/2026 AQUISIÇÃO DE SERVIÇOS DE COORDENAÇÃO DE SEGURANÇA EM OBRA PARA A EOP: \"CONSTRUÇÃO E CONSOLIDAÇÃO DE MUROS DE SUPORTE NA VIA PÚBLICA\"\nEntidade: Município de Almada\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71317200-5, Serviços de saúde e segurança\nPreÃ§o base: 84.000,00 €\nPrazo para propostas: 12 dias.\nData de publicaÃ§Ã£o: 17-09-2026\nNÃºmero do anÃºncio: 23195/2026",
+    "numero_anuncio": "23195/2026",
+    "preco_base": "84.000,00 €",
+    "cpvs": [
+      "71317200-5, Serviços de saúde e segurança"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/181/419973081.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEyMzM1Nw",
+    "id_portal_base": "456255",
+    "id_procedimento": "20400607",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Sim Percentagem 10%",
+    "criterio_detalhe": "Sim Percentagem 10%",
+    "criterio_fatores": "[{\"nome\": \"Sim Percentagem\", \"peso\": 10, \"tipo\": \"outro\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "29-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "EMPREITADA DE REABILITAÇÃO DE 7 HABITAÇÕES DEVOLUTAS NOS EMPREENDIMENTOS AFGOMES, ESFERREIRA, PEROSINHO, ALCOELHO, AACOSTA E ESTEIRO_04.2026",
+    "entidade": "Gaiurb - Urbanismo e Habitação, EM",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=456244",
+    "data": "17-09-2026",
+    "data_limite": "24 dias.",
+    "texto": "DescriÃ§Ã£o: EMPREITADA DE REABILITAÇÃO DE 7 HABITAÇÕES DEVOLUTAS NOS EMPREENDIMENTOS AFGOMES, ESFERREIRA, PEROSINHO, ALCOELHO, AACOSTA E ESTEIRO_04.2026\nEntidade: Gaiurb - Urbanismo e Habitação, EM\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Empreitadas de obras públicas\nTipo de procedimento: Concurso público\nCPV: 45453100-8, Obras de recuperação\nPreÃ§o base: 135.000,00 €\nPrazo para propostas: 24 dias.\nData de publicaÃ§Ã£o: 17-09-2026\nNÃºmero do anÃºncio: 23206/2026",
+    "numero_anuncio": "23206/2026",
+    "preco_base": "135.000,00 €",
+    "cpvs": [
+      "45453100-8, Obras de recuperação"
+    ],
+    "tipos_contrato": [
+      "Empreitadas de obras públicas",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/181/419973035.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTE0NDM0OA",
+    "id_portal_base": "456244",
+    "id_procedimento": "20400596",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "11-10-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Aquisição de Serviços para Alteração do Projeto de Retificação e Beneficiação da EN 233 (Guarda–Sabugal)",
+    "entidade": "Município da Guarda",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=454995",
+    "data": "17-09-2026",
+    "data_limite": "15 dias.",
+    "texto": "DescriÃ§Ã£o: Aquisição de Serviços para Alteração do Projeto de Retificação e Beneficiação da EN 233 (Guarda–Sabugal)\nEntidade: Município da Guarda\nTipo de ato: Anúncio de Alteração\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71335000-5, Estudos de engenharia\nPreÃ§o base: 478.168,25 €\nPrazo para propostas: 15 dias.\nData de publicaÃ§Ã£o: 17-09-2026\nNÃºmero do anÃºncio: 23115/2026",
+    "numero_anuncio": "23115/2026",
+    "preco_base": "478.168,25 €",
+    "cpvs": [
+      "71335000-5, Estudos de engenharia"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de Alteração"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/181/419972778.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/U0JuaUlxRzhDekZUUm5PdXVIQSsreVVWcVUwQ1lnOGQ5eW9taExtQ1BnUVJDaGE3YUNqbE10SENRMVRObjNUZmFUTTNBZEJ1bGVjNXVGQUhmWDZ4RXc9PUtocWIh",
+    "id_portal_base": "454995",
+    "id_procedimento": "20297092",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "02-10-2026 17:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Aquisição de Serviços de Fiscalização, Coordenação de Segurança em obra e gestão do PPGRCD da empreitada Reabilitação da Escola Básica e Secundária Domingos Capela",
+    "entidade": "Município de Espinho",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=456133",
+    "data": "16-09-2026",
+    "data_limite": "6 dias.",
+    "texto": "DescriÃ§Ã£o: Aquisição de Serviços de Fiscalização, Coordenação de Segurança em obra e gestão do PPGRCD da empreitada Reabilitação da Escola Básica e Secundária Domingos Capela\nEntidade: Município de Espinho\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71247000-1, Supervisão de trabalhos de construção\nPreÃ§o base: 151.200,00 €\nPrazo para propostas: 6 dias.\nData de publicaÃ§Ã£o: 16-09-2026\nNÃºmero do anÃºncio: 23075/2026",
+    "numero_anuncio": "23075/2026",
+    "preco_base": "151.200,00 €",
+    "cpvs": [
+      "71247000-1, Supervisão de trabalhos de construção"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/180/419972925.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEzMTQyMA",
+    "id_portal_base": "456133",
+    "id_procedimento": "20391016",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "22-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Assessoria à Fiscalização e Coordenação de Segurança da Empreitada de Construção de redes de drenagem e EEAR da Achada do Gramacho  Santana",
+    "entidade": "A. R. M. - Águas e Resíduos da Madeira, SA",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=456063",
+    "data": "15-09-2026",
+    "data_limite": "7 dias.",
+    "texto": "DescriÃ§Ã£o: Assessoria à Fiscalização e Coordenação de Segurança da Empreitada de Construção de redes de drenagem e EEAR da Achada do Gramacho  Santana\nEntidade: A. R. M. - Águas e Resíduos da Madeira, SA\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71318000-0, Serviços de consultoria e assessoria em matéria de engenharia\nPreÃ§o base: 140.000,00 €\nPrazo para propostas: 7 dias.\nData de publicaÃ§Ã£o: 15-09-2026\nNÃºmero do anÃºncio: 22950/2026",
+    "numero_anuncio": "22950/2026",
+    "preco_base": "140.000,00 €",
+    "cpvs": [
+      "71318000-0, Serviços de consultoria e assessoria em matéria de engenharia"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/179/419972812.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTE0MzgzNg",
+    "id_portal_base": "456063",
+    "id_procedimento": "20385631",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "22-09-2026 17:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Aquisição de Serviços de Elaboração de Projetos de Execução de Infraestruturas de Abastecimento de Água e de Drenagem de Águas Residuais Domésticas para Intervenções a Realizar nos Municípios de Ferreira do Zêzere, Mação, Ourém, Sardoal, Tomar e Vila Nova da Barquinha",
+    "entidade": "Tejo Ambiente - Empresa Intermunicipal de Ambiente do Médio Tejo, EIM, SA",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=456006",
+    "data": "15-09-2026",
+    "data_limite": "26 dias.",
+    "texto": "DescriÃ§Ã£o: Aquisição de Serviços de Elaboração de Projetos de Execução de Infraestruturas de Abastecimento de Água e de Drenagem de Águas Residuais Domésticas para Intervenções a Realizar nos Municípios de Ferreira do Zêzere, Mação, Ourém, Sardoal, Tomar e Vila Nova da Barquinha\nEntidade: Tejo Ambiente - Empresa Intermunicipal de Ambiente do Médio Tejo, EIM, SA\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 72224000-1, Serviços de consultoria em gestão de projectos\nPreÃ§o base: 730.000,00 €\nPrazo para propostas: 26 dias.\nData de publicaÃ§Ã£o: 15-09-2026\nNÃºmero do anÃºncio: 22913/2026",
+    "numero_anuncio": "22913/2026",
+    "preco_base": "730.000,00 €",
+    "cpvs": [
+      "72224000-1, Serviços de consultoria em gestão de projectos"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/179/419972628.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTE0MjY0Ng",
+    "id_portal_base": "456006",
+    "id_procedimento": "20381709",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "11-10-2026 23:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Projeto de Execução do Centro de Capacitação em Ambiente Natural e Núcleo Escutista do Parque Ecológico do Funchal",
+    "entidade": "Município do Funchal",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=455964",
+    "data": "14-09-2026",
+    "data_limite": "15 dias.",
+    "texto": "DescriÃ§Ã£o: Projeto de Execução do Centro de Capacitação em Ambiente Natural e Núcleo Escutista do Parque Ecológico do Funchal\nEntidade: Município do Funchal\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71300000-1, Serviços de engenharia\nPreÃ§o base: 138.892,00 €\nPrazo para propostas: 15 dias.\nData de publicaÃ§Ã£o: 14-09-2026\nNÃºmero do anÃºncio: 22867/2026",
+    "numero_anuncio": "22867/2026",
+    "preco_base": "138.892,00 €",
+    "cpvs": [
+      "71300000-1, Serviços de engenharia"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/178/419972726.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTE0MzM5MQ",
+    "id_portal_base": "455964",
+    "id_procedimento": "20375027",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "29-09-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "AQUISIÇÃO DE SERVIÇOS PARA A ELABORAÇÃO DO PROJETO DO “PAVILHÃO DESPORTIVO DO VALE DO LEÇA”",
+    "entidade": "Município de Santo Tirso",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=455932",
+    "data": "14-09-2026",
+    "data_limite": "22 dias.",
+    "texto": "DescriÃ§Ã£o: AQUISIÇÃO DE SERVIÇOS PARA A ELABORAÇÃO DO PROJETO DO “PAVILHÃO DESPORTIVO DO VALE DO LEÇA”\nEntidade: Município de Santo Tirso\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71200000-0, Serviços de arquitectura e afins\nPreÃ§o base: 190.000,00 €\nPrazo para propostas: 22 dias.\nData de publicaÃ§Ã£o: 14-09-2026\nNÃºmero do anÃºncio: 22789/2026",
+    "numero_anuncio": "22789/2026",
+    "preco_base": "190.000,00 €",
+    "cpvs": [
+      "71200000-0, Serviços de arquitectura e afins"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/178/419972609.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/bXNYZzAyc1dzdXh1Y0pwWExQVStFOHJ5MXFSMEloZ1Eydm1RMXlERnJndEc2emZBbW8yUEg0M012T0VWak5kRTJSZzFkeGc3cHdSbTUwK21XYURKSlE9PTdBcV5w",
+    "id_portal_base": "455932",
+    "id_procedimento": "20371819",
+    "criterio_tipo": "Multifator",
+    "criterio_resumo": "Preço 55% · Qualidade 25% · Qualidade 20%",
+    "criterio_detalhe": "Preço 55%\nQualidade 25%\nQualidade 20%",
+    "criterio_fatores": "[{\"nome\": \"Preço\", \"peso\": 55, \"tipo\": \"preco\"}, {\"nome\": \"Qualidade\", \"peso\": 25, \"tipo\": \"qualidade\"}, {\"nome\": \"Qualidade\", \"peso\": 20, \"tipo\": \"qualidade\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "06-10-2026 17:30",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
   }
 ]
