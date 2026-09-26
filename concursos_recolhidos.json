@@ -2809,5 +2809,245 @@
     "data_entrega_propostas": "06-10-2026 17:30",
     "data_esclarecimentos": null,
     "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Preservar Montesinho - Projeto integrado de renaturalização e salvaguarda de espaços naturais e de revitalização e valorização de recursos patrimoniais - Lote 1, Lote 2 e Lote 3",
+    "entidade": "Município de Bragança",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=456952",
+    "data": "25-09-2026",
+    "data_limite": "14 dias.",
+    "texto": "DescriÃ§Ã£o: Preservar Montesinho - Projeto integrado de renaturalização e salvaguarda de espaços naturais e de revitalização e valorização de recursos patrimoniais - Lote 1, Lote 2 e Lote 3\nEntidade: Município de Bragança\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Empreitadas de obras públicas\nTipo de procedimento: Concurso público\nCPV: 45200000-9, Obras de construção total ou parcial e de engenharia civil\nPreÃ§o base: 635.000,00 €\nPrazo para propostas: 14 dias.\nData de publicaÃ§Ã£o: 25-09-2026\nNÃºmero do anÃºncio: 23821/2026",
+    "numero_anuncio": "23821/2026",
+    "preco_base": "635.000,00 €",
+    "cpvs": [
+      "45200000-9, Obras de construção total ou parcial e de engenharia civil"
+    ],
+    "tipos_contrato": [
+      "Empreitadas de obras públicas",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/187/419973728.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTE0NjMzOA",
+    "id_portal_base": "456952",
+    "id_procedimento": "20457452",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Sim Percentagem 5%",
+    "criterio_detalhe": "Sim Percentagem 5%",
+    "criterio_fatores": "[{\"nome\": \"Sim Percentagem\", \"peso\": 5, \"tipo\": \"outro\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "09-10-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Prestação de Serviços para Elaboração de Projetos de Execução de: Reabilitação de Linhas de Água (Casais dos Barreiros/Casal da Palhagueira - Caldas da Rainha)",
+    "entidade": "Município das Caldas da Rainha",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=456806",
+    "data": "24-09-2026",
+    "data_limite": "15 dias.",
+    "texto": "DescriÃ§Ã£o: Prestação de Serviços para Elaboração de Projetos de Execução de: Reabilitação de Linhas de Água (Casais dos Barreiros/Casal da Palhagueira - Caldas da Rainha)\nEntidade: Município das Caldas da Rainha\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71240000-2, Serviços de arquitectura, engenharia e planeamento\nPreÃ§o base: 25.000,00 €\nPrazo para propostas: 15 dias.\nData de publicaÃ§Ã£o: 24-09-2026\nNÃºmero do anÃºncio: 23743/2026",
+    "numero_anuncio": "23743/2026",
+    "preco_base": "25.000,00 €",
+    "cpvs": [
+      "71240000-2, Serviços de arquitectura, engenharia e planeamento"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/186/419973750.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTE0NjMzNA",
+    "id_portal_base": "456806",
+    "id_procedimento": "20444684",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "09-10-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "CONTRATAÇÃO DA PRESTAÇÃO SERVIÇOS DE ELABORAÇÃO DE ESTUDO PRÉVIO DE REORGANIZAÇÃO FUNCIONAL DO NÓ RODOVIÁRO DA EN 396 / CIRCULAR DE LOULÉ / ROTUNDA ZÉPHIRUS",
+    "entidade": "Município de Loulé",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=456798",
+    "data": "24-09-2026",
+    "data_limite": "18 dias.",
+    "texto": "DescriÃ§Ã£o: CONTRATAÇÃO DA PRESTAÇÃO SERVIÇOS DE ELABORAÇÃO DE ESTUDO PRÉVIO DE REORGANIZAÇÃO FUNCIONAL DO NÓ RODOVIÁRO DA EN 396 / CIRCULAR DE LOULÉ / ROTUNDA ZÉPHIRUS\nEntidade: Município de Loulé\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71335000-5, Estudos de engenharia\nPreÃ§o base: 75.000,00 €\nPrazo para propostas: 18 dias.\nData de publicaÃ§Ã£o: 24-09-2026\nNÃºmero do anÃºncio: 23751/2026",
+    "numero_anuncio": "23751/2026",
+    "preco_base": "75.000,00 €",
+    "cpvs": [
+      "71335000-5, Estudos de engenharia"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/186/419973574.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/TVh4a1psNVJTWWdYdjRBdFU1a0RsT3N4MnJFSUhpYkV3dGtsUDRFbmVaalRvU1NDdEVUWlljaXFZWUxNUytqbXhFWDRkYlZOQnJuOGp2M0RlUWg2QXc9PWUkanNT",
+    "id_portal_base": "456798",
+    "id_procedimento": "20444676",
+    "criterio_tipo": "Multifator",
+    "criterio_resumo": "Preço 70% · Qualidade 30%",
+    "criterio_detalhe": "Preço 70%\nQualidade 30%",
+    "criterio_fatores": "[{\"nome\": \"Preço\", \"peso\": 70, \"tipo\": \"preco\"}, {\"nome\": \"Qualidade\", \"peso\": 30, \"tipo\": \"qualidade\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "12-10-2026 18:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Prestação de serviços para elaboração de projetos de reabilitação do Laboratório de Metrologia das Radiações Ionizantes (LMRI) do Campus Tecnológico e Nuclear do Instituto Superior Técnico",
+    "entidade": "Instituto Superior Técnico",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=456789",
+    "data": "24-09-2026",
+    "data_limite": "14 dias.",
+    "texto": "DescriÃ§Ã£o: Prestação de serviços para elaboração de projetos de reabilitação do Laboratório de Metrologia das Radiações Ionizantes (LMRI) do Campus Tecnológico e Nuclear do Instituto Superior Técnico\nEntidade: Instituto Superior Técnico\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71000000-8, Serviços de arquitectura, construção, engenharia e inspecção\nPreÃ§o base: 24.000,00 €\nPrazo para propostas: 14 dias.\nData de publicaÃ§Ã£o: 24-09-2026\nNÃºmero do anÃºncio: 23635/2026",
+    "numero_anuncio": "23635/2026",
+    "preco_base": "24.000,00 €",
+    "cpvs": [
+      "71000000-8, Serviços de arquitectura, construção, engenharia e inspecção"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/186/419973636.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEzOTk2MA",
+    "id_portal_base": "456789",
+    "id_procedimento": "20439956",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "08-10-2026 20:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Prestação de Serviços para fiscalização da empreitada Reabilitação/Ampliação e Transformação de Antiga Escola Básica dos Carreiros em Creche",
+    "entidade": "Município das Caldas da Rainha",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=456576",
+    "data": "22-09-2026",
+    "data_limite": "15 dias.",
+    "texto": "DescriÃ§Ã£o: Prestação de Serviços para fiscalização da empreitada Reabilitação/Ampliação e Transformação de Antiga Escola Básica dos Carreiros em Creche\nEntidade: Município das Caldas da Rainha\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71520000-9, Serviços de supervisão da construção\nPreÃ§o base: 120.000,00 €\nPrazo para propostas: 15 dias.\nData de publicaÃ§Ã£o: 22-09-2026\nNÃºmero do anÃºncio: 23517/2026",
+    "numero_anuncio": "23517/2026",
+    "preco_base": "120.000,00 €",
+    "cpvs": [
+      "71520000-9, Serviços de supervisão da construção"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/184/419973458.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTE0NDUyOQ",
+    "id_portal_base": "456576",
+    "id_procedimento": "20424824",
+    "criterio_tipo": "Multifator",
+    "criterio_resumo": "Preço 80% · Memória descritiva e justificativa da execução da prestação do serviço 20%",
+    "criterio_detalhe": "Preço 80%\nOutros Outro Nome: Memória descritiva e justificativa da execução da prestação do serviço 20%",
+    "criterio_fatores": "[{\"nome\": \"Preço\", \"peso\": 80, \"tipo\": \"preco\"}, {\"nome\": \"Memória descritiva e justificativa da execução da prestação do serviço\", \"peso\": 20, \"tipo\": \"outro\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "07-10-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Fiscalização, Coordenação de Segurança em Obra e Coordenação de Gestão Ambiental e Acompanhamento Arqueológico da Empreitada de Conceção Construção da ETA de São Teotónio",
+    "entidade": "AgdA - Águas Públicas do Alentejo, SA",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=456548",
+    "data": "22-09-2026",
+    "data_limite": "27 dias.",
+    "texto": "DescriÃ§Ã£o: Fiscalização, Coordenação de Segurança em Obra e Coordenação de Gestão Ambiental e Acompanhamento Arqueológico da Empreitada de Conceção Construção da ETA de São Teotónio\nEntidade: AgdA - Águas Públicas do Alentejo, SA\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71300000-1, Serviços de engenharia\nPreÃ§o base: 328.000,00 €\nPrazo para propostas: 27 dias.\nData de publicaÃ§Ã£o: 22-09-2026\nNÃºmero do anÃºncio: 23470/2026",
+    "numero_anuncio": "23470/2026",
+    "preco_base": "328.000,00 €",
+    "cpvs": [
+      "71300000-1, Serviços de engenharia"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/184/419973246.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTE0MzM1OQ",
+    "id_portal_base": "456548",
+    "id_procedimento": "20422090",
+    "criterio_tipo": "Multifator",
+    "criterio_resumo": "Preço 50% · Qualidade Técnica da Proposta 50%",
+    "criterio_detalhe": "Preço 50%\nOutros Outro Nome: Qualidade Técnica da Proposta 50%",
+    "criterio_fatores": "[{\"nome\": \"Preço\", \"peso\": 50, \"tipo\": \"preco\"}, {\"nome\": \"Qualidade Técnica da Proposta\", \"peso\": 50, \"tipo\": \"qualidade\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "19-10-2026 18:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "CONCURSO PÚBLICO INTERNACIONAL PARA CONCEÇÃO DE PROJETO DE ILUMINAÇÃO DECORATIVA DE NATAL 2026 PARA O MUNICÍPIO DE ALBUFEIRA",
+    "entidade": "Município de Albufeira",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=454284",
+    "data": "22-09-2026",
+    "data_limite": "3 dias.",
+    "texto": "DescriÃ§Ã£o: CONCURSO PÚBLICO INTERNACIONAL PARA CONCEÇÃO DE PROJETO DE ILUMINAÇÃO DECORATIVA DE NATAL 2026 PARA O MUNICÍPIO DE ALBUFEIRA\nEntidade: Município de Albufeira\nTipo de ato: Anúncio de Alteração\nTipo de modelo: Concurso de concepção\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 79421200-3, Serviços de concepção de projectos, excepto projectos de construção\nPrazo para propostas: 3 dias.\nData de publicaÃ§Ã£o: 22-09-2026\nNÃºmero do anÃºncio: 23459/2026",
+    "numero_anuncio": "23459/2026",
+    "preco_base": "",
+    "cpvs": [
+      "79421200-3, Serviços de concepção de projectos, excepto projectos de construção"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Concurso de concepção",
+      "Anúncio de Alteração"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/184/419973143.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/VnpNQWZoL3ZGdXgvTUFMWjBHS292eEduYTRZU0lYcTV0aUdpOHBRWEdoVHljYmNSNWFLMHc2czJHQnQ2ekE2aEw1dDUzZkpmVW9QR3FncmNKajJvZ0E9PXRmTWNs",
+    "id_portal_base": "454284",
+    "id_procedimento": "20245824",
+    "criterio_tipo": null,
+    "criterio_resumo": null,
+    "criterio_detalhe": null,
+    "entregaveis": null,
+    "data_entrega_propostas": null,
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "2026/1471-Elaboração do Projeto de Arquitetura e Especialidades de Beneficiação da Escola Básica Jorge Mineiro em Queluz de Baixo",
+    "entidade": "Município de Oeiras",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=456412",
+    "data": "21-09-2026",
+    "data_limite": "15 dias.",
+    "texto": "DescriÃ§Ã£o: 2026/1471-Elaboração do Projeto de Arquitetura e Especialidades de Beneficiação da Escola Básica Jorge Mineiro em Queluz de Baixo\nEntidade: Município de Oeiras\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71250000-5, Serviços de arquitectura, engenharia e levantamento topográfico\nPreÃ§o base: 100.000,00 €\nPrazo para propostas: 15 dias.\nData de publicaÃ§Ã£o: 21-09-2026\nNÃºmero do anÃºncio: 23391/2026",
+    "numero_anuncio": "23391/2026",
+    "preco_base": "100.000,00 €",
+    "cpvs": [
+      "71250000-5, Serviços de arquitectura, engenharia e levantamento topográfico"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/183/419973263.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/YnpTckJibkhsSkVxMHl4NE40NDRSWTVGU2lQN2wyVDZkemRORHhiMmQrMExub0dWWTJFT3ptaW56TFF3bUtFR2dBT2g1L210MlBBOWFBSUd1Q09odnc9PSo2SChC",
+    "id_portal_base": "456412",
+    "id_procedimento": "20411287",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Outros",
+    "criterio_detalhe": "Outros",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "06-10-2026 17:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
   }
 ]
