@@ -3049,5 +3049,425 @@
     "data_entrega_propostas": "06-10-2026 17:00",
     "data_esclarecimentos": null,
     "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Projeto de Descarbonização do Município de Miranda do Douro (Roteiro)",
+    "entidade": "Município de Miranda do Douro",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=457685",
+    "data": "02-10-2026",
+    "data_limite": "15 dias.",
+    "texto": "DescriÃ§Ã£o: Projeto de Descarbonização do Município de Miranda do Douro (Roteiro)\nEntidade: Município de Miranda do Douro\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Empreitadas de obras públicas\nTipo de procedimento: Concurso público\nCPV: 45315000-8, Instalação de equipamento para aquecimento e de outro equipamento eléctrico em edifícios\nPreÃ§o base: 1.000.000,00 €\nPrazo para propostas: 15 dias.\nData de publicaÃ§Ã£o: 02-10-2026\nNÃºmero do anÃºncio: 24556/2026",
+    "numero_anuncio": "24556/2026",
+    "preco_base": "1.000.000,00 €",
+    "cpvs": [
+      "45315000-8, Instalação de equipamento para aquecimento e de outro equipamento eléctrico em edifícios"
+    ],
+    "tipos_contrato": [
+      "Empreitadas de obras públicas",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/10/192/419974553.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTE0Njg0MA",
+    "id_portal_base": "457685",
+    "id_procedimento": "20517980",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Sim Percentagem 5%",
+    "criterio_detalhe": "Sim Percentagem 5%",
+    "criterio_fatores": "[{\"nome\": \"Sim Percentagem\", \"peso\": 5, \"tipo\": \"outro\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "17-10-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Concurso Publico com publicação no JOUE para aquisição de serviços de fiscalização e coordenação de segurança da empreitada de Requalificação e ampliação da Escola Secundária Fernando Namora de Condeixa-a-Nova",
+    "entidade": "Município de Condeixa-a-Nova",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=457622",
+    "data": "02-10-2026",
+    "data_limite": "28 dias.",
+    "texto": "DescriÃ§Ã£o: Concurso Publico com publicação no JOUE para aquisição de serviços de fiscalização e coordenação de segurança da empreitada de Requalificação e ampliação da Escola Secundária Fernando Namora de Condeixa-a-Nova\nEntidade: Município de Condeixa-a-Nova\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71317200-5, Serviços de saúde e segurança\nPreÃ§o base: 228.000,00 €\nPrazo para propostas: 28 dias.\nData de publicaÃ§Ã£o: 02-10-2026\nNÃºmero do anÃºncio: 24497/2026",
+    "numero_anuncio": "24497/2026",
+    "preco_base": "228.000,00 €",
+    "cpvs": [
+      "71317200-5, Serviços de saúde e segurança"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/10/192/419974144.pdf",
+    "link_pecas": "http://community.vortal.biz/public/public-tender",
+    "id_portal_base": "457622",
+    "id_procedimento": "20515139",
+    "criterio_tipo": "Multifator",
+    "criterio_resumo": "Preço 40% · Qualidade 60%",
+    "criterio_detalhe": "Preço 40%\nQualidade 60%",
+    "criterio_fatores": "[{\"nome\": \"Preço\", \"peso\": 40, \"tipo\": \"preco\"}, {\"nome\": \"Qualidade\", \"peso\": 60, \"tipo\": \"qualidade\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "29-10-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "TER.PR.26.088 - Porto de Portimão: Fornecimento e instalação de projeto de fornecimento de eletricidade aos navios (OPS - Onshore Power Supply)",
+    "entidade": "APS - Administração dos Portos de Sines e do Algarve, SA",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=457583",
+    "data": "02-10-2026",
+    "data_limite": "39 dias.",
+    "texto": "DescriÃ§Ã£o: TER.PR.26.088 - Porto de Portimão: Fornecimento e instalação de projeto de fornecimento de eletricidade aos navios (OPS - Onshore Power Supply)\nEntidade: APS - Administração dos Portos de Sines e do Algarve, SA\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Empreitadas de obras públicas\nTipo de procedimento: Concurso público\nCPV: 45315300-1, Instalações de abastecimento de electricidade\nPreÃ§o base: 5.927.370,00 €\nPrazo para propostas: 39 dias.\nData de publicaÃ§Ã£o: 02-10-2026\nNÃºmero do anÃºncio: 24535/2026",
+    "numero_anuncio": "24535/2026",
+    "preco_base": "5.927.370,00 €",
+    "cpvs": [
+      "45315300-1, Instalações de abastecimento de electricidade"
+    ],
+    "tipos_contrato": [
+      "Empreitadas de obras públicas",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/10/192/419974427.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/RGN5RkdENmpId05ZUlpwNWduaHVncURTN0crNnJPSmlMVU5LSzdZOGdxWStMaFo3WWF5cHlUZnJQY1B6SjFFYnZKNjRvWTgwaWgyQWpTQXFUTEVwcnc9PVNaSnAy",
+    "id_portal_base": "457583",
+    "id_procedimento": "20512851",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Sim Percentagem 5%",
+    "criterio_detalhe": "Sim Percentagem 5%",
+    "criterio_fatores": "[{\"nome\": \"Sim Percentagem\", \"peso\": 5, \"tipo\": \"outro\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "09-11-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Concurso público para aquisição da prestação de serviços de elaboração e implementação das medidas de autoproteção para 16 escolas do município de Oeiras",
+    "entidade": "Município de Oeiras",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=457309",
+    "data": "30-09-2026",
+    "data_limite": "9 dias.",
+    "texto": "DescriÃ§Ã£o: Concurso público para aquisição da prestação de serviços de elaboração e implementação das medidas de autoproteção para 16 escolas do município de Oeiras\nEntidade: Município de Oeiras\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71317000-3, Serviços de consultoria em matéria de controlo e protecção contra os riscos potenciais\nPreÃ§o base: 72.000,00 €\nPrazo para propostas: 9 dias.\nData de publicaÃ§Ã£o: 30-09-2026\nNÃºmero do anÃºncio: 24335/2026",
+    "numero_anuncio": "24335/2026",
+    "preco_base": "72.000,00 €",
+    "cpvs": [
+      "71317000-3, Serviços de consultoria em matéria de controlo e protecção contra os riscos potenciais"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/190/419974341.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/UndneVJVSjNVQUQrcktET3dRSDFKKzNxNzhuM3ZSY0JWenNSK3F5czhrSkpzd1lVVGNxMHE3SVpuZkpTUWVITjkxTktiMzNIcWd3ZHhKcXZMU1JKQ2c9PV5qKmFE",
+    "id_portal_base": "457309",
+    "id_procedimento": "20502029",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "09-10-2026 17:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Instalação e manutenção de Projeto de Monitorização de Logística Urbana",
+    "entidade": "Município do Porto",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=457259",
+    "data": "30-09-2026",
+    "data_limite": "28 dias.",
+    "texto": "DescriÃ§Ã£o: Instalação e manutenção de Projeto de Monitorização de Logística Urbana\nEntidade: Município do Porto\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 63712710-3, Serviços de monitorização do tráfego\nPreÃ§o base: 250.000,00 €\nPrazo para propostas: 28 dias.\nData de publicaÃ§Ã£o: 30-09-2026\nNÃºmero do anÃºncio: 24187/2026",
+    "numero_anuncio": "24187/2026",
+    "preco_base": "250.000,00 €",
+    "cpvs": [
+      "63712710-3, Serviços de monitorização do tráfego"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/190/419973962.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTEwMDM0NA",
+    "id_portal_base": "457259",
+    "id_procedimento": "20496212",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "28-10-2026 17:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Aquisição de Serviços para Projetos de Dois Pavilhões Gimnodesportivos  EB2/3 Fragata do Tejo  Moita e Escola Secundária da Baixa da Banheira- Vale de Amoreira",
+    "entidade": "Município da Moita",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=457189",
+    "data": "29-09-2026",
+    "data_limite": "10 dias.",
+    "texto": "DescriÃ§Ã£o: Aquisição de Serviços para Projetos de Dois Pavilhões Gimnodesportivos  EB2/3 Fragata do Tejo  Moita e Escola Secundária da Baixa da Banheira- Vale de Amoreira\nEntidade: Município da Moita\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71240000-2, Serviços de arquitectura, engenharia e planeamento\nPreÃ§o base: 180.000,00 €\nPrazo para propostas: 10 dias.\nData de publicaÃ§Ã£o: 29-09-2026\nNÃºmero do anÃºncio: 24111/2026",
+    "numero_anuncio": "24111/2026",
+    "preco_base": "180.000,00 €",
+    "cpvs": [
+      "71240000-2, Serviços de arquitectura, engenharia e planeamento"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/189/419974092.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTE0ODI2MQ",
+    "id_portal_base": "457189",
+    "id_procedimento": "20493541",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "09-10-2026 23:59",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Prestação de Serviços de Fiscalização e Coordenação de Segurança em Obra para a Empreitada de Reabilitação dos Edifícios sitos na Rua Andrade, 2 a 2D, em Lisboa e Avenida João Crisóstomo, 43, em Lisboa",
+    "entidade": "Santa Casa da Misericórdia de Lisboa",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=457163",
+    "data": "29-09-2026",
+    "data_limite": "21 dias.",
+    "texto": "DescriÃ§Ã£o: Prestação de Serviços de Fiscalização e Coordenação de Segurança em Obra para a Empreitada de Reabilitação dos Edifícios sitos na Rua Andrade, 2 a 2D, em Lisboa e Avenida João Crisóstomo, 43, em Lisboa\nEntidade: Santa Casa da Misericórdia de Lisboa\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71520000-9, Serviços de supervisão da construção\nPreÃ§o base: 204.000,00 €\nPrazo para propostas: 21 dias.\nData de publicaÃ§Ã£o: 29-09-2026\nNÃºmero do anÃºncio: 24137/2026",
+    "numero_anuncio": "24137/2026",
+    "preco_base": "204.000,00 €",
+    "cpvs": [
+      "71520000-9, Serviços de supervisão da construção"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/189/419974175.pdf",
+    "link_pecas": "https://www.acingov.pt/acingovprod/2/zonaPublica/zona_publica_c/donwloadProcedurePiece/MTE0ODcwOA",
+    "id_portal_base": "457163",
+    "id_procedimento": "20493515",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "20-10-2026 17:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "CONTRATAÇÃO DE SERVIÇOS DE ELABORAÇÃO DOS PROJETOS DE EXECUÇÃO E ESPECIALIDADES PARA O LANÇAMENTO DAS EMPREITADAS “CONSTRUÇÃO DE PARQUES DE ESTACIONAMENTO PARA VIATURAS ABANDONADAS (PARQUE A E PARQUE",
+    "entidade": "Município de Loulé",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=457145",
+    "data": "29-09-2026",
+    "data_limite": "20 dias.",
+    "texto": "DescriÃ§Ã£o: CONTRATAÇÃO DE SERVIÇOS DE ELABORAÇÃO DOS PROJETOS DE EXECUÇÃO E ESPECIALIDADES PARA O LANÇAMENTO DAS EMPREITADAS “CONSTRUÇÃO DE PARQUES DE ESTACIONAMENTO PARA VIATURAS ABANDONADAS (PARQUE A E PARQUE\nEntidade: Município de Loulé\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71242000-6, Preparação de projecto e concepção, estimativa de custos\nPreÃ§o base: 55.000,00 €\nPrazo para propostas: 20 dias.\nData de publicaÃ§Ã£o: 29-09-2026\nNÃºmero do anÃºncio: 24026/2026",
+    "numero_anuncio": "24026/2026",
+    "preco_base": "55.000,00 €",
+    "cpvs": [
+      "71242000-6, Preparação de projecto e concepção, estimativa de custos"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/189/419973772.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/UFV6OEE1RWQ3dXNzOEN4VzZ0Q2laek8zTkkvalVya0w0SjRNWDFZbzVPSm83RVFkRjhOMkhjZkRzS0JyVGZUbFc4Q0VhUVhXOHFrTEFlaVJLNGtzd0E9PUkqRDFJ",
+    "id_portal_base": "457145",
+    "id_procedimento": "20483302",
+    "criterio_tipo": "Multifator",
+    "criterio_resumo": "Preço 70% · Qualidade 30%",
+    "criterio_detalhe": "Preço 70%\nQualidade 30%",
+    "criterio_fatores": "[{\"nome\": \"Preço\", \"peso\": 70, \"tipo\": \"preco\"}, {\"nome\": \"Qualidade\", \"peso\": 30, \"tipo\": \"qualidade\"}]",
+    "entregaveis": null,
+    "data_entrega_propostas": "19-10-2026 18:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Aquisição de serviços para elaboração dos Projetos de Especialidades para a “Ligação dos Passeios das Margens do Ave à Fábrica de Santo Thyrso (Malhado)”",
+    "entidade": "Município de Santo Tirso",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=457131",
+    "data": "29-09-2026",
+    "data_limite": "15 dias.",
+    "texto": "DescriÃ§Ã£o: Aquisição de serviços para elaboração dos Projetos de Especialidades para a “Ligação dos Passeios das Margens do Ave à Fábrica de Santo Thyrso (Malhado)”\nEntidade: Município de Santo Tirso\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71300000-1, Serviços de engenharia\nPreÃ§o base: 110.000,00 €\nPrazo para propostas: 15 dias.\nData de publicaÃ§Ã£o: 29-09-2026\nNÃºmero do anÃºncio: 24040/2026",
+    "numero_anuncio": "24040/2026",
+    "preco_base": "110.000,00 €",
+    "cpvs": [
+      "71300000-1, Serviços de engenharia"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/189/419973999.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/a2FzWURtS0ROSmdQaFA0Q1E4em5KamFPV1JSNVcvVXVjOEpnakRTSFlVZ2EyTlozR2M4Um8xdkRTSU1qTUZOT1dXUEFXTVc2MStzWCs1RXpBZDZmN0E9PUxIclAl",
+    "id_portal_base": "457131",
+    "id_procedimento": "20483283",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "14-10-2026 17:30",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "Concurso Público para projeto de execução para a construção de edifícios habitacionais com atividades económicas nos lotes 1, 2 e 3 em Budens",
+    "entidade": "Município de Vila do Bispo",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=457128",
+    "data": "29-09-2026",
+    "data_limite": "11 dias.",
+    "texto": "DescriÃ§Ã£o: Concurso Público para projeto de execução para a construção de edifícios habitacionais com atividades económicas nos lotes 1, 2 e 3 em Budens\nEntidade: Município de Vila do Bispo\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71300000-1, Serviços de engenharia\nPreÃ§o base: 125.000,00 €\nPrazo para propostas: 11 dias.\nData de publicaÃ§Ã£o: 29-09-2026\nNÃºmero do anÃºncio: 24043/2026",
+    "numero_anuncio": "24043/2026",
+    "preco_base": "125.000,00 €",
+    "cpvs": [
+      "71300000-1, Serviços de engenharia"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/189/419974049.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/Nlg1cTl2UVkyTW1QQUJPRFloM0JXWG9rWHdxdzlqZmdBOWw4VEgzOTcwdGg0WGxzcUNnQmdNTjZwcVowM0wyTk9pam9mcnVXUVg3UXRpdjB6TTQ3YVE9PVBUZUQp",
+    "id_portal_base": "457128",
+    "id_procedimento": "20483279",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "10-10-2026 15:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "CONTRATAÇÃO DA PRESTAÇÃO DE SERVIÇOS DE ELABORAÇÃO DE PROJETOS DE ESPECIALIDADES PARA A EMPREITADA DE “ALTERAÇÕES NO CEMITÉRIO DE BOLIQUEIME”.",
+    "entidade": "Município de Loulé",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=457125",
+    "data": "29-09-2026",
+    "data_limite": "31 dias.",
+    "texto": "DescriÃ§Ã£o: CONTRATAÇÃO DA PRESTAÇÃO DE SERVIÇOS DE ELABORAÇÃO DE PROJETOS DE ESPECIALIDADES PARA A EMPREITADA DE “ALTERAÇÕES NO CEMITÉRIO DE BOLIQUEIME”.\nEntidade: Município de Loulé\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71242000-6, Preparação de projecto e concepção, estimativa de custos\nPreÃ§o base: 14.000,00 €\nPrazo para propostas: 31 dias.\nData de publicaÃ§Ã£o: 29-09-2026\nNÃºmero do anÃºncio: 24046/2026",
+    "numero_anuncio": "24046/2026",
+    "preco_base": "14.000,00 €",
+    "cpvs": [
+      "71242000-6, Preparação de projecto e concepção, estimativa de custos"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/189/419973627.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/eHA1ckZMbkdkOEpjbEpKVTNUeVVSbERZRll2cVZDc0pqVVl6MVVPYnZkM1UwRUJ3d1ppenRaSm5XZm5wOHZIMWtpT1h3L3IrZ2VCeThiU2JpME1ZL3c9PVQ0c2M1",
+    "id_portal_base": "457125",
+    "id_procedimento": "20483276",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "30-10-2026 18:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "AQUISIÇÃO DE SERVIÇOS PARA ELABORAÇÃO DE PROJETOS DE ESPECIALIDADES PARA A “REQUALIFICAÇÃO DA RUA LUÍS DE CAMÕES E ARRUAMENTOS ADJACENTES\"",
+    "entidade": "Município de Santo Tirso",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=457039",
+    "data": "28-09-2026",
+    "data_limite": "16 dias.",
+    "texto": "DescriÃ§Ã£o: AQUISIÇÃO DE SERVIÇOS PARA ELABORAÇÃO DE PROJETOS DE ESPECIALIDADES PARA A “REQUALIFICAÇÃO DA RUA LUÍS DE CAMÕES E ARRUAMENTOS ADJACENTES\"\nEntidade: Município de Santo Tirso\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71300000-1, Serviços de engenharia\nPreÃ§o base: 98.500,00 €\nPrazo para propostas: 16 dias.\nData de publicaÃ§Ã£o: 28-09-2026\nNÃºmero do anÃºncio: 24013/2026",
+    "numero_anuncio": "24013/2026",
+    "preco_base": "98.500,00 €",
+    "cpvs": [
+      "71300000-1, Serviços de engenharia"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/188/419973935.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/WDlvemVSNU04L3UvaC9pdnNUUkJ6TlJEc3d0N1FNTjBDRHp2ais2RVJsR1RKQ3FBbkp2dEJzQ0diL2puUVF2aGxaK2JvWlVMVm1SNG9IdlhPZnUzUWc9PUl2TDM1",
+    "id_portal_base": "457039",
+    "id_procedimento": "20480421",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "14-10-2026 17:30",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "CONTRATAÇÃO DA PRESTAÇÃO DE SERVIÇOS DE ELABORAÇÃO DE PROJETOS DE ESPECIALIDADES PARA A EMPREITADA DE CONSTRUÇÃO DO CENTRO AMBIENTAL DA PENA",
+    "entidade": "Município de Loulé",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=457012",
+    "data": "28-09-2026",
+    "data_limite": "32 dias.",
+    "texto": "DescriÃ§Ã£o: CONTRATAÇÃO DA PRESTAÇÃO DE SERVIÇOS DE ELABORAÇÃO DE PROJETOS DE ESPECIALIDADES PARA A EMPREITADA DE CONSTRUÇÃO DO CENTRO AMBIENTAL DA PENA\nEntidade: Município de Loulé\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71242000-6, Preparação de projecto e concepção, estimativa de custos\nPreÃ§o base: 35.000,00 €\nPrazo para propostas: 32 dias.\nData de publicaÃ§Ã£o: 28-09-2026\nNÃºmero do anÃºncio: 23888/2026",
+    "numero_anuncio": "23888/2026",
+    "preco_base": "35.000,00 €",
+    "cpvs": [
+      "71242000-6, Preparação de projecto e concepção, estimativa de custos"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/188/419973615.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/VGtPeWFpZXVYQ3NhbkZTTGd2MlJ6eExKVXB1YTAxaGtYSjg1bHRjZjFvRFpaVWpNUG53R1dkSXZ5cUVmcUJKT2ZoN3VNL2szWkYwSzdpVElHYnlWUlE9PW1kb2FX",
+    "id_portal_base": "457012",
+    "id_procedimento": "20467688",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "30-10-2026 18:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
+  },
+  {
+    "titulo": "CONTRATAÇÃO DA PRESTAÇÃO DE SERVIÇOS DE ELABORAÇÃO DE PROJETOS DE ESPECIALIDADES PARA AMPLIAÇÃO DO PARQUE DE ESTACIONAMENTO DA ZONA DA CÁSSIMA EM LOULÉ",
+    "entidade": "Município de Loulé",
+    "link": "https://www.base.gov.pt/Base4/pt/detalhe/?type=anuncios&id=457010",
+    "data": "28-09-2026",
+    "data_limite": "32 dias.",
+    "texto": "DescriÃ§Ã£o: CONTRATAÇÃO DA PRESTAÇÃO DE SERVIÇOS DE ELABORAÇÃO DE PROJETOS DE ESPECIALIDADES PARA AMPLIAÇÃO DO PARQUE DE ESTACIONAMENTO DA ZONA DA CÁSSIMA EM LOULÉ\nEntidade: Município de Loulé\nTipo de ato: Anúncio de procedimento\nTipo de modelo: Concurso público\nTipo de contrato: Aquisição de serviços\nTipo de procedimento: Concurso público\nCPV: 71242000-6, Preparação de projecto e concepção, estimativa de custos\nPreÃ§o base: 35.000,00 €\nPrazo para propostas: 32 dias.\nData de publicaÃ§Ã£o: 28-09-2026\nNÃºmero do anÃºncio: 23890/2026",
+    "numero_anuncio": "23890/2026",
+    "preco_base": "35.000,00 €",
+    "cpvs": [
+      "71242000-6, Preparação de projecto e concepção, estimativa de custos"
+    ],
+    "tipos_contrato": [
+      "Aquisição de serviços",
+      "Concurso público",
+      "Anúncio de procedimento"
+    ],
+    "link_anuncio_dr": "https://files.diariodarepublica.pt/cp_hora/2026/09/188/419973621.pdf",
+    "link_pecas": "https://community.vortal.biz/Public/public-tender-documents/Mml1NFB2SUU4dWlwUUhTbFY5OW9CbG94aHI2ODUzSzF4UTFZTERFeGprRDdZWmxXN084TklhMVk3eWJnbjlxaEdEWVI0bmdzUGo4QlFjZkJQSnZZR1E9PTlENVlK",
+    "id_portal_base": "457010",
+    "id_procedimento": "20467685",
+    "criterio_tipo": "Monofator",
+    "criterio_resumo": "Preço",
+    "criterio_detalhe": "Preço",
+    "criterio_fatores": null,
+    "entregaveis": null,
+    "data_entrega_propostas": "30-10-2026 18:00",
+    "data_esclarecimentos": null,
+    "enriquecimento_dr_concluido": true
   }
 ]
