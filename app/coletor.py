@@ -69,6 +69,7 @@ DIAS_A_PESQUISAR = max(
 )
 MAXIMO_PAGINAS = int(os.getenv("BASE_MAX_PAGINAS", "100"))
 MAXIMO_DETALHES = int(os.getenv("BASE_MAX_DETALHES", "300"))
+MAXIMO_DETALHES_CPV = int(os.getenv("BASE_MAX_DETALHES_CPV", "50"))
 INTERVALO_PEDIDOS = float(os.getenv("BASE_INTERVALO_PEDIDOS", "9.0"))
 INTERVALO_DETALHES = float(os.getenv("BASE_INTERVALO_DETALHES", "7.0"))
 MOSTRAR_DIAGNOSTICO = os.getenv(
@@ -580,12 +581,12 @@ class PortalBaseBrowser:
             f"Ãšltimo erro: {ultimo_erro}"
         )
 
-    def pesquisar_pagina(self, pagina: int) -> dict[str, Any]:
+    def pesquisar_pagina(self, pagina: int, query: str = "") -> dict[str, Any]:
         return self.post_json(
             {
                 "type": "search_anuncios",
                 "version": VERSAO_PORTAL,
-                "query": "",
+                "query": query,
                 "sort": "-drPublicationDate",
                 "page": str(pagina),
                 "size": str(TAMANHO_PAGINA),
@@ -702,6 +703,15 @@ def texto_prefiltro(anuncio: dict[str, Any]) -> str:
 
 
 def deve_consultar_detalhe(anuncio: dict[str, Any]) -> bool:
+    if any(
+        signal == f"cpv_query:{prefix}"
+        for signal in anuncio.get("discovery_signals", [])
+        for prefix in PREFIXOS_CPV_ARQUITETURA
+    ):
+        return True
+    if possui_cpv_arquitetura(anuncio):
+        return True
+
     texto = texto_prefiltro(anuncio)
     if not texto:
         return False
@@ -726,7 +736,8 @@ def deve_consultar_detalhe(anuncio: dict[str, Any]) -> bool:
 
 def criar_texto_completo(anuncio: dict[str, Any]) -> str:
     campos = [
-        ("DescriÃ§Ã£o", anuncio.get("contractDesignation") or anuncio.get("description")),
+        ("Designação", anuncio.get("contractDesignation")),
+        ("Descrição", anuncio.get("description")),
         ("Entidade", obter_nome_entidade(anuncio)),
         ("Tipo de ato", anuncio.get("type")),
         ("Tipo de modelo", anuncio.get("modelType")),
@@ -749,27 +760,40 @@ def criar_texto_completo(anuncio: dict[str, Any]) -> str:
 
 
 def parece_relevante(anuncio: dict[str, Any]) -> bool:
+    return classificar_relevancia_com_razoes(anuncio)["accepted"]
+
+
+def classificar_relevancia_com_razoes(anuncio: dict[str, Any]) -> dict[str, Any]:
+    """Explain the existing decision without changing its retrieval policy."""
+    reasons: list[str] = []
     if possui_cpv_arquitetura(anuncio):
-        return True
+        reasons.append("CPV_SIGNAL")
+
+    field_groups = (
+        ("TITLE_SIGNAL", anuncio.get("contractDesignation")),
+        ("OBJECT_SIGNAL", anuncio.get("description")),
+        ("ENTITY_SIGNAL", obter_nome_entidade(anuncio)),
+        ("PROCEDURE_SIGNAL", " ".join(normalizar_texto(anuncio.get(key)) for key in (
+            "type", "modelType", "contractType", "contractingProcedureType"))),
+    )
+    for code, value in field_groups:
+        part = normalizar_para_pesquisa(normalizar_texto(value))
+        if part and (contem(part, PALAVRAS_FORTES_N) or contem(part, PALAVRAS_PROJETO_N)
+                     or contem(part, PALAVRAS_EDIFICIOS_N) or contem(part, PALAVRAS_SERVICOS_N)):
+            reasons.append(code)
 
     texto = normalizar_para_pesquisa(criar_texto_completo(anuncio))
-
-    if contem(texto, PALAVRAS_FORTES_N):
-        return True
-
-    if contem(texto, PALAVRAS_PROJETO_N):
-        return True
-
-    if contem(texto, PALAVRAS_EDIFICIOS_N) and contem(
-        texto,
-        PALAVRAS_SERVICOS_N,
-    ):
-        return True
-
     if contem(texto, PALAVRAS_EXCLUSAO_N):
-        return False
-
-    return False
+        reasons.append("NEGATIVE_SIGNAL")
+    accepted = bool(
+        possui_cpv_arquitetura(anuncio)
+        or contem(texto, PALAVRAS_FORTES_N)
+        or contem(texto, PALAVRAS_PROJETO_N)
+        or (contem(texto, PALAVRAS_EDIFICIOS_N) and contem(texto, PALAVRAS_SERVICOS_N))
+    )
+    if not reasons:
+        reasons.append("NO_RELEVANCE_SIGNAL")
+    return {"accepted": accepted, "reason_codes": reasons}
 
 
 def combinar(
@@ -819,6 +843,7 @@ def normalizar_anuncio(anuncio: dict[str, Any]) -> dict[str, Any]:
         "texto": criar_texto_completo(anuncio),
         "numero_anuncio": numero_anuncio,
         "preco_base": normalizar_texto(anuncio.get("basePrice")),
+        "cpv": "; ".join(obter_cpvs(anuncio)),
         "cpvs": obter_cpvs(anuncio),
         "tipos_contrato": tipos_contrato,
         "link_anuncio_dr": normalizar_texto(anuncio.get("reference")),
@@ -909,47 +934,65 @@ def recolher_listagem(
 ) -> list[dict[str, Any]]:
     limite_data = data_minima()
     resultados: list[dict[str, Any]] = []
-    vistos: set[str] = set()
+    por_id: dict[str, dict[str, Any]] = {}
+    intervalo = {
+        "desdedatapublicacao": limite_data.isoformat(),
+        "atedatapublicacao": data_atual_portugal().isoformat(),
+    }
+    # Backfill windows need a server-side date range on the general lane too.
+    # Normal weekly collection keeps the existing neutral general query.
+    pesquisas = [(urlencode(intervalo) if os.getenv("BASE_HISTORICAL_WINDOW") == "1" else "", "")]
+    if MAXIMO_DETALHES_CPV > 0:
+        pesquisas.extend(
+            (urlencode({"cpv": prefix, **intervalo}), f"cpv_query:{prefix}")
+            for prefix in PREFIXOS_CPV_ARQUITETURA
+        )
 
-    for pagina in range(MAXIMO_PAGINAS):
-        if MOSTRAR_DIAGNOSTICO:
-            print(f"A obter pÃ¡gina {pagina + 1}...")
+    for query, signal in pesquisas:
+        if query:
+            esperar_intervalo(INTERVALO_PEDIDOS)
+        for pagina in range(MAXIMO_PAGINAS):
+            if MOSTRAR_DIAGNOSTICO:
+                print(f"A obter pÃ¡gina {pagina + 1} ({signal or 'geral'})...")
 
-        dados = portal.pesquisar_pagina(pagina)
-        itens = dados.get("items", [])
+            dados = portal.pesquisar_pagina(pagina, query)
+            itens = dados.get("items", [])
 
-        if not isinstance(itens, list):
-            raise RuntimeError(
-                "O Portal BASE devolveu um campo 'items' invÃ¡lido."
-            )
+            if not isinstance(itens, list):
+                raise RuntimeError(
+                    "O Portal BASE devolveu um campo 'items' invÃ¡lido."
+                )
+            if not itens:
+                break
 
-        if not itens:
-            break
+            encontrou_antigo = False
+            for raw in itens:
+                if not isinstance(raw, dict):
+                    continue
+                data_publicacao = converter_data(raw.get("drPublicationDate"))
+                if data_publicacao is not None:
+                    if data_publicacao < limite_data:
+                        encontrou_antigo = True
+                        continue
+                    if data_publicacao > data_atual_portugal():
+                        continue
+                identificador = normalizar_texto(raw.get("id"))
+                if identificador and identificador in por_id:
+                    if signal:
+                        sinais = por_id[identificador].setdefault("discovery_signals", [])
+                        if signal not in sinais:
+                            sinais.append(signal)
+                    continue
+                item = dict(raw)
+                if signal:
+                    item["discovery_signals"] = [signal]
+                if identificador:
+                    por_id[identificador] = item
+                resultados.append(item)
 
-        encontrou_antigo = False
-
-        for item in itens:
-            if not isinstance(item, dict):
-                continue
-
-            data_publicacao = converter_data(item.get("drPublicationDate"))
-            if data_publicacao is not None and data_publicacao < limite_data:
-                encontrou_antigo = True
-                continue
-
-            identificador = normalizar_texto(item.get("id"))
-            if identificador and identificador in vistos:
-                continue
-
-            if identificador:
-                vistos.add(identificador)
-
-            resultados.append(item)
-
-        if encontrou_antigo or len(itens) < TAMANHO_PAGINA:
-            break
-
-        esperar_intervalo(INTERVALO_PEDIDOS)
+            if encontrou_antigo or len(itens) < TAMANHO_PAGINA:
+                break
+            esperar_intervalo(INTERVALO_PEDIDOS)
 
     return resultados
 
@@ -966,14 +1009,24 @@ def enriquecer(
         if normalizar_texto(item.get("id_portal_base"))
     }
 
-    candidatos = [
-        anuncio
-        for anuncio in listagem
-        if deve_consultar_detalhe(anuncio)
-    ]
-
-    if MAXIMO_DETALHES > 0:
-        candidatos = candidatos[:MAXIMO_DETALHES]
+    candidatos_gerais = []
+    candidatos_cpv_adicionais = []
+    for anuncio in listagem:
+        if not deve_consultar_detalhe(anuncio):
+            continue
+        sem_origem = dict(anuncio)
+        sem_origem.pop("discovery_signals", None)
+        if deve_consultar_detalhe(sem_origem):
+            candidatos_gerais.append(anuncio)
+        else:
+            candidatos_cpv_adicionais.append(anuncio)
+    candidatos = (
+        candidatos_gerais[:MAXIMO_DETALHES]
+        if MAXIMO_DETALHES > 0 else candidatos_gerais
+    ) + (
+        candidatos_cpv_adicionais[:MAXIMO_DETALHES_CPV]
+        if MAXIMO_DETALHES_CPV > 0 else []
+    )
 
     erros = 0
     novos = 0
