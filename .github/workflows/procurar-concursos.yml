@@ -3,10 +3,6 @@ name: Procurar concursos de arquitetura
 on:
   workflow_dispatch:
 
-  schedule:
-    # Sábado às 08:17 UTC
-    - cron: "17 8 * * 6"
-
 permissions:
   contents: write
 
