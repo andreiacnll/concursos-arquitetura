@@ -861,6 +861,7 @@ def normalizar_anuncio(anuncio: dict[str, Any]) -> dict[str, Any]:
         "preco_base": normalizar_texto(anuncio.get("basePrice")),
         "cpv": "; ".join(obter_cpvs(anuncio)),
         "cpvs": obter_cpvs(anuncio),
+        "tipo_procedimento": tipo_procedimento or tipo_modelo,
         "tipos_contrato": tipos_contrato,
         "link_anuncio_dr": normalizar_texto(anuncio.get("reference")),
         "link_pecas": normalizar_texto(
