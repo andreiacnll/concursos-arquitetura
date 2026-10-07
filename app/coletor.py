@@ -24,15 +24,31 @@ from typing import Any
 from urllib.parse import urlencode
 from zoneinfo import ZoneInfo
 
-from playwright.sync_api import (
-    Browser,
-    BrowserContext,
-    Error as PlaywrightError,
-    Page,
-    Playwright,
-    TimeoutError as PlaywrightTimeoutError,
-    sync_playwright,
-)
+try:
+    from playwright.sync_api import (
+        Browser,
+        BrowserContext,
+        Error as PlaywrightError,
+        Page,
+        Playwright,
+        TimeoutError as PlaywrightTimeoutError,
+        sync_playwright,
+    )
+except ModuleNotFoundError as error:
+    if error.name not in {"playwright", "playwright.sync_api"}:
+        raise
+    # The PHP-hosted collector replaces PortalBaseBrowser with its HTTP
+    # transport before collection. Browser-based callers still fail clearly.
+    Browser = BrowserContext = Page = Playwright = Any
+
+    class PlaywrightError(Exception):
+        pass
+
+    class PlaywrightTimeoutError(PlaywrightError):
+        pass
+
+    def sync_playwright() -> Any:
+        raise RuntimeError("Playwright is unavailable in this Python runtime")
 
 
 BASE_URL = "https://www.base.gov.pt"
